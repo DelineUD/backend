@@ -3,10 +3,10 @@ import { MongooseModuleOptions } from '@nestjs/mongoose';
 
 const getMongoString = (configService: ConfigService) =>
   'mongodb://' +
-  configService.get('DB_LOGIN') +
-  ':' +
-  configService.get('DB_PASSWORD') +
-  '@' +
+  // configService.get('DB_LOGIN') +
+  // ':' +
+  // configService.get('DB_PASSWORD') +
+  // '@' +
   configService.get('DB_HOST') +
   ':' +
   configService.get('DB_PORT') +
@@ -19,7 +19,7 @@ const getMongoOptions = () => ({
 });
 
 export const getMongoConfig = async (
-  configService: ConfigService
+  configService: ConfigService,
 ): Promise<MongooseModuleOptions> => {
   return {
     uri: getMongoString(configService),

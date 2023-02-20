@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: db.mongo
+    image: bitnami/mongodb:4.4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME:
+      MONGO_INITDB_ROOT_PASSWORD:
+      MONGO_INITDB_DATABASE: admin
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/bitnami/mongodb
+
+  api:
+    container_name: api
+    user: 1000:1000 # for linux to delete created files
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - envs/.backend.env
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+
+volumes:
+  mongo-data:

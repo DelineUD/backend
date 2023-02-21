@@ -11,4 +11,6 @@ export class LoginUserDto {
   readonly vpass: number;
 
   readonly refreshToken: string;
+
+  readonly refreshtoken: string;
 }

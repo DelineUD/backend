@@ -1,4 +1,4 @@
-export interface LoginStatus2 {
+export interface loginSms {
   accessToken: string;
   expiresIn: any;
   phone: number;

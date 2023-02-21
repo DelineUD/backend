@@ -5,5 +5,7 @@ export class RefreshTokenDto {
 		message: 'You did not pass refresh token or it is not a string!',
 	})
 	refreshToken: string
+	refreshtoken: string
 	phone: number
 }
+

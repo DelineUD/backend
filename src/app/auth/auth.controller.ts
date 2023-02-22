@@ -71,7 +71,7 @@ export class AuthController {
       throw new HttpException('не верный одноразовый пароль', HttpStatus.UNAUTHORIZED);
     }
     if (!loginUserDto.phone) {
-      throw new HttpException('Tполе phone обязательно!', HttpStatus.BAD_REQUEST);
+      throw new HttpException('поле phone обязательно!', HttpStatus.BAD_REQUEST);
     }
     return await this.authService.loginSms(loginUserDto);
   }

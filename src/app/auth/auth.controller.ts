@@ -67,11 +67,11 @@ export class AuthController {
   public async loginSms(
     @Body() loginUserDto: LoginUserDto,
   ): Promise<loginSms> {
-    if (loginUserDto.vpass != 1111) {
-      throw new HttpException('FUCK OFF!!!!', HttpStatus.UNAUTHORIZED);
+    if (loginUserDto.vpass !== 1111) {
+      throw new HttpException('не верный одноразовый пароль', HttpStatus.UNAUTHORIZED);
     }
     if (!loginUserDto.phone) {
-      throw new HttpException('FUCK OFF!!!!', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Tполе phone обязательно!', HttpStatus.BAD_REQUEST);
     }
     return await this.authService.loginSms(loginUserDto);
   }

@@ -92,19 +92,19 @@ export class AuthService {
   }
 
   async getNewTokens({ refreshtoken }: RefreshTokenDto) {
-    console.log(refreshtoken);
     if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
 
     try {
       await this.jwtService.verifyAsync(refreshtoken);
     } catch (err) {
-      throw new UnauthorizedException('Invalid token or expired! Please Login again!');
+      throw new UnauthorizedException(
+        'Invalid token or expired! Please Login again!',
+      );
     }
     const result = await this.jwtService.verifyAsync(refreshtoken);
     const user = await this.usersService.findByPhone(result);
 
     const token = this._createToken(user);
-    console.log(user);
     return {
       result,
       ...token,
@@ -113,8 +113,6 @@ export class AuthService {
 
   async getMe({ refreshtoken }: RefreshTokenDto) {
     if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
-
-    // const result = await this.jwtService.verifyAsync(refreshToken)
 
     try {
       await await this.jwtService.verifyAsync(refreshtoken);

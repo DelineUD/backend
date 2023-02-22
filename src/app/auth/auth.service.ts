@@ -1,22 +1,27 @@
-import { Injectable, HttpException, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { LoginStatus } from './interfaces/login-status.interface';
-import { LoginStatus1 } from './interfaces/login-status1.interface';
+import { checkUserExists } from './interfaces/checkUserExists.interface';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { JwtPayload } from './interfaces/payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/user.create.dto';
 import { UserDto } from '../users/dto/user.dto';
-import { LoginStatus2 } from './interfaces/login-status2.interface';
+import { loginSms } from './interfaces/loginSms.interface';
 import HttpStatusCode from 'http-status-typed';
-import { RefreshTokenDto } from './dto/refreshToken.dto'
+import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
@@ -42,7 +47,7 @@ export class AuthService {
     const token = this._createToken(user);
     return {
       user: user.phone,
-      ...token
+      ...token,
     };
   }
 
@@ -57,53 +62,64 @@ export class AuthService {
   private _createToken({ phone }: UserDto): any {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
-			expiresIn: '1h',
-		})
+      expiresIn: '1m',
+    });
     const refreshToken = this.jwtService.sign(user, {
-			expiresIn: '15d',
-		});
+      expiresIn: '3m',
+    });
 
     return {
       accessToken,
-      refreshToken 
+      refreshToken,
     };
   }
 
-  async login1(loginUserDto: LoginUserDto): Promise<LoginStatus1> {
+  async checkUserExists(loginUserDto: LoginUserDto): Promise<checkUserExists> {
     const user = await this.usersService.findByPhone(loginUserDto);
     return {
-   phone: user.phone,
-   status: HttpStatusCode.OK
-     };
-    
+      phone: user.phone,
+      status: HttpStatusCode.OK,
+    };
   }
 
-  async login2(loginUserDto: LoginUserDto): Promise<LoginStatus2> {
+  async loginSms(loginUserDto: LoginUserDto): Promise<loginSms> {
     const user = await this.usersService.findByPhone(loginUserDto);
     const token = this._createToken(user);
     return {
       user: user.phone,
-   ...token
-     };
-    
+      ...token,
+    };
   }
 
- async getNewTokens({ refreshToken }: RefreshTokenDto) {
-	if (!refreshToken) throw new UnauthorizedException('Please sign in!')
+  async getNewTokens({ refreshtoken }: RefreshTokenDto) {
+    if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
 
-	const result = await this.jwtService.verifyAsync(refreshToken)
+    try {
+      await this.jwtService.verifyAsync(refreshtoken);
+    } catch (err) {
+      throw new UnauthorizedException(
+        'Invalid token or expired! Please Login again!',
+      );
+    }
+    const result = await this.jwtService.verifyAsync(refreshtoken);
+    const user = await this.usersService.findByPhone(result);
 
-		if (!result) throw new UnauthorizedException('Invalid token or expired!')
+    const token = this._createToken(user);
+    return {
+      result,
+      ...token,
+    };
+  }
 
- const user = await this.usersService.findByPhone(result);
+  async getMe({ refreshtoken }: RefreshTokenDto) {
+    if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
 
- const token = this._createToken(user);
+    try {
+      await await this.jwtService.verifyAsync(refreshtoken);
+    } catch (err) {
+      throw new UnauthorizedException('Invalid token or expired!');
+    }
 
-	return {
-    
-    result,
-			...token
-		}
-	}
-
- }
+    return this.jwtService.verifyAsync(refreshtoken);
+  }
+}

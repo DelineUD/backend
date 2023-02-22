@@ -1,5 +1,5 @@
 import HttpStatusCode from 'http-status-typed';
-export interface LoginStatus1 {
+export interface checkUserExists {
     phone: number;
     status: HttpStatusCode;
   }

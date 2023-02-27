@@ -5,7 +5,7 @@ import { getMongoConfig } from '../config/db-connect.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-//import { TasksModule } from './tasks/tasks.module';
+import { ResidentsModule } from './residents/residents.module';
 
 @Module({
   imports: [
@@ -19,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
       useFactory: getMongoConfig,
     }),
     AuthModule,
+    ResidentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

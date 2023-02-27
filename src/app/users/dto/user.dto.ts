@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEmail } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 //import { TaskDto } from '../../tasks/dto/task.dto';
 
 export class UserDto {
@@ -9,8 +9,6 @@ export class UserDto {
   @IsEmail()
   email: string;
 
- // @IsNotEmpty()
- // tasks: TaskDto[];
- @IsNotEmpty()
- vpass: number;
+  @IsNotEmpty()
+  vpass: number;
 }

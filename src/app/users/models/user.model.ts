@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { IUser } from '../interfaces/user.interface';
 //import { TaskModel } from '../../tasks/models/task.model';
 
@@ -14,11 +14,8 @@ export class UserModel extends Document implements IUser {
   @Prop({ required: true })
   email: string;
 
-
   @Prop({ required: true })
   vpass: number;
- // @Prop({ type: [Types.ObjectId], ref: TaskModel.name })
- // tasks: TaskModel[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

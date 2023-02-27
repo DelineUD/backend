@@ -14,7 +14,3 @@ export const toUserDto = (data: UserModel): UserDto => {
 
   return userDto;
 };
-
-export const toUsersDto = (data: UserModel[]): UserDto[] => {
-  return data.map((user) => toUserDto(user));
-};

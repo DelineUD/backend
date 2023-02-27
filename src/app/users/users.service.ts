@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Model } from 'mongoose';
-import { toUserDto, toUsersDto } from '../shared/mapper';
+import { toUserDto } from '../shared/mapper';
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user.create.dto';
 import { UserDto } from './dto/user.dto';
@@ -15,10 +15,10 @@ export class UsersService {
     private readonly userModel: Model<UserModel>,
   ) {}
 
-  async getUsers(): Promise<UserDto[]> {
+  async getUsers(): Promise<UserModel[]> {
     const users = await this.userModel.find({});
 
-    return toUsersDto(users);
+    return users;
   }
 
   async findOne(options?: object): Promise<UserDto> {
@@ -62,6 +62,15 @@ export class UsersService {
       password: hashPassword,
       email,
       vpass,
+      quality: null,
+      instagram: null,
+      vk: null,
+      bio: null,
+      city: null,
+      age: null,
+      price: null,
+      readyToRemote: false,
+      readyToWorkNow: false,
     });
 
     await user.save();

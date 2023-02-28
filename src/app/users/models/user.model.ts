@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { IUser } from '../interfaces/user.interface';
-//import { TaskModel } from '../../tasks/models/task.model';
 
 @Schema({ collection: 'users', timestamps: true })
 export class UserModel extends Document implements IUser {
@@ -14,11 +13,44 @@ export class UserModel extends Document implements IUser {
   @Prop({ required: true })
   email: string;
 
-
   @Prop({ required: true })
   vpass: number;
- // @Prop({ type: [Types.ObjectId], ref: TaskModel.name })
- // tasks: TaskModel[];
+
+  /** квалификация */
+  @Prop()
+  quality: string;
+
+  /** ссылка на инстаграм */
+  @Prop()
+  instagram: string;
+
+  /** ссылка на вк */
+  @Prop()
+  vk: string;
+
+  /** о себе */
+  @Prop()
+  bio: string;
+
+  /** город */
+  @Prop()
+  city: string;
+
+  /** возраст */
+  @Prop()
+  age: number;
+
+  /** Стоимость услуг */
+  @Prop()
+  price: string;
+
+  /** Готовность к удаленной работе */
+  @Prop()
+  readyToRemote: boolean;
+
+  /** Готовность к работе прямо сейчас */
+  @Prop()
+  readyToWorkNow: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

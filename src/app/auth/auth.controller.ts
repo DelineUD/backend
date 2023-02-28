@@ -1,28 +1,26 @@
 import {
-  Controller,
   Body,
+  Controller,
+  Get,
   Headers,
-  Param,
-  Post,
   HttpException,
   HttpStatus,
-  Get,
+  Post,
   Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { AuthService } from './auth.service';
-import { LoginStatus } from './interfaces/login-status.interface';
-import { checkUserExists } from './interfaces/checkUserExists.interface';
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { JwtPayload } from './interfaces/payload.interface';
 import { AuthGuard } from '@nestjs/passport';
+import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user.create.dto';
-import { loginSms } from './interfaces/loginSms.interface';
+import { AuthService } from './auth.service';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
-
+import { checkUserExists } from './interfaces/checkUserExists.interface';
+import { LoginStatus } from './interfaces/login-status.interface';
+import { loginSms } from './interfaces/loginSms.interface';
+import { JwtPayload } from './interfaces/payload.interface';
+import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -64,14 +62,18 @@ export class AuthController {
   }
 
   @Post('loginSms') // логин по смс
-  public async loginSms(
-    @Body() loginUserDto: LoginUserDto,
-  ): Promise<loginSms> {
+  public async loginSms(@Body() loginUserDto: LoginUserDto): Promise<loginSms> {
     if (loginUserDto.vpass !== 1111) {
-      throw new HttpException('не верный одноразовый пароль', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        'не верный одноразовый пароль',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
     if (!loginUserDto.phone) {
-      throw new HttpException('поле phone обязательно!', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'поле phone обязательно!',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return await this.authService.loginSms(loginUserDto);
   }
@@ -80,11 +82,8 @@ export class AuthController {
     return this.authService.getNewTokens(data);
   }
 
-
   @Get('getMe')
   async getMeH(@Headers() data: RefreshTokenDto) {
     return this.authService.getMe(data);
   }
-
-  //sans
 }

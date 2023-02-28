@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
@@ -13,9 +13,30 @@ async function bootstrap() {
     .setDescription('UDM_back')
     .setVersion('1.0')
     .addTag('UDM')
+    .addBearerAuth(undefined, 'defaultBearerAuth')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('apis', app, document);
+
+  const options = {
+    swaggerOptions: {
+      authAction: {
+        defaultBearerAuth: {
+          name: 'defaultBearerAuth',
+          schema: {
+            description: 'Default',
+            type: 'http',
+            in: 'header',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+          value: 'mockValue',
+        },
+      },
+    },
+  };
+
+  SwaggerModule.setup('api/docs', app, document, options);
 
   await app.listen(3000);
 }

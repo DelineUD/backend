@@ -1,19 +1,25 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { UserDto } from './dto/user.dto';
-import { CreateUserDto } from './dto/user.create.dto';
-import { LoginUserDto } from './dto/user-login.dto';
-import { toUserDto } from '../shared/mapper';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserModel } from './models/user.model';
+import { compare, genSalt, hash } from 'bcrypt';
 import { Model } from 'mongoose';
-import { genSalt, hash, compare } from 'bcrypt';
+import { toUserDto } from '../shared/mapper';
+import { LoginUserDto } from './dto/user-login.dto';
+import { CreateUserDto } from './dto/user.create.dto';
+import { UserDto } from './dto/user.dto';
+import { UserModel } from './models/user.model';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserModel.name)
-    private readonly userModel: Model<UserModel>
+    private readonly userModel: Model<UserModel>,
   ) {}
+
+  async getUsers(): Promise<UserModel[]> {
+    const users = await this.userModel.find({});
+
+    return users;
+  }
 
   async findOne(options?: object): Promise<UserDto> {
     const user = await this.userModel.findOne(options).exec();
@@ -55,7 +61,16 @@ export class UsersService {
       phone,
       password: hashPassword,
       email,
-      vpass
+      vpass,
+      quality: null,
+      instagram: null,
+      vk: null,
+      bio: null,
+      city: null,
+      age: null,
+      price: null,
+      readyToRemote: false,
+      readyToWorkNow: false,
     });
 
     await user.save();
@@ -70,20 +85,19 @@ export class UsersService {
   async deleteTaskToCurrentUser(_id, taskId) {
     await this.userModel.updateOne({ _id }, { $pull: { tasks: taskId } });
   }
-//sans
-async findByPhone({ phone }: LoginUserDto): Promise<UserDto> {
-  const user = await this.userModel.findOne({ phone }).exec();
 
-  if (!user) {
-    throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+  async findByPhone({ phone }: LoginUserDto): Promise<UserDto> {
+    const user = await this.userModel.findOne({ phone }).exec();
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+    }
+
+    return toUserDto(user);
   }
 
-  return toUserDto(user);
-  
-}
-async findById(options?: object): Promise<UserDto> {
-  const user = await this.userModel.findOne(options).exec();
-  return toUserDto(user);
-}
-
+  async findById(options?: object): Promise<UserDto> {
+    const user = await this.userModel.findOne(options).exec();
+    return toUserDto(user);
+  }
 }

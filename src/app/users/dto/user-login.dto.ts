@@ -9,8 +9,4 @@ export class LoginUserDto {
 
   @IsNotEmpty()
   readonly vpass: number;
-
-  readonly refreshToken: string;
-
-  readonly refreshtoken: string;
 }

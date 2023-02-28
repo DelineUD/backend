@@ -13,8 +13,8 @@ export class UserModel extends Document implements IUser {
   @Prop({ required: true })
   email: string;
 
-  @Prop({ required: true })
-  vpass: number;
+  @Prop()
+  vpass?: number;
 
   /** квалификация */
   @Prop()

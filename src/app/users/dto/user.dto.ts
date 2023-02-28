@@ -9,6 +9,5 @@ export class UserDto {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
-  vpass: number;
+  vpass?: number;
 }

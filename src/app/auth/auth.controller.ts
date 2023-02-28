@@ -21,6 +21,7 @@ import { LoginStatus } from './interfaces/login-status.interface';
 import { loginSms } from './interfaces/loginSms.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
+import { LoginSmsDto } from '../users/dto/login-sms.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -54,28 +55,28 @@ export class AuthController {
     return req.user;
   }
   //sans
-  @Post('checkUserExists') //проверка по телефону первый экран авторизации
+  @Post('check-user-exists') //проверка по телефону первый экран авторизации
   public async checkUserExists(
     @Body() loginUserDto: LoginUserDto,
   ): Promise<checkUserExists> {
     return await this.authService.checkUserExists(loginUserDto);
   }
 
-  @Post('loginSms') // логин по смс
-  public async loginSms(@Body() loginUserDto: LoginUserDto): Promise<loginSms> {
-    if (loginUserDto.vpass !== 1111) {
+  @Post('login-sms') // логин по смс
+  public async loginSms(@Body() LoginSmsDto: LoginSmsDto): Promise<loginSms> {
+    if (LoginSmsDto.vpass !== 1111) {
       throw new HttpException(
         'не верный одноразовый пароль',
         HttpStatus.UNAUTHORIZED,
       );
     }
-    if (!loginUserDto.phone) {
+    if (!LoginSmsDto.phone) {
       throw new HttpException(
         'поле phone обязательно!',
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.authService.loginSms(loginUserDto);
+    return await this.authService.loginSms(LoginSmsDto);
   }
   @Post('refresh')
   async getNewTokens(@Headers() data: RefreshTokenDto) {

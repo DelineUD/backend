@@ -16,6 +16,8 @@ import { UserDto } from '../users/dto/user.dto';
 import { loginSms } from './interfaces/loginSms.interface';
 import HttpStatusCode from 'http-status-typed';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { LoginSmsDto } from '../users/dto/login-sms.dto';
+
 
 @Injectable()
 export class AuthService {
@@ -82,8 +84,8 @@ export class AuthService {
     };
   }
 
-  async loginSms(loginUserDto: LoginUserDto): Promise<loginSms> {
-    const user = await this.usersService.findByPhone(loginUserDto);
+  async loginSms(LoginSmsDto : LoginSmsDto ): Promise<loginSms> {
+    const user = await this.usersService.findByPhone(LoginSmsDto);
     const token = this._createToken(user);
     return {
       user: user.phone,

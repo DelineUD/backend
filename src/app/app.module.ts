@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getMongoConfig } from '../config/db-connect.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ResidentsModule } from './residents/residents.module';
+import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor';
 
 @Module({
   imports: [
@@ -22,6 +24,12 @@ import { ResidentsModule } from './residents/residents.module';
     ResidentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: NotFoundInterceptor,
+    },
+  ],
 })
 export class AppModule {}

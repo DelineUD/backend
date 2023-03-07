@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Model } from 'mongoose';
+import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { toUserDto } from '../shared/mapper';
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user.create.dto';
@@ -21,16 +22,20 @@ export class UsersService {
     return users;
   }
 
-  async findOne(options?: object): Promise<UserDto> {
-    const user = await this.userModel.findOne(options).exec();
-    return toUserDto(user);
+  async findOne(where): Promise<UserModel> {
+    try {
+      const user = await this.userModel.findOne(where).exec();
+      return user;
+    } catch (e) {
+      throw new EntityNotFoundError(e);
+    }
   }
 
   async findByLogin({ phone, password }: LoginUserDto): Promise<UserDto> {
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+      throw new EntityNotFoundError('User not found');
     }
 
     const areEqual = await compare(password, user.password);
@@ -47,7 +52,7 @@ export class UsersService {
   }
 
   async create(userDto: CreateUserDto): Promise<UserDto> {
-    const { phone, password, email} = userDto;
+    const { phone, password, email } = userDto;
 
     const userInDb = await this.userModel.findOne({ phone }).exec();
     if (userInDb) {
@@ -77,7 +82,6 @@ export class UsersService {
     return toUserDto(user);
   }
 
-
   async findByPhone({ phone }: LoginUserDto): Promise<UserDto> {
     const user = await this.userModel.findOne({ phone }).exec();
 
@@ -88,8 +92,8 @@ export class UsersService {
     return toUserDto(user);
   }
 
-  async findById(options?: object): Promise<UserDto> {
-    const user = await this.userModel.findOne(options).exec();
-    return toUserDto(user);
+  async findById(where): Promise<UserModel> {
+    const user = await this.userModel.findOne(where).exec();
+    return user;
   }
 }

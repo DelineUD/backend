@@ -1,8 +1,12 @@
 import { UserModel } from '../users/models/user.model';
-import { ResidentInterface } from './interfaces/resident.interface';
+import { IResident } from './interfaces/resident.interface';
 
-export const residentListMapper = (users: UserModel[]): ResidentInterface[] => {
-  return users.map((user) => ({
+export const residentListMapper = (users: UserModel[]): IResident[] => {
+  return users.map(residentMapper);
+};
+
+export const residentMapper = (user: UserModel): IResident => {
+  return {
     _id: user.id,
     phone: user.phone,
     email: user.email,
@@ -15,5 +19,5 @@ export const residentListMapper = (users: UserModel[]): ResidentInterface[] => {
     price: user.price,
     readyToRemote: user.readyToRemote,
     readyToWorkNow: user.readyToWorkNow,
-  }));
+  };
 };

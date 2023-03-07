@@ -1,4 +1,4 @@
-export interface ResidentInterface {
+export interface IResident {
   _id: string;
   phone: number;
   email: string;

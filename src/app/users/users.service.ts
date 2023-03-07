@@ -96,4 +96,18 @@ export class UsersService {
     const user = await this.userModel.findOne(where).exec();
     return user;
   }
+
+  async update(where, newData): Promise<UserModel> {
+    let user: UserModel;
+
+    try {
+      user = await this.userModel.findOneAndUpdate(where, newData, {
+        new: true,
+      });
+    } catch (e) {
+      throw new EntityNotFoundError(e);
+    }
+
+    return user;
+  }
 }

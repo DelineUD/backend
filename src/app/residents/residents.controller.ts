@@ -13,6 +13,7 @@ import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { ResidentUpdate } from './entities/resident-update.entity';
 import { Resident } from './entities/resident.entity';
+import { UserIsResidentFromParams } from './guards/user-is-resident.guard';
 import { IResident } from './interfaces/resident.interface';
 import { ResidentsService } from './residents.service';
 
@@ -46,6 +47,7 @@ export class ResidentsController {
   }
 
   @Patch(':_id')
+  @UseGuards(UserIsResidentFromParams)
   @ApiBody({
     description: 'Новые данные резидента',
     type: ResidentUpdate,

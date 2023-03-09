@@ -38,6 +38,15 @@ async function bootstrap() {
 
   SwaggerModule.setup('api/docs', app, document, options);
 
+  app.enableCors({
+    origin: [
+      /** IOS Capacitor Application */
+      'capacitor://localhost',
+      /** Android Capacitor Application */
+      'http://localhost',
+    ],
+  });
+
   await app.listen(3000);
 }
 bootstrap();

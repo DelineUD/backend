@@ -1,23 +1,22 @@
 import {
-  Injectable,
   HttpException,
   HttpStatus,
+  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { LoginStatus } from './interfaces/login-status.interface';
-import { checkUserExists } from './interfaces/checkUserExists.interface';
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { JwtPayload } from './interfaces/payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import HttpStatusCode from 'http-status-typed';
+import { LoginSmsDto } from '../users/dto/login-sms.dto';
+import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user.create.dto';
 import { UserDto } from '../users/dto/user.dto';
-import { loginSms } from './interfaces/loginSms.interface';
-import HttpStatusCode from 'http-status-typed';
+import { UsersService } from '../users/users.service';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
-import { LoginSmsDto } from '../users/dto/login-sms.dto';
-
+import { checkUserExists } from './interfaces/checkUserExists.interface';
+import { LoginStatus } from './interfaces/login-status.interface';
+import { loginSms } from './interfaces/loginSms.interface';
+import { JwtPayload } from './interfaces/payload.interface';
+import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
 @Injectable()
 export class AuthService {
@@ -84,7 +83,7 @@ export class AuthService {
     };
   }
 
-  async loginSms(LoginSmsDto : LoginSmsDto ): Promise<loginSms> {
+  async loginSms(LoginSmsDto: LoginSmsDto): Promise<loginSms> {
     const user = await this.usersService.findByPhone(LoginSmsDto);
     const token = this._createToken(user);
     return {

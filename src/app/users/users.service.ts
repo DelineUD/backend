@@ -86,7 +86,9 @@ export class UsersService {
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+      throw new EntityNotFoundError(
+        `Пользователь с телефоном ${phone} не найден`,
+      );
     }
 
     return toUserDto(user);

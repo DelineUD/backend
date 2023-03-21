@@ -12,6 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { LoginSmsDto } from '../users/dto/login-sms.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user.create.dto';
 import { AuthService } from './auth.service';
@@ -21,7 +22,6 @@ import { LoginStatus } from './interfaces/login-status.interface';
 import { loginSms } from './interfaces/loginSms.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { LoginSmsDto } from '../users/dto/login-sms.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -67,7 +67,7 @@ export class AuthController {
     if (LoginSmsDto.vpass !== 1111) {
       throw new HttpException(
         'не верный одноразовый пароль',
-        HttpStatus.UNAUTHORIZED,
+        HttpStatus.BAD_REQUEST,
       );
     }
     if (!LoginSmsDto.phone) {

@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ResidentsModule } from './residents/residents.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { ResidentsModule } from './residents/residents.module';
       useFactory: getMongoConfig,
     }),
     AuthModule,
-    ResidentsModule,
+    PostsModule
+
   ],
   controllers: [AppController],
   providers: [AppService],

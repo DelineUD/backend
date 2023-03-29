@@ -7,8 +7,6 @@ export interface IResident {
   vk: string;
   bio: string;
   city: string;
-  age: number;
+  age: string;
   price: string;
-  readyToRemote: boolean;
-  readyToWorkNow: boolean;
 }

@@ -29,7 +29,7 @@ export class AuthService {
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
     let status: RegistrationStatus = {
       success: true,
-      message: 'user registered',
+      message: 'user registered or updated',
     };
 
     try {
@@ -40,7 +40,6 @@ export class AuthService {
         message: err,
       };
     }
-
     return status;
   }
 
@@ -64,10 +63,10 @@ export class AuthService {
   private _createToken({ phone }: UserDto): any {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
-      expiresIn: '1m',
+      expiresIn: '10m',
     });
     const refreshToken = this.jwtService.sign(user, {
-      expiresIn: '3m',
+      expiresIn: '100h',
     });
 
     return {
@@ -84,7 +83,7 @@ export class AuthService {
     };
   }
 
-  async loginSms(LoginSmsDto : LoginSmsDto ): Promise<loginSms> {
+  async loginSms(LoginSmsDto: LoginSmsDto): Promise<loginSms> {
     const user = await this.usersService.findByPhone(LoginSmsDto);
     const token = this._createToken(user);
     return {
@@ -124,4 +123,5 @@ export class AuthService {
 
     return this.jwtService.verifyAsync(refreshtoken);
   }
+
 }

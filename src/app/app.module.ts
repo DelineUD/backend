@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ResidentsModule } from './residents/residents.module';
 import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor
       useFactory: getMongoConfig,
     }),
     AuthModule,
-    ResidentsModule,
+    PostsModule
+
   ],
   controllers: [AppController],
   providers: [

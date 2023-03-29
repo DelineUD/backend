@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Headers,
+  Query,
   HttpException,
   HttpStatus,
   Post,
@@ -28,15 +29,14 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @UsePipes(new ValidationPipe())
-  @Post('register')
+  @Post('register-or-update')
   public async register(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<RegistrationStatus> {
-    const result: RegistrationStatus = await this.authService.register(
-      createUserDto,
-    );
+    @Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> 
+  {
+    const result: RegistrationStatus = await this.authService.register(createUserDto);
 
-    if (!result.success) {
+    if (!result.success) 
+    {
       throw new HttpException(result.message, HttpStatus.BAD_REQUEST);
     }
 
@@ -67,7 +67,7 @@ export class AuthController {
     if (LoginSmsDto.vpass !== 1111) {
       throw new HttpException(
         'не верный одноразовый пароль',
-        HttpStatus.UNAUTHORIZED,
+        HttpStatus.BAD_REQUEST,
       );
     }
     if (!LoginSmsDto.phone) {
@@ -87,4 +87,5 @@ export class AuthController {
   async getMeH(@Headers() data: RefreshTokenDto) {
     return this.authService.getMe(data);
   }
+
 }

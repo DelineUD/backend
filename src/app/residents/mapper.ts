@@ -10,14 +10,12 @@ export const residentMapper = (user: UserModel): IResident => {
     _id: user.id,
     phone: user.phone,
     email: user.email,
-    quality: user.quality,
+    quality: user.service_cost,
     instagram: user.instagram,
     vk: user.vk,
-    bio: user.bio,
-    city: user.city,
-    age: user.age,
-    price: user.price,
-    readyToRemote: user.readyToRemote,
-    readyToWorkNow: user.readyToWorkNow,
+    bio: user.about,
+    city: user.city_ru,
+    age: user.birthday,
+    price: user.service_cost
   };
 };

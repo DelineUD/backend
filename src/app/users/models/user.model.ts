@@ -85,6 +85,7 @@ searching_work_project_administrator?: string;
 portfolio_project_administrator?:string;
 @Prop()
 searching_work_studio_manager?: string;
+@Prop()
 portfolio_studio_manager?: string;
 @Prop()
 searching_work_different?: string;

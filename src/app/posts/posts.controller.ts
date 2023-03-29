@@ -1,4 +1,4 @@
-import { Controller, Get, Post, HttpStatus, UseGuards, Body, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, HttpStatus, UseGuards, Body, HttpException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IPosts } from './interfaces/posts.interface';
@@ -18,7 +18,7 @@ export class PostsController {
     return result;
   }
   
-  @Post('create-or-update')
+  @Post('create')
   @UseGuards(AuthGuard('jwt'))
   public async create(
     @Body() createPostDto: PostDto,
@@ -34,4 +34,35 @@ export class PostsController {
     return result;
   }
 
+  @Post('update')
+  @UseGuards(AuthGuard('jwt'))
+  public async update(
+    @Body() updatePostDto: PostDto,
+  ): Promise<PostDto> {
+    const result: PostDto = await this.PostsService.update(
+      updatePostDto,
+    );
+
+    if (!result) {
+      throw new HttpException("Some error", HttpStatus.BAD_REQUEST);
+    }
+
+    return result;
+  }
+
+  @Delete('delete')
+  @UseGuards(AuthGuard('jwt'))
+  public async delete(
+    @Body() deletePostDto: PostDto,
+  ): Promise<PostDto> {
+    const result: PostDto = await this.PostsService.delete(
+      deletePostDto,
+    );
+
+    if (!result) {
+      throw new HttpException("Some error", HttpStatus.BAD_REQUEST);
+    }
+
+    return result;
+  }
 }

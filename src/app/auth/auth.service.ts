@@ -48,6 +48,7 @@ export class AuthService {
     const token = this._createToken(user);
     return {
       user: user.phone,
+      _id:user._id,
       ...token,
     };
   }

@@ -52,12 +52,7 @@ export class UsersService {
     return await this.findOne({ phone });
   }
 
-<<<<<<< HEAD
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
-=======
-  async create(userDto: CreateUserDto): Promise<UserDto> {
-    const { phone, password, email } = userDto;
->>>>>>> main
 
       
       const salt = await genSalt(10);
@@ -161,6 +156,7 @@ export class UsersService {
 
     const user: UserModel = new this.userModel({
       phone,
+      password:hashPassword,
       email: createUserDto.email,
       id: createUserDto.id,
       service_cost: createUserDto.service_cost,
@@ -265,23 +261,6 @@ export class UsersService {
   async findById(where): Promise<UserModel> {
     const user = await this.userModel.findOne(where).exec();
     return user;
-<<<<<<< HEAD
-=======
-  }
-
-  async update(where, newData): Promise<UserModel> {
-    let user: UserModel;
-
-    try {
-      user = await this.userModel.findOneAndUpdate(where, newData, {
-        new: true,
-      });
-    } catch (e) {
-      throw new EntityNotFoundError(e);
-    }
-
-    return user;
->>>>>>> main
   }
 
   async update(where, newData): Promise<UserModel> {

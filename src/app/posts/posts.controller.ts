@@ -5,13 +5,20 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { PostDto } from './dto/post.dto';
+import { CreatePostDto } from './dto/create.post.dto';
+import { DeletePostDto } from './dto/delete.post.dto';
+import { GetPostParamsDto } from './dto/get-post-params.dto';
+import { UpdatePostDto } from './dto/update.post.dto';
+import { CreatePostEntity } from './entities/create-post.entity';
+import { DeletePostEntity } from './entities/delete-posts.entity';
 import { PostEntity } from './entities/posts.entity';
+import { UpdatePostEntity } from './entities/update-posts.entity';
 import { IPosts } from './interfaces/posts.interface';
 import { PostsService } from './posts.service';
 
@@ -36,15 +43,17 @@ export class PostsController {
   @Post('create')
   @ApiBody({
     description: 'Новывй пост',
-    type: PostEntity,
+    type: CreatePostEntity,
   })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Пост успешно создан',
-    type: PostEntity,
+    type: CreatePostEntity,
   })
-  public async create(@Body() createPostDto: PostDto): Promise<PostDto> {
-    const result: PostDto = await this.PostsService.create(createPostDto);
+  public async create(
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<CreatePostDto> {
+    const result: CreatePostDto = await this.PostsService.create(createPostDto);
 
     if (!result) {
       throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
@@ -56,15 +65,17 @@ export class PostsController {
   @Post('update')
   @ApiBody({
     description: 'Обновление поста',
-    type: PostEntity,
+    type: UpdatePostEntity,
   })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Пост успешно обновлен',
-    type: PostEntity,
+    type: UpdatePostEntity,
   })
-  public async update(@Body() updatePostDto: PostDto): Promise<PostDto> {
-    const result: PostDto = await this.PostsService.update(updatePostDto);
+  public async update(
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<UpdatePostDto> {
+    const result: UpdatePostDto = await this.PostsService.update(updatePostDto);
 
     if (!result) {
       throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
@@ -76,20 +87,33 @@ export class PostsController {
   @Delete('delete')
   @ApiBody({
     description: 'Удаление поста',
-    type: PostEntity,
+    type: DeletePostEntity,
   })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Пост успешно удаленн',
-    type: PostEntity,
+    type: DeletePostEntity,
   })
-  public async delete(@Body() deletePostDto: PostDto): Promise<PostDto> {
-    const result: PostDto = await this.PostsService.delete(deletePostDto);
+  public async delete(
+    @Body() deletePostDto: DeletePostDto,
+  ): Promise<DeletePostDto> {
+    const result: DeletePostDto = await this.PostsService.delete(deletePostDto);
 
     if (!result) {
       throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
     }
 
+    return result;
+  }
+
+  @Get(':_id')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'пост по id',
+    type: PostEntity,
+  })
+  async getById(@Param() params: GetPostParamsDto): Promise<GetPostParamsDto> {
+    const result = await this.PostsService.getPostById(params);
     return result;
   }
 }

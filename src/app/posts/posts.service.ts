@@ -2,7 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
+import { DeletePostDto } from './dto/delete.post.dto';
+import { GetPostParamsDto } from './dto/get-post-params.dto';
 import { PostDto } from './dto/post.dto';
+import { UpdatePostDto } from './dto/update.post.dto';
 import { PostModel } from './models/posts.model';
 
 @Injectable()
@@ -57,19 +60,8 @@ export class PostsService {
     }
   }
 
-  async update(postDto: PostDto): Promise<PostDto> {
-    const {
-      _id,
-      authorId,
-      pText,
-      createdAt,
-      updatedAt,
-      stick,
-      pImg,
-      likes,
-      views,
-      group,
-    } = postDto;
+  async update(postDto: UpdatePostDto): Promise<UpdatePostDto> {
+    const { _id, authorId, pText, stick, pImg, group } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (!postInDb) {
@@ -77,14 +69,10 @@ export class PostsService {
     } else if (authorId === postInDb.authorId) {
       await postInDb.updateOne({
         _id,
-        createdAt,
-        updatedAt,
         authorId,
         pText,
         stick,
         pImg,
-        likes,
-        views,
         group,
       });
       await postInDb.save();
@@ -95,7 +83,7 @@ export class PostsService {
     }
   }
 
-  async delete(postDto: PostDto): Promise<PostDto> {
+  async delete(postDto: DeletePostDto): Promise<DeletePostDto> {
     const { _id, authorId } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
@@ -114,5 +102,18 @@ export class PostsService {
     } else {
       throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async getPostById(
+    getPostParamsDto: GetPostParamsDto,
+  ): Promise<GetPostParamsDto> {
+    const _id = getPostParamsDto._id;
+
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError('пост не найден');
+    }
+    return postInDb;
   }
 }

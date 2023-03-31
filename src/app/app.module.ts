@@ -6,9 +6,9 @@ import { getMongoConfig } from '../config/db-connect.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { PostsModule } from './posts/posts.module';
 import { ResidentsModule } from './residents/residents.module';
 import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor';
-import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -22,8 +22,8 @@ import { PostsModule } from './posts/posts.module';
       useFactory: getMongoConfig,
     }),
     AuthModule,
-    PostsModule
-
+    ResidentsModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [

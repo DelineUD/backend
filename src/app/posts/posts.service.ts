@@ -1,12 +1,8 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { IPosts } from './interfaces/posts.interface';
-import { postListMapper } from './mapper';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PostDto } from './dto/post.dto';
 import { PostModel } from './models/posts.model';
-import { CreateStatus } from './interfaces/create-status.interface';
-
 
 @Injectable()
 export class PostsService {
@@ -21,82 +17,101 @@ export class PostsService {
     return posts;
   }
 
-
   async create(postDto: PostDto): Promise<PostDto> {
-    const { _id,  authorId, cDate, pText, stick, pImg, likes, views, group } = postDto;
-
-    const postInDb = await this.postModel.findOne({ _id }).exec();
-    if (postInDb) {throw new HttpException('This post already created ', HttpStatus.BAD_REQUEST);}
-
-else {
-    const post: PostModel = await new this.postModel({
+    const {
+      _id,
+      createdAt,
+      updatedAt,
       authorId,
-      cDate,
       pText,
       stick,
       pImg,
       likes,
       views,
-      group
-    });
-
-    await post.save();
-
-    if(post){throw new HttpException('OK Created', HttpStatus.OK);}
-    
-    return post;
-     
-  }
-  
-  }
-  
-  async update(postDto: PostDto): Promise<PostDto> {
-    const { _id,  authorId, cDate, pText, stick, pImg, likes, views, group } = postDto;
+      group,
+    } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
-    if (!postInDb) {throw new HttpException('Post not found !', HttpStatus.BAD_REQUEST);}
-
-    else if (authorId === postInDb.authorId) {
-
-      await postInDb.updateOne({
-        _id,
+    if (postInDb) {
+      throw new HttpException(
+        'This post already created ',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else {
+      const post: PostModel = await new this.postModel({
         authorId,
-        cDate,
+        createdAt,
+        updatedAt,
         pText,
         stick,
         pImg,
         likes,
         views,
-        group
+        group,
+      });
 
+      await post.save();
+
+      return post;
+    }
+  }
+
+  async update(postDto: PostDto): Promise<PostDto> {
+    const {
+      _id,
+      authorId,
+      pText,
+      createdAt,
+      updatedAt,
+      stick,
+      pImg,
+      likes,
+      views,
+      group,
+    } = postDto;
+
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+    if (!postInDb) {
+      throw new HttpException('Post not found !', HttpStatus.BAD_REQUEST);
+    } else if (authorId === postInDb.authorId) {
+      await postInDb.updateOne({
+        _id,
+        createdAt,
+        updatedAt,
+        authorId,
+        pText,
+        stick,
+        pImg,
+        likes,
+        views,
+        group,
       });
       await postInDb.save();
 
-      if(postInDb){throw new HttpException('OK Updated', HttpStatus.OK);}
+      return postInDb;
+    } else {
+      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async delete(postDto: PostDto): Promise<PostDto> {
+    const { _id, authorId } = postDto;
+
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+    if (!postInDb) {
+      throw new HttpException('Post not found !', HttpStatus.BAD_REQUEST);
+    } else if (authorId === postInDb.authorId) {
+      await postInDb.deleteOne({
+        _id,
+      });
+
+      if (postInDb) {
+        throw new HttpException('OK Deleted', HttpStatus.OK);
+      }
 
       return postInDb;
+    } else {
+      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
     }
-      else {throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);}
-    }
-
-    
-    async delete(postDto: PostDto): Promise<PostDto> {
-      const { _id,  authorId } = postDto;
-  
-      const postInDb = await this.postModel.findOne({ _id }).exec();
-      if (!postInDb) {throw new HttpException('Post not found !', HttpStatus.BAD_REQUEST);}
-  
-      else if (authorId === postInDb.authorId) {
-  
-        await postInDb.deleteOne({
-          _id
-        });
-  
-        if(postInDb){throw new HttpException('OK Deleted', HttpStatus.OK);}
-  
-        return postInDb;
-      }
-        else {throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);}
-      }
-
   }
+}

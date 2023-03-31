@@ -2,61 +2,61 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class PostEntity {
   @ApiProperty({
-    example: false,
+    example: 'id',
     description: 'id',
   })
   _id: string;
 
   @ApiProperty({
-    example: false,
+    example: 'id автора',
     description: 'id автора',
   })
   authorId: string;
 
   @ApiProperty({
-    example: false,
+    example: 'боди текст',
     description: 'боди текст',
   })
   pText: string;
 
   @ApiProperty({
-    example: false,
+    example: 'прилеплен',
     description: 'прилеплен',
   })
   stick: string;
 
   @ApiProperty({
-    example: false,
+    example: 'картинки',
     description: 'картинки',
   })
   pImg: string;
 
   @ApiProperty({
-    example: false,
+    example: 'лайки',
     description: 'лайки',
   })
   likes: number;
 
   @ApiProperty({
-    example: false,
+    example: 'просмотры',
     description: 'просмотры',
   })
   views: number;
 
   @ApiProperty({
-    example: false,
+    example: 'группа',
     description: 'группа',
   })
   group: string;
 
   @ApiProperty({
-    example: false,
+    example: 'дата создания',
     description: 'дата создания',
   })
   createdAt: string;
 
   @ApiProperty({
-    example: false,
+    example: 'дата редактирования',
     description: 'дата редактирования',
   })
   updatedAt: string;

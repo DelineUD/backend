@@ -3,7 +3,7 @@ export interface IPosts {
 
   pText: string;
 
-  stick: string;
+  stick: boolean;
 
   pImg: string;
 

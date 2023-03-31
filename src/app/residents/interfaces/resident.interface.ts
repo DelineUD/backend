@@ -6,4 +6,6 @@ export interface IResident {
   last_name: string;
 
   qualification: string;
+
+  badge: string;
 }

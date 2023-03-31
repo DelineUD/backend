@@ -28,4 +28,11 @@ export class Resident {
     nullable: true,
   })
   last_name: string;
+
+  @ApiProperty({
+    example: 'Бэйдж',
+    description: 'Бэйдж резидента',
+    nullable: true,
+  })
+  badge: string;
 }

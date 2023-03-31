@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { PostDto } from './dto/post.dto';
 import { PostModel } from './models/posts.model';
 
@@ -72,7 +73,7 @@ export class PostsService {
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (!postInDb) {
-      throw new HttpException('Post not found !', HttpStatus.BAD_REQUEST);
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
     } else if (authorId === postInDb.authorId) {
       await postInDb.updateOne({
         _id,
@@ -99,14 +100,14 @@ export class PostsService {
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (!postInDb) {
-      throw new HttpException('Post not found !', HttpStatus.BAD_REQUEST);
+      throw new EntityNotFoundError('не найден пост для удаления');
     } else if (authorId === postInDb.authorId) {
       await postInDb.deleteOne({
         _id,
       });
 
       if (postInDb) {
-        throw new HttpException('OK Deleted', HttpStatus.OK);
+        throw new HttpException('OK Deleted', HttpStatus.NO_CONTENT);
       }
 
       return postInDb;

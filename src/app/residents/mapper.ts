@@ -14,5 +14,7 @@ export const residentMapper = (user: UserModel): IResident => {
     last_name: user.last_name,
 
     qualification: user.qualification,
+
+    badge: user.badge,
   };
 };

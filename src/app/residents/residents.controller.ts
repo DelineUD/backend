@@ -1,19 +1,8 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Param,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
-import { UpdateResidentDto } from './dto/update-resident.dto';
-import { ResidentUpdate } from './entities/resident-update.entity';
 import { Resident } from './entities/resident.entity';
-import { UserIsResidentFromParams } from './guards/user-is-resident.guard';
 import { IResident } from './interfaces/resident.interface';
 import { ResidentsService } from './residents.service';
 
@@ -43,29 +32,6 @@ export class ResidentsController {
   })
   async getById(@Param() params: GetResidentParamsDto): Promise<IResident> {
     const result = await this.residentsService.getResidentById(params);
-    return result;
-  }
-
-  @Patch(':_id')
-  @UseGuards(UserIsResidentFromParams)
-  @ApiBody({
-    description: 'Новые данные резидента',
-    type: ResidentUpdate,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Данные резидента успешно обновлены',
-    type: Resident,
-  })
-  async updateResident(
-    @Param() params: GetResidentParamsDto,
-    @Body() updateResidentDto: UpdateResidentDto,
-  ): Promise<IResident> {
-    const result = await this.residentsService.updateResident(
-      params,
-      updateResidentDto,
-    );
-
     return result;
   }
 }

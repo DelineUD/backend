@@ -1,23 +1,25 @@
-import {IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class PostDto {
+  _id?: string;
 
-  _id?:string;
-  
   @IsNotEmpty()
   authorId: string;
 
-  @IsNotEmpty()
-  cDate: string;
+  createdAt?: string;
+
+  updatedAt?: string;
 
   @IsNotEmpty()
   pText: string;
 
   stick?: string;
+
   pImg?: string;
+
   likes?: number;
+
   views?: number;
+
   group?: string;
-
-
 }

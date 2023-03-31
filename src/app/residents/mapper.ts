@@ -8,14 +8,13 @@ export const residentListMapper = (users: UserModel[]): IResident[] => {
 export const residentMapper = (user: UserModel): IResident => {
   return {
     _id: user.id,
-    phone: user.phone,
-    email: user.email,
-    quality: user.service_cost,
-    instagram: user.instagram,
-    vk: user.vk,
-    bio: user.about,
-    city: user.city_ru,
-    age: user.birthday,
-    price: user.service_cost
+
+    first_name: user.first_name,
+
+    last_name: user.last_name,
+
+    qualification: user.qualification,
+
+    badge: user.badge,
   };
 };

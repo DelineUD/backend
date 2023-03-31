@@ -1,66 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Resident {
+  @ApiProperty({
+    example: 'id',
+    description: 'id резидента',
+    nullable: true,
+  })
   _id: string;
-
-  @ApiProperty({ example: '79999999999', description: 'Номер телефона' })
-  phone: string;
-
-  @ApiProperty({ example: 'test@test.test', description: 'Электронная почта' })
-  email: string;
 
   @ApiProperty({
     example: 'новичок',
     description: 'Квалификация резидента',
     nullable: true,
   })
-  quality: string;
+  qualification: string;
 
   @ApiProperty({
-    example: '@testNick',
-    description: 'Никнейм инстаграм',
+    example: 'Имя',
+    description: 'Имя резидента',
     nullable: true,
   })
-  instagram: string;
+  first_name: string;
 
   @ApiProperty({
-    example: '@testNick',
-    description: 'Никнейм vk',
+    example: 'Фамилия',
+    description: 'Фамилия резидента',
     nullable: true,
   })
-  vk: string;
+  last_name: string;
 
   @ApiProperty({
-    example: 'О себе',
-    description: 'информация о себе',
+    example: 'Бэйдж',
+    description: 'Бэйдж резидента',
     nullable: true,
   })
-  bio: string;
-
-  @ApiProperty({ example: 'Томск', description: 'Город', nullable: true })
-  city: string;
-
-  @ApiProperty({ example: '25', description: 'Возраст', nullable: true })
-  age: string;
-
-  @ApiProperty({
-    example: 'от 500 руб. кв. м.',
-    description: 'Стоимость услуг',
-    nullable: true,
-  })
-  price: string;
-
-  @ApiProperty({
-    example: false,
-    description: 'Готовность к удаленной работе',
-    nullable: true,
-  })
-  readyToRemote: boolean;
-
-  @ApiProperty({
-    example: false,
-    description: 'Готовность к работе прямо сейчас',
-    nullable: true,
-  })
-  readyToWorkNow: boolean;
+  badge: string;
 }

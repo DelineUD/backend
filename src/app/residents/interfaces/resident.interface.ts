@@ -1,12 +1,11 @@
 export interface IResident {
   _id: string;
-  phone: number;
-  email: string;
-  quality: string;
-  instagram: string;
-  vk: string;
-  bio: string;
-  city: string;
-  age: string;
-  price: string;
+
+  first_name: string;
+
+  last_name: string;
+
+  qualification: string;
+
+  badge: string;
 }

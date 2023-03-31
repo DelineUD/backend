@@ -1,4 +1,6 @@
 export interface IPosts {
+  _id?: string;
+
   authorId: string;
 
   pText: string;

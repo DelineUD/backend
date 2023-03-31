@@ -1,6 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class CreatePostDto {
+export class UpdatePostDto {
+  @IsNotEmpty()
+  _id: string;
+
   @IsNotEmpty()
   authorId: string;
 

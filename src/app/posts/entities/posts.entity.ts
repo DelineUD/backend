@@ -20,10 +20,10 @@ export class PostEntity {
   pText: string;
 
   @ApiProperty({
-    example: 'прилеплен',
+    example: false,
     description: 'прилеплен',
   })
-  stick: string;
+  stick: boolean;
 
   @ApiProperty({
     example: 'картинки',
@@ -32,13 +32,13 @@ export class PostEntity {
   pImg: string;
 
   @ApiProperty({
-    example: 'лайки',
+    example: 0,
     description: 'лайки',
   })
   likes: number;
 
   @ApiProperty({
-    example: 'просмотры',
+    example: 0,
     description: 'просмотры',
   })
   views: number;

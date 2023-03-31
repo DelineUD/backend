@@ -13,7 +13,7 @@ export class PostDto {
   @IsNotEmpty()
   pText: string;
 
-  stick?: string;
+  stick?: boolean;
 
   pImg?: string;
 

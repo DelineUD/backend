@@ -11,7 +11,7 @@ export class PostModel extends Document implements IPosts {
   pText: string;
 
   @Prop({ required: false })
-  stick: string;
+  stick: boolean;
 
   @Prop({ required: false })
   pImg: string;

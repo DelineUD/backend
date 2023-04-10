@@ -16,7 +16,7 @@ export class PostsService {
   ) {}
 
   async getPostsList(): Promise<PostModel[]> {
-    const posts = await this.postModel.find({});
+    const posts = await this.postModel.find({}).sort({ createdAt: -1 });
 
     return posts;
   }

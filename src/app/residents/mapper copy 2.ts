@@ -19,6 +19,11 @@ type ItemLabel = {
   value: any;
 };
 
+type FieldLabel = {
+  field: string;
+  items: any;
+};
+
 const getItemWithLabel = (
   user: UserModel,
   fieldName: any,
@@ -174,6 +179,7 @@ export const residentMapper = (user: UserModel): any => {
       {
         field: 'Информация',
         items: [
+          ...getItemWithLabel(user, 'phone', 'Телефон'),
           ...getItemWithLabel(user, 'birthday', 'Возраст'),
           ...getItemWithLabel(user, 'ervice_cost', 'Стоимость услуг'),
           ...getItemWithLabel(

@@ -1,5 +1,4 @@
 import { IsNotEmpty } from 'class-validator';
-//import { TaskDto } from '../../tasks/dto/task.dto';
 
 export class UserDto {
   _id?: string;

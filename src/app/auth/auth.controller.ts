@@ -3,16 +3,16 @@ import {
   Controller,
   Get,
   Headers,
-  Query,
   HttpException,
   HttpStatus,
   Post,
-  Req,
+  Query,
   UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { LoginSmsDto } from '../users/dto/login-sms.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user.create.dto';
 import { AuthService } from './auth.service';
@@ -22,7 +22,6 @@ import { LoginStatus } from './interfaces/login-status.interface';
 import { loginSms } from './interfaces/loginSms.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { LoginSmsDto } from '../users/dto/login-sms.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -31,12 +30,13 @@ export class AuthController {
   @UsePipes(new ValidationPipe())
   @Post('register-or-update')
   public async register(
-    @Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> 
-  {
-    const result: RegistrationStatus = await this.authService.register(createUserDto);
+    @Query() createUserDto: CreateUserDto,
+  ): Promise<RegistrationStatus> {
+    const result: RegistrationStatus = await this.authService.register(
+      createUserDto,
+    );
 
-    if (!result.success) 
-    {
+    if (!result.success) {
       throw new HttpException(result.message, HttpStatus.BAD_REQUEST);
     }
 
@@ -51,7 +51,8 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(AuthGuard())
-  public async testAuth(@Req() req: any): Promise<JwtPayload> {
+  public async testAuth(@Query() req: any): Promise<JwtPayload> {
+    console.log(typeof req.user);
     return req.user;
   }
   //sans
@@ -84,8 +85,7 @@ export class AuthController {
   }
 
   @Get('getMe')
-  async getMeH(@Headers() data: RefreshTokenDto) {
+  async getMe(@Headers() data: RefreshTokenDto) {
     return this.authService.getMe(data);
   }
-
 }

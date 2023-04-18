@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { Resident } from './entities/resident.entity';
 import { IResident } from './interfaces/resident.interface';
+import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 
 @ApiBearerAuth('defaultBearerAuth')
@@ -19,7 +20,7 @@ export class ResidentsController {
     description: 'список резидентов',
     type: [Resident],
   })
-  async getList(): Promise<IResident[]> {
+  async getList(): Promise<IResidentList[]> {
     const result = await this.residentsService.getResidentsList();
     return result;
   }

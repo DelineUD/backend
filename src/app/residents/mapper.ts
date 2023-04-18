@@ -2,10 +2,10 @@ import { UserModel } from '../users/models/user.model';
 import { IResidentList } from './interfaces/resident.interface-list';
 
 export const residentListMapper = (user: UserModel[]): IResidentList[] => {
-  return user.map(residenstMapper);
+  return user.map(residentsMapper);
 };
 
-export const residenstMapper = (user: UserModel): IResidentList => {
+export const residentsMapper = (user: UserModel): IResidentList => {
   return {
     _id: user._id,
     avatar: user.avatar,
@@ -16,12 +16,12 @@ export const residenstMapper = (user: UserModel): IResidentList => {
 };
 type ItemLabel = {
   label: string;
-  value: any;
+  value: string;
 };
 
 const getItemWithLabel = (
   user: UserModel,
-  fieldName: any,
+  fieldName: string,
   label: string,
 ): ItemLabel[] => {
   return user[fieldName]

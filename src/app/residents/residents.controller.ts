@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { Resident } from './entities/resident.entity';
+import { ResidentList } from './entities/resident.list.entity';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
@@ -18,7 +19,7 @@ export class ResidentsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'список резидентов',
-    type: [Resident],
+    type: [ResidentList],
   })
   async getList(): Promise<IResidentList[]> {
     const result = await this.residentsService.getResidentsList();

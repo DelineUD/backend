@@ -52,7 +52,6 @@ export class AuthController {
   @Get('profile')
   @UseGuards(AuthGuard())
   public async testAuth(@Query() req: any): Promise<JwtPayload> {
-    console.log(typeof req.user);
     return req.user;
   }
   //sans

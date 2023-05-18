@@ -57,7 +57,7 @@ export class ResidentsController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './files',
+        destination: '/var/www/html/teststand',
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,

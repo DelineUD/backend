@@ -6,5 +6,6 @@ export class RefreshTokenDto {
   })
   refreshToken: string;
   refreshtoken: string;
+  authorization: any;
   phone: number;
 }

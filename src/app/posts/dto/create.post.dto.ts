@@ -9,7 +9,7 @@ export class CreatePostDto {
 
   group?: string;
 
-  pImg?: string;
+  pImg?: Array<string>;
 
   stick?: boolean;
 }

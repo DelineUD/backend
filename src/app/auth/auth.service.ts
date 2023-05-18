@@ -1,23 +1,22 @@
 import {
-  Injectable,
   HttpException,
   HttpStatus,
+  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { LoginStatus } from './interfaces/login-status.interface';
-import { checkUserExists } from './interfaces/checkUserExists.interface';
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { JwtPayload } from './interfaces/payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import HttpStatusCode from 'http-status-typed';
+import { LoginSmsDto } from '../users/dto/login-sms.dto';
+import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user.create.dto';
 import { UserDto } from '../users/dto/user.dto';
-import { loginSms } from './interfaces/loginSms.interface';
-import HttpStatusCode from 'http-status-typed';
+import { UsersService } from '../users/users.service';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
-import { LoginSmsDto } from '../users/dto/login-sms.dto';
-
+import { checkUserExists } from './interfaces/checkUserExists.interface';
+import { LoginStatus } from './interfaces/login-status.interface';
+import { loginSms } from './interfaces/loginSms.interface';
+import { JwtPayload } from './interfaces/payload.interface';
+import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +47,7 @@ export class AuthService {
     const token = this._createToken(user);
     return {
       user: user.phone,
-      _id:user._id,
+      _id: user._id,
       ...token,
     };
   }
@@ -93,17 +92,18 @@ export class AuthService {
     };
   }
 
-  async getNewTokens({ refreshtoken }: RefreshTokenDto) {
-    if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
+  async getNewTokens({ authorization }: RefreshTokenDto) {
+    const noBearer = authorization.split(' ');
+    if (!authorization) throw new UnauthorizedException('Please sign in!');
 
     try {
-      await this.jwtService.verifyAsync(refreshtoken);
+      await this.jwtService.verifyAsync(noBearer[1]);
     } catch (err) {
       throw new UnauthorizedException(
         'Invalid token or expired! Please Login again!',
       );
     }
-    const result = await this.jwtService.verifyAsync(refreshtoken);
+    const result = await this.jwtService.verifyAsync(noBearer[1]);
     const user = await this.usersService.findByPhone(result);
 
     const token = this._createToken(user);
@@ -113,16 +113,26 @@ export class AuthService {
     };
   }
 
-  async getMe({ refreshtoken }: RefreshTokenDto) {
-    if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
+  async getMe({ authorization }: RefreshTokenDto) {
+    const noBearer = authorization.split(' ');
+    if (!authorization) throw new UnauthorizedException('Please sign in!');
 
     try {
-      await await this.jwtService.verifyAsync(refreshtoken);
+      await await this.jwtService.verifyAsync(noBearer[1]);
     } catch (err) {
+      console.log(noBearer[1]);
       throw new UnauthorizedException('Invalid token or expired!');
     }
 
-    return this.jwtService.verifyAsync(refreshtoken);
-  }
+    const result = await this.jwtService.verifyAsync(noBearer[1]);
+    const user = await this.usersService.findByPhone(result);
 
+    return {
+      _id: user._id,
+      first_name: user.first_name ?? null,
+      last_name: user.last_name ?? null,
+      phone: user.phone ?? null,
+      email: user.email ?? null,
+    };
+  }
 }

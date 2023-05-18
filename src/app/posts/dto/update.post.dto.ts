@@ -12,7 +12,7 @@ export class UpdatePostDto {
 
   group?: string;
 
-  pImg?: string;
+  pImg?: Array<string>;
 
   stick?: boolean;
 }

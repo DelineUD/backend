@@ -4,4 +4,5 @@ export interface IResidentList {
   qualification: string;
   first_name: string;
   last_name: string;
+  badge: string;
 }

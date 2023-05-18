@@ -15,7 +15,7 @@ export class PostDto {
 
   stick?: boolean;
 
-  pImg?: string;
+  pImg?: Array<string>;
 
   likes?: number;
 

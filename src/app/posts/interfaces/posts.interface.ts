@@ -7,7 +7,7 @@ export interface IPosts {
 
   stick: boolean;
 
-  pImg: string;
+  pImg?: Array<string>;
 
   likes: number;
 

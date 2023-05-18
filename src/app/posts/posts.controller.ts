@@ -7,10 +7,15 @@ import {
   HttpStatus,
   Param,
   Post,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
+import { editFileName, imageFileFilter } from '../upload/upload.service';
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { GetPostParamsDto } from './dto/get-post-params.dto';
@@ -21,6 +26,7 @@ import { PostEntity } from './entities/posts.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
 import { IPosts } from './interfaces/posts.interface';
 import { PostsService } from './posts.service';
+var postId: any = 0;
 
 @ApiBearerAuth('defaultBearerAuth')
 @ApiTags('posts')
@@ -28,7 +34,6 @@ import { PostsService } from './posts.service';
 @UseGuards(AuthGuard('jwt'))
 export class PostsController {
   constructor(private PostsService: PostsService) {}
-
   @Get('list')
   @ApiResponse({
     status: HttpStatus.OK,
@@ -53,11 +58,7 @@ export class PostsController {
   public async create(
     @Body() createPostDto: CreatePostDto,
   ): Promise<CreatePostDto> {
-    const result: CreatePostDto = await this.PostsService.create(createPostDto);
-
-    if (!result) {
-      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
-    }
+    const result = await this.PostsService.create(createPostDto);
 
     return result;
   }
@@ -114,6 +115,33 @@ export class PostsController {
   })
   async getById(@Param() params: GetPostParamsDto): Promise<GetPostParamsDto> {
     const result = await this.PostsService.getPostById(params);
+    return result;
+  }
+
+  @Post('upload-images')
+  @UseInterceptors(
+    FilesInterceptor('image', 4, {
+      storage: diskStorage({
+        destination: './files',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  public async upImages(
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFiles() files,
+  ): Promise<CreatePostDto> {
+    let result: any;
+    const response = files.filter(Boolean).map((file) => ({
+      originalname: file.originalname,
+      filename: file.filename,
+      url: `www.ya.ru/${file.filename}`,
+    }));
+
+    console.log(response);
+    result = await this.PostsService.upImages(createPostDto, response);
+
     return result;
   }
 }

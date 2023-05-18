@@ -41,46 +41,48 @@ export class PostsService {
         'This post already created ',
         HttpStatus.BAD_REQUEST,
       );
-    } else {
-      const post: PostModel = await new this.postModel({
-        authorId,
-        createdAt,
-        updatedAt,
-        pText,
-        stick,
-        pImg,
-        likes,
-        views,
-        group,
-      });
-
-      await post.save();
-
-      return post;
     }
+    const post: PostModel = await new this.postModel({
+      authorId,
+      createdAt,
+      updatedAt,
+      pText,
+      stick,
+      pImg,
+      likes,
+      views,
+      group,
+    });
+
+    await post.save();
+
+    return post;
   }
 
   async update(postDto: UpdatePostDto): Promise<UpdatePostDto> {
     const { _id, authorId, pText, stick, pImg, group } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
+
     if (!postInDb) {
       throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
-    } else if (authorId === postInDb.authorId) {
-      await postInDb.updateOne({
-        _id,
-        authorId,
-        pText,
-        stick,
-        pImg,
-        group,
-      });
-      await postInDb.save();
+    }
 
-      return postInDb;
-    } else {
+    if (authorId !== postInDb.authorId) {
       throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
     }
+
+    await postInDb.updateOne({
+      _id,
+      authorId,
+      pText,
+      stick,
+      group,
+      pImg,
+    });
+    await postInDb.save();
+    const newPostInDb = await this.postModel.findOne({ _id }).exec();
+    return newPostInDb;
   }
 
   async delete(postDto: DeletePostDto): Promise<DeletePostDto> {
@@ -115,5 +117,38 @@ export class PostsService {
       throw new EntityNotFoundError('пост не найден');
     }
     return postInDb;
+  }
+
+  async upImages(postDto: PostDto, file: any): Promise<PostDto> {
+    const { _id, authorId } = postDto;
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+    }
+
+    if (authorId !== postInDb.authorId) {
+      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+    }
+
+    if (file?.length && !postInDb.pImg.length) {
+      await postInDb.updateOne({
+        pImg: file,
+      });
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return newPostInDb;
+    }
+
+    if (file?.length && postInDb.pImg?.length) {
+      const newArray = [].concat(postInDb.pImg, file);
+      await postInDb.updateOne({
+        pImg: newArray,
+      });
+
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return newPostInDb;
+    }
   }
 }

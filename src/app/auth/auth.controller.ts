@@ -20,7 +20,6 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { checkUserExists } from './interfaces/checkUserExists.interface';
 import { LoginStatus } from './interfaces/login-status.interface';
 import { loginSms } from './interfaces/loginSms.interface';
-import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
 @Controller('auth')
@@ -49,11 +48,6 @@ export class AuthController {
     return await this.authService.login(loginUserDto);
   }
 
-  @Get('profile')
-  @UseGuards(AuthGuard())
-  public async testAuth(@Query() req: any): Promise<JwtPayload> {
-    return req.user;
-  }
   //sans
   @Post('check-user-exists') //проверка по телефону первый экран авторизации
   public async checkUserExists(
@@ -83,7 +77,8 @@ export class AuthController {
     return this.authService.getNewTokens(data);
   }
 
-  @Get('getMe')
+  @Get('profile')
+  @UseGuards(AuthGuard())
   async getMe(@Headers() data: RefreshTokenDto) {
     return this.authService.getMe(data);
   }

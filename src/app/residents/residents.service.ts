@@ -44,7 +44,7 @@ export class ResidentsService {
     const userInDb = await this.userModel.findOne({ _id }).exec();
 
     await userInDb.updateOne({
-      avatar: `www.ya.ru/${file}`,
+      avatar: `https://teststand.udmobile.app:81/${file}`,
     });
     await userInDb.save();
 

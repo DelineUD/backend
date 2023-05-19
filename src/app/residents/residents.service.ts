@@ -47,7 +47,7 @@ export class ResidentsService {
       avatar: `https://teststand.udmobile.app:81/${file}`,
     });
     await userInDb.save();
-
-    return user;
+    const newUserInDb = await this.userModel.findOne({ _id }).exec();
+    return newUserInDb;
   }
 }

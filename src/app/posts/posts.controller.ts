@@ -119,10 +119,15 @@ export class PostsController {
   }
 
   @Post('upload-images')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Загрузка картинок',
+    type: PostEntity,
+  })
   @UseInterceptors(
     FilesInterceptor('image', 4, {
       storage: diskStorage({
-        destination: './files',
+        destination: '/var/www/html/teststand',
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,
@@ -136,7 +141,7 @@ export class PostsController {
     const response = files.filter(Boolean).map((file) => ({
       originalname: file.originalname,
       filename: file.filename,
-      url: `www.ya.ru/${file.filename}`,
+      url: `https://teststand.udmobile.app:81/${file.filename}`,
     }));
 
     console.log(response);

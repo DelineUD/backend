@@ -63,6 +63,11 @@ export class ResidentsController {
       fileFilter: imageFileFilter,
     }),
   )
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'загрузить аватар',
+    type: Resident,
+  })
   async avatarUpload(
     @Headers() data: IResidentAuth,
     @UploadedFile() file: any,

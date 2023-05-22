@@ -63,7 +63,7 @@ export class AuthService {
   private _createToken({ phone }: UserDto): any {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
-      expiresIn: '10s',
+      expiresIn: '1h',
     });
     const refreshToken = this.jwtService.sign(user, {
       expiresIn: '100h',

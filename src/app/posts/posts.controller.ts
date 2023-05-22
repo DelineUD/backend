@@ -26,7 +26,6 @@ import { PostEntity } from './entities/posts.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
 import { IPosts } from './interfaces/posts.interface';
 import { PostsService } from './posts.service';
-var postId: any = 0;
 
 @ApiBearerAuth('defaultBearerAuth')
 @ApiTags('posts')

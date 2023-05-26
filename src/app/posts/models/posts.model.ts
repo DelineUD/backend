@@ -17,13 +17,16 @@ export class PostModel extends Document implements IPosts {
   pImg?: Array<string>;
 
   @Prop({ required: false })
-  likes: number;
+  likes?: Array<string>;
 
   @Prop({ required: false })
   views: number;
 
   @Prop({ required: false })
   group: string;
+
+  @Prop({ required: false })
+  countLikes: number;
 }
 
 export const PostsSchema = SchemaFactory.createForClass(PostModel);

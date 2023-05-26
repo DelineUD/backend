@@ -17,9 +17,11 @@ export class PostDto {
 
   pImg?: Array<string>;
 
-  likes?: number;
+  likes?: Array<string>;
 
   views?: number;
 
   group?: string;
+
+  countLikes?: number;
 }

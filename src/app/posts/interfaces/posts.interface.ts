@@ -9,9 +9,13 @@ export interface IPosts {
 
   pImg?: Array<string>;
 
-  likes: number;
+  likes?: Array<string>;
 
   views: number;
 
   group: string;
+
+  isLiled?: boolean;
+
+  countLikes?: number;
 }

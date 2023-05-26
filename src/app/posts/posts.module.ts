@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
+import { AuthModule } from '../auth/auth.module';
+import { AuthService } from '../auth/auth.service';
+import { JwtStrategy } from '../auth/jwt.strategy';
+import { UsersModule } from '../users/users.module';
+import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { PostModel, PostsSchema } from './models/posts.model';
-
 
 @Module({
   imports: [
@@ -13,8 +19,27 @@ import { PostModel, PostsSchema } from './models/posts.model';
         schema: PostsSchema,
       },
     ]),
+    AuthModule,
+    UsersModule,
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+      property: 'user',
+      session: false,
+    }),
+    JwtModule.registerAsync({
+      useFactory: (config: ConfigService) => {
+        return {
+          secret: config.get<string>('JWT_KEY'),
+          signOptions: {
+            expiresIn: config.get<string>('EXPIRESIN'),
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
   ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, JwtStrategy, AuthService],
+  exports: [PassportModule, JwtModule],
 })
 export class PostsModule {}

@@ -74,6 +74,7 @@ export class AuthController {
   }
   @Post('refresh')
   async getNewTokens(@Headers() data: RefreshTokenDto) {
+    console.log(data);
     return this.authService.getNewTokens(data);
   }
 

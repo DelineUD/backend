@@ -5,14 +5,22 @@ export class UpdatePostDto {
   _id: string;
 
   @IsNotEmpty()
-  authorId: string;
+  authorId?: string;
 
   @IsNotEmpty()
-  pText: string;
+  pText?: string;
 
   group?: string;
 
   pImg?: Array<string>;
 
   stick?: boolean;
+
+  views?: any;
+
+  isLiked?: boolean;
+
+  likes?: Array<string>;
+
+  countLikes?: number;
 }

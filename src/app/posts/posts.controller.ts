@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Request,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -39,8 +40,8 @@ export class PostsController {
     description: 'список постов',
     type: [PostEntity],
   })
-  public async gettList(): Promise<IPosts[]> {
-    const result = await this.PostsService.getPostsList();
+  public async gettList(@Request() data: any): Promise<IPosts[]> {
+    const result = await this.PostsService.getPostsList(data);
     return result;
   }
 
@@ -112,8 +113,11 @@ export class PostsController {
     description: 'пост по id',
     type: PostEntity,
   })
-  async getById(@Param() params: GetPostParamsDto): Promise<GetPostParamsDto> {
-    const result = await this.PostsService.getPostById(params);
+  async getById(
+    @Param() params: GetPostParamsDto,
+    @Request() data: any,
+  ): Promise<GetPostParamsDto> {
+    const result = await this.PostsService.getPostById(params, data);
     return result;
   }
 
@@ -146,6 +150,32 @@ export class PostsController {
     console.log(response);
     result = await this.PostsService.upImages(createPostDto, response);
 
+    return result;
+  }
+  @Post(':_id/view')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Просмотры',
+    type: PostEntity,
+  })
+  async addView(@Param() params: GetPostParamsDto): Promise<GetPostParamsDto> {
+    const result = await this.PostsService.addView(params);
+    console.log(result.views);
+    const rv = result.views;
+    return rv;
+  }
+
+  @Post(':_id/like')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Лайки',
+    type: PostEntity,
+  })
+  async liked(
+    @Param() params: GetPostParamsDto,
+    @Request() data: any,
+  ): Promise<GetPostParamsDto> {
+    const result = await this.PostsService.liked(params, data.user._id);
     return result;
   }
 }

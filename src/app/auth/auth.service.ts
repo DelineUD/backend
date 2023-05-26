@@ -63,10 +63,10 @@ export class AuthService {
   private _createToken({ phone }: UserDto): any {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
-      expiresIn: '1h',
+      expiresIn: '30d',
     });
     const refreshToken = this.jwtService.sign(user, {
-      expiresIn: '100h',
+      expiresIn: '30d',
     });
 
     return {
@@ -92,18 +92,17 @@ export class AuthService {
     };
   }
 
-  async getNewTokens({ authorization }: RefreshTokenDto) {
-    const noBearer = authorization.split(' ');
-    if (!authorization) throw new UnauthorizedException('Please sign in!');
+  async getNewTokens({ refreshtoken }: RefreshTokenDto) {
+    if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
 
     try {
-      await this.jwtService.verifyAsync(noBearer[1]);
+      await this.jwtService.verifyAsync(refreshtoken);
     } catch (err) {
       throw new UnauthorizedException(
         'Invalid token or expired! Please Login again!',
       );
     }
-    const result = await this.jwtService.verifyAsync(noBearer[1]);
+    const result = await this.jwtService.verifyAsync(refreshtoken);
     const user = await this.usersService.findByPhone(result);
 
     const token = this._createToken(user);

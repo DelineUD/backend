@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
+import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { GetPostParamsDto } from './dto/get-post-params.dto';
 import { PostDto } from './dto/post.dto';
@@ -13,12 +15,31 @@ export class PostsService {
   constructor(
     @InjectModel(PostModel.name)
     private readonly postModel: Model<PostModel>,
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
   ) {}
 
-  async getPostsList(): Promise<PostModel[]> {
+  async getPostsList(initUsr: any): Promise<any> {
     const posts = await this.postModel.find({}).sort({ createdAt: -1 });
+    const user = await this.usersService.findOne(initUsr.user._id);
+    let response;
+    const resArr = [];
+    posts.forEach((element) => {
+      let arrLikes = element.likes;
+      if (arrLikes.length === 0) {
+        response = { post: element, isLiked: false };
+        resArr.push(response);
+      }
+      if (arrLikes.includes(user._id)) {
+        response = { post: element, isLiked: true };
+        resArr.push(response);
+      } else {
+        response = { post: element, isLiked: false };
+        resArr.push(response);
+      }
+    });
 
-    return posts;
+    return resArr;
   }
 
   async create(postDto: PostDto): Promise<PostDto> {
@@ -108,15 +129,31 @@ export class PostsService {
 
   async getPostById(
     getPostParamsDto: GetPostParamsDto,
+    initUsr: any,
   ): Promise<GetPostParamsDto> {
     const _id = getPostParamsDto._id;
-
+    const user = await this.usersService.findOne(initUsr.user._id);
     const postInDb = await this.postModel.findOne({ _id }).exec();
-
+    const resArr = [];
     if (!postInDb) {
       throw new EntityNotFoundError('пост не найден');
     }
-    return postInDb;
+    let response;
+    let arrLikes = postInDb.likes;
+
+    if (arrLikes.length === 0) {
+      response = { post: postInDb, isLiked: false };
+      resArr.push(response);
+    }
+    if (arrLikes.includes(user._id)) {
+      response = { post: postInDb, isLiked: true };
+      resArr.push(response);
+    } else {
+      response = { post: postInDb, isLiked: false };
+      resArr.push(response);
+    }
+
+    return response;
   }
 
   async upImages(postDto: PostDto, file: any): Promise<PostDto> {
@@ -149,6 +186,80 @@ export class PostsService {
       await postInDb.save();
       const newPostInDb = await this.postModel.findOne({ _id }).exec();
       return newPostInDb;
+    }
+  }
+
+  async addView(postDto: UpdatePostDto): Promise<UpdatePostDto> {
+    const { _id } = postDto;
+
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+    }
+
+    await postInDb.updateOne({
+      views: postInDb.views + 1,
+    });
+    await postInDb.save();
+    const newPostInDb = await this.postModel.findOne({ _id }).exec();
+    return newPostInDb;
+  }
+
+  async liked(postDto: UpdatePostDto, initUser: any): Promise<UpdatePostDto> {
+    const { _id } = postDto;
+
+    const user = await this.usersService.findOne(initUser);
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+    }
+    let arrLikes = postInDb.likes;
+
+    let checkResult;
+    if (arrLikes.length === 0) {
+      await postInDb.updateOne({
+        likes: arrLikes.unshift(user._id),
+        countLikes: 1,
+      });
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return newPostInDb;
+    }
+
+    arrLikes.forEach((item) => {
+      if (item.toString() === user._id.toString()) {
+        checkResult = true;
+      }
+    });
+
+    if (checkResult !== true) {
+      await postInDb.updateOne({
+        likes: arrLikes.unshift(user._id),
+        countLikes: postInDb.countLikes + 1,
+      });
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return newPostInDb;
+    }
+
+    if (checkResult === true) {
+      let filteredArray = arrLikes.filter((f) => {
+        return f != user._id.toString();
+      });
+      const count = filteredArray.length;
+      await postInDb.updateOne({
+        likes: filteredArray,
+        countLikes: count,
+      });
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return {
+        _id: newPostInDb._id,
+        likes: newPostInDb.likes,
+        countLikes: newPostInDb.countLikes,
+      };
     }
   }
 }

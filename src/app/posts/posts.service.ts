@@ -198,9 +198,18 @@ export class PostsService {
       throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
     }
 
-    await postInDb.updateOne({
-      views: postInDb.views + 1,
-    });
+    if (isNaN(postInDb.views)) {
+      await postInDb.updateOne({
+        views: 1,
+      });
+    }
+
+    if (!isNaN(postInDb.views)) {
+      await postInDb.updateOne({
+        views: postInDb.views + 1,
+      });
+    }
+
     await postInDb.save();
     const newPostInDb = await this.postModel.findOne({ _id }).exec();
     return newPostInDb;

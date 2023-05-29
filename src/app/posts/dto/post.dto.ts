@@ -24,4 +24,6 @@ export class PostDto {
   group?: string;
 
   countLikes?: number;
+
+  isLiked?: boolean;
 }

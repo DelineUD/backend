@@ -1,15 +1,30 @@
 import { PostModel } from '../posts/models/posts.model';
 import { IPosts } from './interfaces/posts.interface';
 
-export const postListMapper = (post: PostModel[]): IPosts[] => {
-  return post.map((post) => ({
+export const postListMapper = (posts: PostModel[], user: any): IPosts[] => {
+  return posts.map((posts) => ({
+    _id: posts._id,
+    authorId: posts.authorId,
+    pText: posts.pText,
+    pImg: posts.pImg,
+    countLikes: posts.countLikes,
+    views: posts.views,
+    isLiked: posts.likes.includes(user._id),
+    createdAt: posts.createdAt,
+    updatedAt: posts.updatedAt,
+  }));
+};
+
+export const postMapper = (post: PostModel, user: any): IPosts => {
+  return {
     _id: post._id,
     authorId: post.authorId,
     pText: post.pText,
-    stick: post.stick,
     pImg: post.pImg,
-    likes: post.likes,
+    countLikes: post.countLikes,
     views: post.views,
-    group: post.group,
-  }));
+    isLiked: post.likes.includes(user._id),
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+  };
 };

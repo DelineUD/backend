@@ -5,9 +5,9 @@ import { Model } from 'mongoose';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
-import { GetPostParamsDto } from './dto/get-post-params.dto';
 import { PostDto } from './dto/post.dto';
 import { UpdatePostDto } from './dto/update.post.dto';
+import { postListMapper, postMapper } from './mapper';
 import { PostModel } from './models/posts.model';
 
 @Injectable()
@@ -20,26 +20,10 @@ export class PostsService {
   ) {}
 
   async getPostsList(initUsr: any): Promise<any> {
-    const posts = await this.postModel.find({}).sort({ createdAt: -1 });
     const user = await this.usersService.findOne(initUsr.user._id);
-    let response;
-    const resArr = [];
-    posts.forEach((element) => {
-      let arrLikes = element.likes;
-      if (arrLikes.length === 0) {
-        response = { post: element, isLiked: false };
-        resArr.push(response);
-      }
-      if (arrLikes.includes(user._id)) {
-        response = { post: element, isLiked: true };
-        resArr.push(response);
-      } else {
-        response = { post: element, isLiked: false };
-        resArr.push(response);
-      }
-    });
-
-    return resArr;
+    const posts = await this.postModel.find({}).sort({ createdAt: -1 });
+    const res = postListMapper(posts, user);
+    return res;
   }
 
   async create(postDto: PostDto): Promise<PostDto> {
@@ -127,33 +111,31 @@ export class PostsService {
     }
   }
 
-  async getPostById(
-    getPostParamsDto: GetPostParamsDto,
-    initUsr: any,
-  ): Promise<GetPostParamsDto> {
+  async getPostById(getPostParamsDto: any, initUsr: any): Promise<any> {
     const _id = getPostParamsDto._id;
     const user = await this.usersService.findOne(initUsr.user._id);
     const postInDb = await this.postModel.findOne({ _id }).exec();
-    const resArr = [];
     if (!postInDb) {
       throw new EntityNotFoundError('пост не найден');
     }
-    let response;
-    let arrLikes = postInDb.likes;
+    // let response;
+    // let arrLikes = postInDb.likes;
 
-    if (arrLikes.length === 0) {
-      response = { post: postInDb, isLiked: false };
-      resArr.push(response);
-    }
-    if (arrLikes.includes(user._id)) {
-      response = { post: postInDb, isLiked: true };
-      resArr.push(response);
-    } else {
-      response = { post: postInDb, isLiked: false };
-      resArr.push(response);
-    }
+    // if (arrLikes.length === 0) {
+    //   response = { post: postInDb, isLiked: false };
+    //   resArr.push(response);
+    // }
+    // if (arrLikes.includes(user._id)) {
+    //   response = { post: postInDb, isLiked: true };
+    //   resArr.push(response);
+    // } else {
+    //   response = { post: postInDb, isLiked: false };
+    //   resArr.push(response);
+    // }
 
-    return response;
+    // return response;
+    const res = postMapper(postInDb, user);
+    return res;
   }
 
   async upImages(postDto: PostDto, file: any): Promise<PostDto> {

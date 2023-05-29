@@ -1,21 +1,25 @@
 export interface IPosts {
   _id?: string;
 
-  authorId: string;
+  authorId?: string;
 
-  pText: string;
+  pText?: string;
 
-  stick: boolean;
+  stick?: boolean;
 
   pImg?: Array<string>;
 
   likes?: Array<string>;
 
-  views: number;
+  views?: number;
 
-  group: string;
-
-  isLiled?: boolean;
+  group?: string;
 
   countLikes?: number;
+
+  isLiked?: boolean;
+
+  createdAt?: Date;
+
+  updatedAt?: Date;
 }

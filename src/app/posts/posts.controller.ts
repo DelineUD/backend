@@ -25,7 +25,6 @@ import { CreatePostEntity } from './entities/create-post.entity';
 import { DeletePostEntity } from './entities/delete-posts.entity';
 import { PostEntity } from './entities/posts.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
-import { IPosts } from './interfaces/posts.interface';
 import { PostsService } from './posts.service';
 
 @ApiBearerAuth('defaultBearerAuth')
@@ -40,7 +39,7 @@ export class PostsController {
     description: 'список постов',
     type: [PostEntity],
   })
-  public async gettList(@Request() data: any): Promise<IPosts[]> {
+  public async gettList(@Request() data: any): Promise<any> {
     const result = await this.PostsService.getPostsList(data);
     return result;
   }

@@ -1,4 +1,4 @@
 export class GetPostParamsDto {
-  _id: string;
+  _id?: string;
   views?: number;
 }

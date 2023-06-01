@@ -5,9 +5,12 @@ import { Model } from 'mongoose';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
+import { GetPostParamsDto } from './dto/get-post-params.dto';
 import { PostDto } from './dto/post.dto';
 import { UpdatePostDto } from './dto/update.post.dto';
-import { postListMapper, postMapper } from './mapper';
+import { IcPosts } from './interfaces/posts.comments.interface';
+import { commentListMapper, postListMapper, postMapper } from './mapper';
+import { PostCommentsModel } from './models/posts.comments.model';
 import { PostModel } from './models/posts.model';
 
 @Injectable()
@@ -15,6 +18,8 @@ export class PostsService {
   constructor(
     @InjectModel(PostModel.name)
     private readonly postModel: Model<PostModel>,
+    @InjectModel(PostCommentsModel.name)
+    private readonly postCommentsModel: Model<PostCommentsModel>,
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
@@ -118,22 +123,7 @@ export class PostsService {
     if (!postInDb) {
       throw new EntityNotFoundError('пост не найден');
     }
-    // let response;
-    // let arrLikes = postInDb.likes;
 
-    // if (arrLikes.length === 0) {
-    //   response = { post: postInDb, isLiked: false };
-    //   resArr.push(response);
-    // }
-    // if (arrLikes.includes(user._id)) {
-    //   response = { post: postInDb, isLiked: true };
-    //   resArr.push(response);
-    // } else {
-    //   response = { post: postInDb, isLiked: false };
-    //   resArr.push(response);
-    // }
-
-    // return response;
     const res = postMapper(postInDb, user);
     return res;
   }
@@ -251,6 +241,157 @@ export class PostsService {
         likes: newPostInDb.likes,
         countLikes: newPostInDb.countLikes,
       };
+    }
+  }
+
+  async createComment(
+    createComments: IcPosts,
+    paramPostID: GetPostParamsDto,
+    initUser: any,
+  ): Promise<IcPosts> {
+    const { cText, cImg } = createComments;
+
+    const postInDb = await this.postModel.findOne({ paramPostID }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${paramPostID}, не найден`);
+    }
+
+    const comment: PostCommentsModel = await new this.postCommentsModel({
+      authorId: initUser,
+      cText,
+      cImg,
+      postID: paramPostID,
+    });
+
+    await comment.save();
+    return comment;
+  }
+
+  async CommentList(paramCommentID: IcPosts, initUser: any): Promise<any> {
+    const user = await this.usersService.findOne(initUser);
+    const postInDb = await this.postModel.findOne({ paramCommentID }).exec();
+    console.log(paramCommentID);
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${paramCommentID}, не найден`);
+    }
+
+    const comments = await this.postCommentsModel
+      .find({})
+      .sort({ createdAt: -1 });
+    const res = commentListMapper(comments, user);
+    return res;
+  }
+
+  async Commentliked(comment: any, initUser: any): Promise<IcPosts> {
+    const { _id } = comment;
+
+    const user = await this.usersService.findOne(initUser);
+    const commentInDb = await this.postCommentsModel.findOne({ _id }).exec();
+
+    if (!commentInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+    }
+    let arrLikes = commentInDb.likes;
+    let checkResult;
+
+    if (arrLikes.length === 0) {
+      await commentInDb.updateOne({
+        likes: arrLikes.unshift(user._id),
+        countLikes: 1,
+      });
+      await commentInDb.save();
+      const newCommentInDb = await this.postCommentsModel
+        .findOne({ _id })
+        .exec();
+      return newCommentInDb;
+    }
+
+    arrLikes.forEach((item) => {
+      if (item.toString() === user._id.toString()) {
+        checkResult = true;
+      }
+    });
+
+    if (checkResult !== true) {
+      await commentInDb.updateOne({
+        likes: arrLikes.unshift(user._id),
+        countLikes: commentInDb.countLikes + 1,
+      });
+      await commentInDb.save();
+      const newCommentInDb = await this.postCommentsModel
+        .findOne({ _id })
+        .exec();
+      return newCommentInDb;
+    }
+
+    if (checkResult === true) {
+      let filteredArray = arrLikes.filter((f) => {
+        return f != user._id.toString();
+      });
+      const count = filteredArray.length;
+      await commentInDb.updateOne({
+        likes: filteredArray,
+        countLikes: count,
+      });
+      await commentInDb.save();
+      const newCommentInDb = await this.postCommentsModel
+        .findOne({ _id })
+        .exec();
+      return {
+        _id: newCommentInDb._id,
+        likes: newCommentInDb.likes,
+        countLikes: newCommentInDb.countLikes,
+      };
+    }
+  }
+
+  async updateComment(
+    idComment: any,
+    updateComment: IcPosts,
+    initUser: any,
+  ): Promise<IcPosts> {
+    const { _id, cText, cImg } = updateComment;
+
+    const postInDb = await this.postCommentsModel.findOne({ idComment }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Коммент с id: ${idComment}, не найден`);
+    }
+
+    if (initUser.toString() !== postInDb.authorId) {
+      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+    }
+
+    await postInDb.updateOne({
+      _id,
+      cText,
+      cImg,
+    });
+    await postInDb.save();
+    const newPostInDb = await this.postCommentsModel
+      .findOne({ idComment })
+      .exec();
+    return newPostInDb;
+  }
+
+  async deleteComment(idComment: any, initUser: any): Promise<any> {
+    const postInDb = await this.postCommentsModel.findOne({ idComment }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError('не найден пост для удаления');
+    } else if (initUser.toString() === postInDb.authorId) {
+      await postInDb.deleteOne({
+        _id: idComment,
+      });
+
+      if (!postInDb) {
+        throw new HttpException('OK Deleted', HttpStatus.NO_CONTENT);
+      }
+
+      return postInDb;
+    } else {
+      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
     }
   }
 }

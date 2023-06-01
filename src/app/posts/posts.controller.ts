@@ -21,10 +21,14 @@ import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { GetPostParamsDto } from './dto/get-post-params.dto';
 import { UpdatePostDto } from './dto/update.post.dto';
+import { CommentListEntity } from './entities/comment-list.entity';
 import { CreatePostEntity } from './entities/create-post.entity';
+import { DeleteCommentPostEntity } from './entities/delete-comment.entity';
 import { DeletePostEntity } from './entities/delete-posts.entity';
 import { PostEntity } from './entities/posts.entity';
+import { UpdateCommentPostEntity } from './entities/update-comment.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
+import { IcPosts } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
 
 @ApiBearerAuth('defaultBearerAuth')
@@ -175,6 +179,122 @@ export class PostsController {
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
     const result = await this.PostsService.liked(params, data.user._id);
+    return result;
+  }
+
+  @Post(':_id/comments')
+  @ApiBody({
+    description: 'Новывй коммент',
+    type: CreatePostEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Коммент успешно создан',
+    type: CreatePostEntity,
+  })
+  public async createComment(
+    @Body() createComments: IcPosts,
+    @Param() params: GetPostParamsDto,
+    @Request() data: any,
+  ): Promise<IcPosts> {
+    const result = await this.PostsService.createComment(
+      createComments,
+      params,
+      data.user._id,
+    );
+    return result;
+  }
+
+  @Get(':_id/comments')
+  @ApiBody({
+    description: 'Список комментов',
+    type: CommentListEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Список комментов',
+    type: CommentListEntity,
+  })
+  public async CommentList(
+    @Param() params: GetPostParamsDto,
+    @Request() data: any,
+  ): Promise<IcPosts[]> {
+    const result = await this.PostsService.CommentList(params, data.user._id);
+    return result;
+  }
+
+  @Post(':_id/like-comment/:_id/')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Лайки',
+    type: CommentListEntity,
+  })
+  async Commentliked(
+    @Param() params: IcPosts,
+    @Param() comment_ID: IcPosts,
+    @Request() data: any,
+  ): Promise<GetPostParamsDto> {
+    const result = await this.PostsService.Commentliked(
+      comment_ID,
+      data.user._id,
+    );
+    console.log(comment_ID);
+    return result;
+  }
+
+  @Post(':_id/update-comment/:_id/')
+  @ApiBody({
+    description: 'Обновление коммента',
+    type: UpdateCommentPostEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'коммент успешно обновлен',
+    type: UpdateCommentPostEntity,
+  })
+  public async updateComment(
+    @Param() params: any,
+    @Param() comment_ID: IcPosts,
+    @Body() updateComment: IcPosts,
+    @Request() data: any,
+  ): Promise<IcPosts> {
+    const result: IcPosts = await this.PostsService.updateComment(
+      comment_ID,
+      updateComment,
+      data.user._id,
+    );
+
+    if (!result) {
+      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
+    }
+
+    return result;
+  }
+
+  @Delete(':_id/delete-comment/:_id/')
+  @ApiBody({
+    description: 'Удаление поста',
+    type: DeleteCommentPostEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Пост успешно удаленн',
+    type: DeleteCommentPostEntity,
+  })
+  public async deleteComment(
+    @Param() params: any,
+    @Param() comment_ID: IcPosts,
+    @Request() data: any,
+  ): Promise<any> {
+    const result: IcPosts = await this.PostsService.deleteComment(
+      comment_ID,
+      data.user._id,
+    );
+
+    if (!result) {
+      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
+    }
+
     return result;
   }
 }

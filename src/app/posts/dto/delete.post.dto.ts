@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class DeletePostDto {
   @IsNotEmpty()
-  authorId: string;
+  authorId?: string;
 
   @IsNotEmpty()
   _id: string;

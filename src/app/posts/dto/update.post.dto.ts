@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class UpdatePostDto {
   @IsNotEmpty()
-  _id: string;
+  _id?: string;
 
   @IsNotEmpty()
   authorId?: string;

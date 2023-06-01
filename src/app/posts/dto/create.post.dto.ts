@@ -2,10 +2,10 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
-  authorId: string;
+  authorId?: string;
 
   @IsNotEmpty()
-  pText: string;
+  pText?: string;
 
   group?: string;
 

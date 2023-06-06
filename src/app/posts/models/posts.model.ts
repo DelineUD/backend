@@ -15,7 +15,7 @@ export class PostModel extends Document implements IPosts {
   stick: boolean;
 
   @Prop({ required: false })
-  cImg?: Array<string>;
+  pImg?: Array<string>;
 
   @Prop({ required: false })
   likes?: Array<string>;

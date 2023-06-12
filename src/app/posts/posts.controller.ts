@@ -163,7 +163,7 @@ export class PostsController {
   })
   async addView(@Param() params: GetPostParamsDto): Promise<GetPostParamsDto> {
     const result = await this.PostsService.addView(params);
-    console.log(result.views);
+    console.log(params);
     const rv = result.views;
     return rv;
   }
@@ -223,15 +223,15 @@ export class PostsController {
     return result;
   }
 
-  @Post(':_id/like-comment/:_id/')
+  @Post(':_id_post/like-comment/:_id_comment/')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Лайки',
     type: CommentListEntity,
   })
   async Commentliked(
-    @Param() params: IcPosts,
-    @Param() comment_ID: IcPosts,
+    @Param('_id_post') post_id: any,
+    @Param('_id_comment') comment_ID: any,
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
     const result = await this.PostsService.Commentliked(
@@ -242,7 +242,7 @@ export class PostsController {
     return result;
   }
 
-  @Post(':_id/update-comment/:_id/')
+  @Post(':_id_post/update-comment/:_id_comment')
   @ApiBody({
     description: 'Обновление коммента',
     type: UpdateCommentPostEntity,
@@ -253,8 +253,8 @@ export class PostsController {
     type: UpdateCommentPostEntity,
   })
   public async updateComment(
-    @Param() params: any,
-    @Param() comment_ID: IcPosts,
+    @Param('_id_post') post_id: any,
+    @Param('_id_comment') comment_ID: any,
     @Body() updateComment: IcPosts,
     @Request() data: any,
   ): Promise<IcPosts> {
@@ -271,7 +271,7 @@ export class PostsController {
     return result;
   }
 
-  @Delete(':_id/delete-comment/:_id/')
+  @Delete(':_id_post/delete-comment/:_id_comment')
   @ApiBody({
     description: 'Удаление поста',
     type: DeleteCommentPostEntity,
@@ -282,13 +282,16 @@ export class PostsController {
     type: DeleteCommentPostEntity,
   })
   public async deleteComment(
-    @Param() params: any,
-    @Param() comment_ID: IcPosts,
+    @Param('_id_post') post_id: any,
+    @Param('_id_comment') comment_ID: any,
     @Request() data: any,
   ): Promise<any> {
+    console.log(post_id);
+    console.log(comment_ID);
     const result: IcPosts = await this.PostsService.deleteComment(
       comment_ID,
       data.user._id,
+      post_id,
     );
 
     if (!result) {

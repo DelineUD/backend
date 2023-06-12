@@ -1,7 +1,11 @@
-export interface IPosts {
+export class PostDto {
   _id?: string;
 
   authorId?: string;
+
+  createdAt?: string;
+
+  updatedAt?: string;
 
   pText?: string;
 
@@ -18,10 +22,4 @@ export interface IPosts {
   countLikes?: number;
 
   isLiked?: boolean;
-
-  createdAt?: Date;
-
-  updatedAt?: Date;
-
-  countComments?: number;
 }

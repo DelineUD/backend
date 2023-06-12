@@ -5,6 +5,7 @@ import { IPosts } from '../interfaces/posts.interface';
 @Schema({ collection: 'posts', timestamps: true })
 export class PostModel extends Document implements IPosts {
   [x: string]: any;
+
   @Prop({ required: true })
   authorId: string;
 
@@ -31,6 +32,9 @@ export class PostModel extends Document implements IPosts {
 
   @Prop({ required: false })
   isLiked?: boolean;
+
+  @Prop({ required: false })
+  countComments: number;
 }
 
 export const PostsSchema = SchemaFactory.createForClass(PostModel);

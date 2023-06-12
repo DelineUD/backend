@@ -62,6 +62,7 @@ export class PostsService {
       likes,
       views,
       group,
+      countComments: 0,
     });
 
     await post.save();
@@ -163,7 +164,6 @@ export class PostsService {
 
   async addView(postDto: UpdatePostDto): Promise<UpdatePostDto> {
     const { _id } = postDto;
-
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
@@ -250,11 +250,11 @@ export class PostsService {
     initUser: any,
   ): Promise<IcPosts> {
     const { cText, cImg } = createComments;
-
-    const postInDb = await this.postModel.findOne({ paramPostID }).exec();
+    const { _id } = paramPostID;
+    const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${paramPostID}, не найден`);
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
     }
 
     const comment: PostCommentsModel = await new this.postCommentsModel({
@@ -263,22 +263,26 @@ export class PostsService {
       cImg,
       postID: paramPostID,
     });
-
     await comment.save();
+
+    await postInDb.updateOne({
+      countComments: postInDb.countComments + 1,
+    });
+
     return comment;
   }
 
   async CommentList(paramCommentID: IcPosts, initUser: any): Promise<any> {
     const user = await this.usersService.findOne(initUser);
-    const postInDb = await this.postModel.findOne({ paramCommentID }).exec();
-    console.log(paramCommentID);
+    const { _id } = paramCommentID;
+    console.log(_id);
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${paramCommentID}, не найден`);
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
     }
 
-    const comments = await this.postCommentsModel
-      .find({})
-      .sort({ createdAt: -1 });
+    const comments = await this.postCommentsModel.find({ postID: _id });
     const res = commentListMapper(comments, user);
     return res;
   }
@@ -353,10 +357,10 @@ export class PostsService {
   ): Promise<IcPosts> {
     const { _id, cText, cImg } = updateComment;
 
-    const postInDb = await this.postCommentsModel.findOne({ idComment }).exec();
+    const postInDb = await this.postCommentsModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Коммент с id: ${idComment}, не найден`);
+      throw new EntityNotFoundError(`Коммент с id: ${_id}, не найден`);
     }
 
     if (initUser.toString() !== postInDb.authorId) {
@@ -375,23 +379,38 @@ export class PostsService {
     return newPostInDb;
   }
 
-  async deleteComment(idComment: any, initUser: any): Promise<any> {
-    const postInDb = await this.postCommentsModel.findOne({ idComment }).exec();
+  async deleteComment(
+    idComment: any,
+    initUser: any,
+    idPost: any,
+  ): Promise<any> {
+    const commentInDb = await this.postCommentsModel
+      .findOne({ _id: idComment })
+      .exec();
 
-    if (!postInDb) {
+    if (!commentInDb) {
       throw new EntityNotFoundError('не найден пост для удаления');
-    } else if (initUser.toString() === postInDb.authorId) {
-      await postInDb.deleteOne({
+    } else if (initUser.toString() === commentInDb.authorId) {
+      await commentInDb.deleteOne({
         _id: idComment,
       });
+      await this.deleteMinus(idPost);
 
-      if (!postInDb) {
+      if (!commentInDb) {
         throw new HttpException('OK Deleted', HttpStatus.NO_CONTENT);
       }
 
-      return postInDb;
+      return commentInDb;
     } else {
       throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async deleteMinus(idPost: any): Promise<any> {
+    const postInDb = await this.postModel.findOne({ _id: idPost }).exec();
+
+    await postInDb.updateOne({
+      countComments: postInDb.countComments - 1,
+    });
   }
 }

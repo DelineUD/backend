@@ -12,6 +12,7 @@ import { ResidentsModule } from './residents/residents.module';
 import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor';
 import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UploadModule } from './upload/upload.module';
     ResidentsModule,
     PostsModule,
     UploadModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [

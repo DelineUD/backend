@@ -13,6 +13,7 @@ export const postListMapper = (posts: PostModel[], user: any): IPosts[] => {
     isLiked: posts.likes.includes(user._id),
     createdAt: posts.createdAt,
     updatedAt: posts.updatedAt,
+    countComments: posts.countComments,
   }));
 };
 
@@ -27,6 +28,7 @@ export const postMapper = (post: PostModel, user: any): IPosts => {
     isLiked: post.likes.includes(user._id),
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
+    countComments: post.countComments,
   };
 };
 

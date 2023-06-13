@@ -272,11 +272,11 @@ export class PostsService {
     return comment;
   }
 
-  async CommentList(paramCommentID: IcPosts, initUser: any): Promise<any> {
+  async CommentList(paramPostID: IcPosts, initUser: any): Promise<any> {
     const user = await this.usersService.findOne(initUser);
-    const { _id } = paramCommentID;
+    const { _id } = paramPostID;
     console.log(_id);
-    const postInDb = await this.postModel.findOne({ _id }).exec();
+    const postInDb = await this.postModel.findOne({ paramPostID }).exec();
 
     if (!postInDb) {
       throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
@@ -287,14 +287,15 @@ export class PostsService {
     return res;
   }
 
-  async Commentliked(comment: any, initUser: any): Promise<IcPosts> {
-    const { _id } = comment;
-
+  async Commentliked(post: any, comment: any, initUser: any): Promise<IcPosts> {
     const user = await this.usersService.findOne(initUser);
-    const commentInDb = await this.postCommentsModel.findOne({ _id }).exec();
 
+    const commentInDb = await this.postCommentsModel
+      .findOne({ _id: comment })
+      .exec();
+    console.log(commentInDb);
     if (!commentInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Коммент с id: ${comment}, не найден`);
     }
     let arrLikes = commentInDb.likes;
     let checkResult;
@@ -306,7 +307,7 @@ export class PostsService {
       });
       await commentInDb.save();
       const newCommentInDb = await this.postCommentsModel
-        .findOne({ _id })
+        .findOne({ _id: comment })
         .exec();
       return newCommentInDb;
     }
@@ -324,7 +325,7 @@ export class PostsService {
       });
       await commentInDb.save();
       const newCommentInDb = await this.postCommentsModel
-        .findOne({ _id })
+        .findOne({ _id: comment })
         .exec();
       return newCommentInDb;
     }
@@ -340,7 +341,7 @@ export class PostsService {
       });
       await commentInDb.save();
       const newCommentInDb = await this.postCommentsModel
-        .findOne({ _id })
+        .findOne({ _id: comment })
         .exec();
       return {
         _id: newCommentInDb._id,

@@ -234,11 +234,14 @@ export class PostsController {
     @Param('_id_comment') comment_ID: any,
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
+    console.log(post_id);
+    console.log(comment_ID);
     const result = await this.PostsService.Commentliked(
+      post_id,
       comment_ID,
       data.user._id,
     );
-    console.log(comment_ID);
+
     return result;
   }
 

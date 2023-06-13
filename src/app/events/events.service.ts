@@ -46,7 +46,6 @@ export class EventsService {
       );
     }
     const event: EventsModel = await new this.eventsModel({
-      _id,
       authorId,
       hText,
       hImg,
@@ -131,9 +130,13 @@ export class EventsService {
     const user = await this.usersService.findOne(initUsr.user._id);
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (!eventInDb) {
-      throw new EntityNotFoundError('пост не найден');
+      throw new EntityNotFoundError('ивент не найден');
     }
 
     return eventInDb;
+  }
+
+  async finde(data: any): Promise<any> {
+    return data;
   }
 }

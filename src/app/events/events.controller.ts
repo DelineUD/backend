@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -46,6 +47,12 @@ export class EventsController {
   public async gettList(@Request() data: any): Promise<any> {
     const result = await this.EventsService.getPostsList(data);
     return result;
+  }
+
+  @Get('by-month')
+  async getUsers(@Query('month') month: string): Promise<any> {
+    console.log(month);
+    return month;
   }
 
   @Get(':_id')

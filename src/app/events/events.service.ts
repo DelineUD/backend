@@ -19,10 +19,21 @@ export class EventsService {
   async getPostsList(initUsr: any): Promise<any> {
     const user = await this.usersService.findOne(initUsr.user._id);
     const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
-
     return events;
   }
 
+  async getPostsListByMonth(month: any, year: any, initUsr: any): Promise<any> {
+    // const user = await this.usersService.findOne(initUsr.user._id);
+    console.log(month);
+    console.log(year);
+    const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
+    console.log(`${year}-${month}`);
+    const ev_d = events.filter((item) =>
+      item.startDate.includes(`${year}-${month}`),
+    );
+    console.log(ev_d);
+    return ev_d;
+  }
   async create(eventDto: IEvents): Promise<IEvents> {
     const {
       _id,

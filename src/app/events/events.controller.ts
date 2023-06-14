@@ -46,13 +46,29 @@ export class EventsController {
   })
   public async gettList(@Request() data: any): Promise<any> {
     const result = await this.EventsService.getPostsList(data);
+    console.log(data.user._id);
     return result;
   }
 
   @Get('by-month')
-  async getUsers(@Query('month') month: string): Promise<any> {
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'список постов по месяцам',
+    type: [EventsEntity],
+  })
+  public async getPostsListByMonth(
+    @Query('month') month: string,
+    @Query('year') year: string,
+    @Request() data: any,
+  ): Promise<any> {
     console.log(month);
-    return month;
+    console.log(year);
+    const result = await this.EventsService.getPostsListByMonth(
+      month,
+      year,
+      data.user.api_city,
+    );
+    return result;
   }
 
   @Get(':_id')

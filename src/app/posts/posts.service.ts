@@ -9,7 +9,7 @@ import { GetPostParamsDto } from './dto/get-post-params.dto';
 import { PostDto } from './dto/post.dto';
 import { UpdatePostDto } from './dto/update.post.dto';
 import { IcPosts } from './interfaces/posts.comments.interface';
-import { commentListMapper, postListMapper, postMapper } from './mapper';
+import { commentItemMapper, postListMapper, postMapper } from './mapper';
 import { PostCommentsModel } from './models/posts.comments.model';
 import { PostModel } from './models/posts.model';
 
@@ -273,9 +273,7 @@ export class PostsService {
   }
 
   async CommentList(paramPostID: IcPosts, initUser: any): Promise<any> {
-    const user = await this.usersService.findOne(initUser);
     const { _id } = paramPostID;
-    console.log(_id);
     const postInDb = await this.postModel.findOne({ paramPostID }).exec();
 
     if (!postInDb) {
@@ -283,7 +281,20 @@ export class PostsService {
     }
 
     const comments = await this.postCommentsModel.find({ postID: _id });
-    const res = commentListMapper(comments, user);
+    // const { authorId } = comments;
+    const res = Promise.all(
+      comments
+        .map(async (comment) => {
+          const commenetAuthor = await this.usersService.findOne({
+            _id: comment.authorId,
+          });
+          if (!commenetAuthor) {
+            return null;
+          }
+          return commentItemMapper(comment, commenetAuthor);
+        })
+        .filter(Boolean),
+    );
     return res;
   }
 

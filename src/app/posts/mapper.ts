@@ -1,4 +1,5 @@
 import { PostModel } from '../posts/models/posts.model';
+import { UserModel } from '../users/models/user.model';
 import { IPosts } from './interfaces/posts.interface';
 import { PostCommentsModel } from './models/posts.comments.model';
 
@@ -32,22 +33,22 @@ export const postMapper = (post: PostModel, user: any): IPosts => {
   };
 };
 
-export const commentListMapper = (
-  postscomments: PostCommentsModel[],
-  user: any,
-): any => {
-  return postscomments.map((postscomments) => ({
-    authorId: user._id,
-    authorAvatar: user.avatar ?? null,
-    first_name: user.first_name ?? null,
-    last_name: user.last_name ?? null,
+export const commentItemMapper = (
+  postscomments: PostCommentsModel,
+  commenetAuthor: UserModel,
+) => {
+  return {
+    authorId: commenetAuthor._id,
+    authorAvatar: commenetAuthor.avatar,
+    first_name: commenetAuthor.first_name ?? null,
+    last_name: commenetAuthor.last_name ?? null,
     _id: postscomments._id ?? null,
     postID: postscomments.postID ?? null,
     cText: postscomments.cText ?? null,
     countLikes: postscomments.countLikes ?? 0,
-    isLiked: postscomments.likes.includes(user._id) ?? null,
+    isLiked: postscomments.likes.includes(commenetAuthor._id) ?? null,
     cImg: postscomments.cImg ?? null,
     createdAt: postscomments.createdAt ?? null,
     updatedAt: postscomments.updatedAt ?? null,
-  }));
+  };
 };

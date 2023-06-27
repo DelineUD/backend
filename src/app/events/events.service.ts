@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { IEvents } from './interfaces/events.interface';
+import { eventListMapper, eventMapper } from './mapper';
 import { EventsModel } from './models/events.model';
 
 @Injectable()
@@ -16,22 +17,34 @@ export class EventsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async getPostsList(initUsr: any): Promise<any> {
+  async getEventsList(initUsr: any): Promise<any> {
+    const _id = initUsr;
     const user = await this.usersService.findOne(initUsr.user._id);
     const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
-    return events;
+    const res = eventListMapper(events, user);
+    return res;
   }
 
-  async getPostsListByMonth(month: any, year: any, initUsr: any): Promise<any> {
-    // const user = await this.usersService.findOne(initUsr.user._id);
-    console.log(month);
-    console.log(year);
+  async getEventsListByMonth(
+    month: any,
+    year: any,
+    initUsr: any,
+  ): Promise<any> {
     const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
-    console.log(`${year}-${month}`);
-    const ev_d = events.filter((item) =>
-      item.startDate.includes(`${year}-${month}`),
-    );
-    console.log(ev_d);
+    const queryDate = new Date(`${year}-${month}-01`);
+    const newMonth = parseInt(month, 10);
+    const newYaer = parseInt(year, 10);
+    const ev_d = events.filter((item) => {
+      const newStartMonth = item.startDate.getMonth() + 1;
+      const newStartYear = item.startDate.getFullYear();
+
+      if (
+        (newStartMonth === newMonth && newStartYear === newYaer) ||
+        queryDate < item.stopDate
+      ) {
+        return item;
+      }
+    });
     return ev_d;
   }
   async create(eventDto: IEvents): Promise<IEvents> {
@@ -49,6 +62,9 @@ export class EventsService {
       bodyText,
     } = eventDto;
 
+    const newStartDate = new Date(startDate);
+    const newStopDate = new Date(stopDate);
+
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (eventInDb) {
       throw new HttpException(
@@ -56,12 +72,13 @@ export class EventsService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     const event: EventsModel = await new this.eventsModel({
       authorId,
       hText,
       hImg,
-      startDate,
-      stopDate,
+      startDate: newStartDate.toISOString(),
+      stopDate: newStopDate.toISOString(),
       addr,
       category,
       access,
@@ -89,6 +106,9 @@ export class EventsService {
       bodyText,
     } = eventDto;
 
+    const newStartDate = new Date(startDate);
+    const newStopDate = new Date(stopDate);
+
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
 
     if (!eventInDb) {
@@ -102,8 +122,8 @@ export class EventsService {
     await eventInDb.updateOne({
       hText,
       hImg,
-      startDate,
-      stopDate,
+      startDate: newStartDate.toISOString(),
+      stopDate: newStopDate.toISOString(),
       addr,
       category,
       access,
@@ -143,11 +163,206 @@ export class EventsService {
     if (!eventInDb) {
       throw new EntityNotFoundError('ивент не найден');
     }
-
-    return eventInDb;
+    const res = eventMapper(eventInDb, user);
+    return res;
   }
 
-  async finde(data: any): Promise<any> {
-    return data;
+  async EventIGo(event: any, initUser: any): Promise<IEvents> {
+    const user = await this.usersService.findOne(initUser.user._id);
+
+    const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+
+    if (!eventInDb) {
+      throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
+    }
+    let arrGoNotGo = eventInDb.iGo;
+    let checkResult;
+    let checkResultNotGo;
+
+    if (eventInDb.notGo.includes(user._id.toString())) {
+      checkResultNotGo = true;
+    }
+
+    if (checkResultNotGo === true) {
+      let filteredArray = eventInDb.notGo.filter((f) => {
+        return f != user._id.toString();
+      });
+      await eventInDb.updateOne({
+        notGo: filteredArray,
+      });
+      await eventInDb.save();
+      console.log('da');
+    }
+
+    arrGoNotGo.forEach((item) => {
+      if (item.toString() === user._id.toString()) {
+        checkResult = true;
+      }
+    });
+
+    if (checkResult !== true) {
+      await eventInDb.updateOne({
+        iGo: arrGoNotGo.unshift(user._id),
+      });
+      await eventInDb.save();
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return newEventInDb;
+    }
+
+    if (checkResult === true) {
+      let filteredArray = arrGoNotGo.filter((f) => {
+        return f != user._id.toString();
+      });
+
+      await eventInDb.updateOne({
+        iGo: filteredArray,
+      });
+      await eventInDb.save();
+
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return {
+        _id: newEventInDb._id,
+        iGo: newEventInDb.iGo,
+      };
+    }
+  }
+
+  async EventINotGo(event: any, initUser: any): Promise<IEvents> {
+    const user = await this.usersService.findOne(initUser.user._id);
+
+    const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+
+    if (!eventInDb) {
+      throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
+    }
+    let arrGoNotGo = eventInDb.notGo;
+    let checkResult;
+    let checkResultItGo;
+
+    if (eventInDb.iGo.includes(user._id.toString())) {
+      checkResultItGo = true;
+    }
+    if (checkResultItGo === true) {
+      let filteredArray = eventInDb.iGo.filter((f) => {
+        return f != user._id.toString();
+      });
+      await eventInDb.updateOne({
+        iGo: filteredArray,
+      });
+      await eventInDb.save();
+      console.log('da');
+    }
+
+    if (arrGoNotGo.length === 0) {
+      await eventInDb.updateOne({
+        notGo: arrGoNotGo.unshift(user._id),
+      });
+      await eventInDb.save();
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return newEventInDb;
+    }
+
+    arrGoNotGo.forEach((item) => {
+      if (item.toString() === user._id.toString()) {
+        checkResult = true;
+      }
+    });
+
+    if (checkResult !== true) {
+      await eventInDb.updateOne({
+        notGo: arrGoNotGo.unshift(user._id),
+      });
+      await eventInDb.save();
+
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return newEventInDb;
+    }
+
+    if (checkResult === true) {
+      let filteredArray = arrGoNotGo.filter((f) => {
+        return f != user._id.toString();
+      });
+
+      await eventInDb.updateOne({
+        notGo: filteredArray,
+      });
+      await eventInDb.save();
+
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return {
+        _id: newEventInDb._id,
+        notGo: newEventInDb.notGo,
+      };
+    }
+  }
+
+  async EventFavor(event: any, initUser: any): Promise<IEvents> {
+    const user = await this.usersService.findOne(initUser.user._id);
+
+    const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+
+    if (!eventInDb) {
+      throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
+    }
+    let arrGoNotGo = eventInDb.favor;
+    let checkResult;
+
+    if (arrGoNotGo.length === 0) {
+      await eventInDb.updateOne({
+        notGo: arrGoNotGo.unshift(user._id),
+      });
+      await eventInDb.save();
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return newEventInDb;
+    }
+
+    arrGoNotGo.forEach((item) => {
+      if (item.toString() === user._id.toString()) {
+        checkResult = true;
+      }
+    });
+
+    if (checkResult !== true) {
+      await eventInDb.updateOne({
+        favor: arrGoNotGo.unshift(user._id),
+      });
+      await eventInDb.save();
+
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return newEventInDb;
+    }
+
+    if (checkResult === true) {
+      let filteredArray = arrGoNotGo.filter((f) => {
+        return f != user._id.toString();
+      });
+
+      await eventInDb.updateOne({
+        favor: filteredArray,
+      });
+      await eventInDb.save();
+
+      const newEventInDb = await this.eventsModel
+        .findOne({ _id: event })
+        .exec();
+      return {
+        _id: newEventInDb._id,
+        favor: newEventInDb.favor,
+      };
+    }
   }
 }

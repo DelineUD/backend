@@ -7,9 +7,9 @@ export interface IEvents {
 
   hImg?: string;
 
-  startDate?: string;
+  startDate?: Date;
 
-  stopDate?: string;
+  stopDate?: Date;
 
   addr?: string;
 
@@ -20,4 +20,14 @@ export interface IEvents {
   format?: string;
 
   bodyText?: string;
+
+  favor?: Array<string>;
+
+  iGo?: Array<string>;
+
+  notGo?: Array<string>;
+
+  createdAt?: Date;
+
+  updatedAt?: Date;
 }

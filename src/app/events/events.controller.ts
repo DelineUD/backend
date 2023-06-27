@@ -41,11 +41,11 @@ export class EventsController {
   @Get('list')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'список постов',
+    description: 'список ивентов',
     type: [EventsEntity],
   })
   public async gettList(@Request() data: any): Promise<any> {
-    const result = await this.EventsService.getPostsList(data);
+    const result = await this.EventsService.getEventsList(data);
     console.log(data.user._id);
     return result;
   }
@@ -53,20 +53,18 @@ export class EventsController {
   @Get('by-month')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'список постов по месяцам',
+    description: 'список ивентов по месяцам',
     type: [EventsEntity],
   })
-  public async getPostsListByMonth(
+  public async getEventListByMonth(
     @Query('month') month: string,
     @Query('year') year: string,
     @Request() data: any,
   ): Promise<any> {
-    console.log(month);
-    console.log(year);
-    const result = await this.EventsService.getPostsListByMonth(
+    const result = await this.EventsService.getEventsListByMonth(
       month,
       year,
-      data.user.api_city,
+      data.user._id,
     );
     return result;
   }
@@ -82,6 +80,49 @@ export class EventsController {
     @Request() data: any,
   ): Promise<IEvents> {
     const result = await this.EventsService.getEventById(params, data);
+    return result;
+  }
+
+  @Post(':_id_event/igo/')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Пойду',
+    type: EventsEntity,
+  })
+  async igo(
+    @Param('_id_event') event_id: any,
+    @Request() data: any,
+  ): Promise<IEvents> {
+    const result = await this.EventsService.EventIGo(event_id, data);
+
+    return result;
+  }
+
+  @Post(':_id_event/notgo/')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Не пойду',
+    type: EventsEntity,
+  })
+  async notgo(
+    @Param('_id_event') event_id: any,
+    @Request() data: any,
+  ): Promise<IEvents> {
+    const result = await this.EventsService.EventINotGo(event_id, data);
+    return result;
+  }
+
+  @Post(':_id_event/favor/')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Отметить евент звездочкой',
+    type: EventsEntity,
+  })
+  async favor(
+    @Param('_id_event') event_id: any,
+    @Request() data: any,
+  ): Promise<IEvents> {
+    const result = await this.EventsService.EventFavor(event_id, data);
     return result;
   }
 }

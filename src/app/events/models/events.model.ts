@@ -16,10 +16,10 @@ export class EventsModel extends Document implements IEvents {
   hImg?: string;
 
   @Prop({ required: false })
-  startDate?: string;
+  startDate?: Date;
 
   @Prop({ required: false })
-  stopDate?: string;
+  stopDate?: Date;
 
   @Prop({ required: false })
   addr?: string;
@@ -35,6 +35,15 @@ export class EventsModel extends Document implements IEvents {
 
   @Prop({ required: false })
   bodyText?: string;
+
+  @Prop({ required: false })
+  favor?: Array<string>;
+
+  @Prop({ required: false })
+  iGo?: Array<string>;
+
+  @Prop({ required: false })
+  notGo?: Array<string>;
 }
 
 export const EventsSchema = SchemaFactory.createForClass(EventsModel);

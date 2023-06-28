@@ -31,18 +31,21 @@ export class EventsService {
     initUsr: any,
   ): Promise<any> {
     const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
+
     const queryDate = new Date(`${year}-${month}-01`);
     const newMonth = parseInt(month, 10);
     const newYaer = parseInt(year, 10);
-    const ev_d = events.filter((item) => {
-      const newStartMonth = item.startDate.getMonth() + 1;
-      const newStartYear = item.startDate.getFullYear();
+    const ev_d = events?.filter((i) => {
+      const newStartMonth =
+        i.startDate === undefined ? 1 : i.startDate.getMonth() + 1;
+      const newStartYear =
+        i.startDate === undefined ? 1 : i.startDate.getFullYear();
 
       if (
         (newStartMonth === newMonth && newStartYear === newYaer) ||
-        queryDate < item.stopDate
+        queryDate < i.stopDate
       ) {
-        return item;
+        return i;
       }
     });
     return ev_d;
@@ -64,7 +67,6 @@ export class EventsService {
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);
-
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (eventInDb) {
       throw new HttpException(
@@ -77,8 +79,8 @@ export class EventsService {
       authorId,
       hText,
       hImg,
-      startDate,
-      stopDate,
+      startDate: newStartDate.toISOString(),
+      stopDate: newStopDate.toISOString(),
       addr,
       category,
       access,
@@ -122,8 +124,8 @@ export class EventsService {
     await eventInDb.updateOne({
       hText,
       hImg,
-      startDate,
-      stopDate,
+      startDate: newStartDate.toISOString(),
+      stopDate: newStopDate.toISOString(),
       addr,
       category,
       access,

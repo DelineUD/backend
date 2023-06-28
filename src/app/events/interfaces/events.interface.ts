@@ -9,8 +9,6 @@ export interface IEvents {
 
   startDate?: Date;
 
-  stopDate?: Date;
-
   addr?: string;
 
   category?: string;
@@ -30,4 +28,6 @@ export interface IEvents {
   createdAt?: Date;
 
   updatedAt?: Date;
+
+  stopDate?: Date;
 }

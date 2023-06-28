@@ -32,8 +32,9 @@ export class EventsController {
     description: 'Ивент успешно создан',
     type: EventsEntity,
   })
-  public async create(@Body() createEventDto: IEvents): Promise<IEvents> {
-    const result = await this.EventsService.create(createEventDto);
+  public async create(@Body() createEvent: IEvents): Promise<IEvents> {
+    console.log(createEvent.stopDate);
+    const result = await this.EventsService.create(createEvent);
 
     return result;
   }
@@ -66,6 +67,7 @@ export class EventsController {
       year,
       data.user._id,
     );
+
     return result;
   }
 

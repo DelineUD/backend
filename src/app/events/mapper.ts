@@ -5,13 +5,14 @@ export const eventListMapper = (
   events: EventsModel[],
   user: any,
 ): IEvents[] => {
+  console.log(events);
   return events.map((event) => ({
     _id: event._id,
     authorId: event.authorId,
     hText: event.hText ?? null,
     hImg: event.hImg ?? null,
     startDate: event.startDate ?? null,
-    stopDate: event.stoptDate ?? null,
+    stopDate: event.stopDate,
     createdAt: event.createdAt ?? null,
     updatedAt: event.updatedAt ?? null,
     addr: event.addr ?? null,

@@ -35,7 +35,6 @@ export class EventsController {
   public async create(@Body() createEvent: IEvents): Promise<IEvents> {
     console.log(createEvent.stopDate);
     const result = await this.EventsService.create(createEvent);
-
     return result;
   }
 
@@ -47,7 +46,6 @@ export class EventsController {
   })
   public async gettList(@Request() data: any): Promise<any> {
     const result = await this.EventsService.getEventsList(data);
-    console.log(data.user._id);
     return result;
   }
 

@@ -15,6 +15,8 @@ export interface IPosts {
 
   views_count?: number;
 
+  isViewed?: boolean;
+
   group?: string;
 
   countLikes?: number;

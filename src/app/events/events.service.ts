@@ -193,7 +193,6 @@ export class EventsService {
         notGo: filteredArray,
       });
       await eventInDb.save();
-      console.log('da');
     }
 
     arrGoNotGo.forEach((item) => {
@@ -210,7 +209,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return newEventInDb;
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
 
     if (checkResult === true) {
@@ -226,10 +226,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return {
-        _id: newEventInDb._id,
-        iGo: newEventInDb.iGo,
-      };
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
   }
 
@@ -267,7 +265,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return newEventInDb;
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
 
     arrGoNotGo.forEach((item) => {
@@ -285,7 +284,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return newEventInDb;
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
 
     if (checkResult === true) {
@@ -301,10 +301,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return {
-        _id: newEventInDb._id,
-        notGo: newEventInDb.notGo,
-      };
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
   }
 
@@ -327,7 +325,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return newEventInDb;
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
 
     arrGoNotGo.forEach((item) => {
@@ -345,7 +344,8 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return newEventInDb;
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
 
     if (checkResult === true) {
@@ -361,10 +361,9 @@ export class EventsService {
       const newEventInDb = await this.eventsModel
         .findOne({ _id: event })
         .exec();
-      return {
-        _id: newEventInDb._id,
-        favor: newEventInDb.favor,
-      };
+
+      const res = eventMapper(newEventInDb, user);
+      return res;
     }
   }
 }

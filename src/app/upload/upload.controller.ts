@@ -45,7 +45,7 @@ export class UploadController {
   @UseInterceptors(
     FilesInterceptor('image', 4, {
       storage: diskStorage({
-        destination: './files',
+        destination: '/var/www/html/teststand',
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,

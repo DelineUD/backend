@@ -11,7 +11,9 @@ export interface IPosts {
 
   likes?: Array<string>;
 
-  views?: number;
+  views?: Array<string>;
+
+  views_count?: number;
 
   group?: string;
 

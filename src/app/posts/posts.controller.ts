@@ -161,11 +161,12 @@ export class PostsController {
     description: 'Просмотры',
     type: PostEntity,
   })
-  async addView(@Param() params: GetPostParamsDto): Promise<GetPostParamsDto> {
-    const result = await this.PostsService.addView(params);
-    console.log(params);
-    const rv = result.views;
-    return rv;
+  async addView(
+    @Param() params: GetPostParamsDto,
+    @Request() data: any,
+  ): Promise<GetPostParamsDto> {
+    const result = await this.PostsService.addView(params, data.user._id);
+    return result;
   }
 
   @Post(':_id/like')

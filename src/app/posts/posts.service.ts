@@ -162,30 +162,30 @@ export class PostsService {
     }
   }
 
-  async addView(postDto: UpdatePostDto): Promise<UpdatePostDto> {
-    const { _id } = postDto;
-    const postInDb = await this.postModel.findOne({ _id }).exec();
+  // async addView(postDto: UpdatePostDto): Promise<UpdatePostDto> {
+  //   const { _id } = postDto;
+  //   const postInDb = await this.postModel.findOne({ _id }).exec();
 
-    if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
-    }
+  //   if (!postInDb) {
+  //     throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+  //   }
 
-    if (isNaN(postInDb.views)) {
-      await postInDb.updateOne({
-        views: 1,
-      });
-    }
+  //   if (isNaN(postInDb.views)) {
+  //     await postInDb.updateOne({
+  //       views: 1,
+  //     });
+  //   }
 
-    if (!isNaN(postInDb.views)) {
-      await postInDb.updateOne({
-        views: postInDb.views + 1,
-      });
-    }
+  //   if (!isNaN(postInDb.views)) {
+  //     await postInDb.updateOne({
+  //       views: postInDb.views + 1,
+  //     });
+  //   }
 
-    await postInDb.save();
-    const newPostInDb = await this.postModel.findOne({ _id }).exec();
-    return newPostInDb;
-  }
+  //   await postInDb.save();
+  //   const newPostInDb = await this.postModel.findOne({ _id }).exec();
+  //   return newPostInDb;
+  // }
 
   async liked(postDto: UpdatePostDto, initUser: any): Promise<UpdatePostDto> {
     const { _id } = postDto;
@@ -424,5 +424,42 @@ export class PostsService {
     await postInDb.updateOne({
       countComments: postInDb.countComments - 1,
     });
+  }
+
+  async addView(postDto: UpdatePostDto, initUser: any): Promise<UpdatePostDto> {
+    const { _id } = postDto;
+
+    const user = await this.usersService.findOne(initUser);
+    const postInDb = await this.postModel.findOne({ _id }).exec();
+
+    if (!postInDb) {
+      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+    }
+    let arrViews = postInDb.views;
+
+    let checkResult;
+    if (arrViews.length === 0) {
+      await postInDb.updateOne({
+        views: arrViews.unshift(user._id),
+      });
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return newPostInDb;
+    }
+
+    arrViews.forEach((item) => {
+      if (item.toString() === user._id.toString()) {
+        checkResult = true;
+      }
+    });
+
+    if (checkResult !== true) {
+      await postInDb.updateOne({
+        views: arrViews.unshift(user._id),
+      });
+      await postInDb.save();
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      return newPostInDb;
+    }
   }
 }

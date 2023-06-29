@@ -22,7 +22,7 @@ export class PostModel extends Document implements IPosts {
   likes?: Array<string>;
 
   @Prop({ required: false })
-  views: number;
+  views: Array<string>;
 
   @Prop({ required: false })
   group: string;

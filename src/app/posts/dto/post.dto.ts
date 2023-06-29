@@ -15,7 +15,7 @@ export class PostDto {
 
   likes?: Array<string>;
 
-  views?: number;
+  views?: Array<string>;
 
   group?: string;
 

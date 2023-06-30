@@ -161,10 +161,7 @@ export class PostsController {
     description: 'Просмотры',
     type: PostEntity,
   })
-  async addView(
-    @Param() params: GetPostParamsDto,
-    @Request() data: any,
-  ): Promise<GetPostParamsDto> {
+  async addView(@Param() params: any, @Request() data: any): Promise<any> {
     const result = await this.PostsService.addView(params, data.user._id);
     return result;
   }

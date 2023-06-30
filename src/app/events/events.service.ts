@@ -20,7 +20,7 @@ export class EventsService {
   async getEventsList(initUsr: any): Promise<any> {
     const _id = initUsr;
     const user = await this.usersService.findOne(initUsr.user._id);
-    const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
+    const events = await this.eventsModel.find({}).sort({ startDate: -1 });
     const res = eventListMapper(events, user);
     return res;
   }
@@ -30,7 +30,7 @@ export class EventsService {
     year: any,
     initUsr: any,
   ): Promise<any> {
-    const events = await this.eventsModel.find({}).sort({ createdAt: -1 });
+    const events = await this.eventsModel.find({}).sort({ startDate: -1 });
 
     const queryDate = new Date(`${year}-${month}-01`);
     const newMonth = parseInt(month, 10);

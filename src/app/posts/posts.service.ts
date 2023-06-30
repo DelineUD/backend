@@ -426,7 +426,7 @@ export class PostsService {
     });
   }
 
-  async addView(postDto: UpdatePostDto, initUser: any): Promise<UpdatePostDto> {
+  async addView(postDto: any, initUser: any): Promise<any> {
     const { _id } = postDto;
 
     const user = await this.usersService.findOne(initUser);
@@ -444,7 +444,8 @@ export class PostsService {
       });
       await postInDb.save();
       const newPostInDb = await this.postModel.findOne({ _id }).exec();
-      return newPostInDb;
+      const res = postMapper(newPostInDb, user);
+      return res.views_count;
     }
 
     arrViews.forEach((item) => {
@@ -459,7 +460,14 @@ export class PostsService {
       });
       await postInDb.save();
       const newPostInDb = await this.postModel.findOne({ _id }).exec();
-      return newPostInDb;
+      const res = postMapper(newPostInDb, user);
+      return res.views_count;
+    }
+
+    if (checkResult === true) {
+      const newPostInDb = await this.postModel.findOne({ _id }).exec();
+      const res = postMapper(newPostInDb, user);
+      return res.views_count;
     }
   }
 }

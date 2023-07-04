@@ -43,12 +43,13 @@ export class EventsService {
 
       if (
         (newStartMonth === newMonth && newStartYear === newYaer) ||
-        queryDate < i.stopDate
+        (queryDate < i.stopDate && queryDate > i.sartDate)
       ) {
         return i;
       }
     });
-    return ev_d;
+    const res = eventListMapper(ev_d, initUsr);
+    return res;
   }
   async create(eventDto: IEvents): Promise<IEvents> {
     const {

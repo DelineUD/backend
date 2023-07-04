@@ -5,7 +5,6 @@ export const eventListMapper = (
   events: EventsModel[],
   user: any,
 ): IEvents[] => {
-  console.log(events);
   return events.map((event) => ({
     _id: event._id,
     authorId: event.authorId,

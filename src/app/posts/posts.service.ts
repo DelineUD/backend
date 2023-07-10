@@ -24,11 +24,74 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async getPostsList(initUsr: any): Promise<any> {
+  async getPostsList(
+    initUsr: any,
+    search: any,
+    lastIndex: string,
+  ): Promise<any> {
     const user = await this.usersService.findOne(initUsr.user._id);
-    const posts = await this.postModel.find({}).sort({ createdAt: -1 });
-    const res = postListMapper(posts, user);
-    return res;
+
+    if (search !== undefined && lastIndex === undefined) {
+      const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
+      const sorted = postsFind.filter((el) => el.pText.includes(search));
+      const sortedLimit = sorted.slice(0, 10);
+      if (sortedLimit.length < 1) {
+        throw new EntityNotFoundError(`Такой текст не найден`);
+      }
+      const res = postListMapper(sortedLimit, user);
+      return res;
+    }
+
+    if (search !== undefined && lastIndex !== undefined) {
+      const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
+      const sorted = postsFind.filter((el) => el.pText.includes(search));
+      const newArr = [];
+      let i;
+      sorted.forEach(async (elem) => {
+        if (elem._id.toString() === lastIndex.toString()) {
+          i = sorted.indexOf(elem);
+        }
+        if (i !== undefined) {
+          return i;
+        }
+      });
+
+      if (i !== undefined) {
+        sorted.forEach(async (elem) => {
+          if (sorted.indexOf(elem) > i && sorted.indexOf(elem) < i + 10) {
+            newArr.push(elem);
+          }
+        });
+      }
+
+      if (newArr.length < 1) {
+        throw new EntityNotFoundError(`Такой текст не найден`);
+      }
+
+      const res = postListMapper(newArr, user);
+      return res;
+    }
+
+    if (lastIndex === undefined && search === undefined) {
+      const postsStart = await this.postModel
+        .find({})
+        .limit(10)
+        .sort({ createdAt: -1 });
+      const res = postListMapper(postsStart, user);
+      return res;
+    }
+
+    if (lastIndex !== undefined && search === undefined) {
+      const sposts = await this.postModel
+        .find({ _id: { $lt: lastIndex } })
+        .limit(10)
+        .sort({ createdAt: -1 });
+      if (sposts) {
+        return postListMapper(sposts, user);
+      } else {
+        throw new EntityNotFoundError(`Пост с id, не найден`);
+      }
+    }
   }
 
   async create(postDto: PostDto): Promise<PostDto> {

@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   Request,
   UploadedFiles,
   UseGuards,
@@ -43,8 +44,16 @@ export class PostsController {
     description: 'список постов',
     type: [PostEntity],
   })
-  public async gettList(@Request() data: any): Promise<any> {
-    const result = await this.PostsService.getPostsList(data);
+  public async gettList(
+    @Request() data: any,
+    @Query('search') search: any,
+    @Query('lastIndex') lastIndex: any,
+  ): Promise<any> {
+    const result = await this.PostsService.getPostsList(
+      data,
+      search,
+      lastIndex,
+    );
     return result;
   }
 

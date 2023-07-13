@@ -33,10 +33,12 @@ export class PostsService {
 
     if (search !== undefined && lastIndex === undefined) {
       const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
-      const sorted = postsFind.filter((el) => el.pText.includes(search));
+      const sorted = postsFind.filter((el) =>
+        el.pText.toLowerCase().includes(search.toLowerCase()),
+      );
       const sortedLimit = sorted.slice(0, 10);
       if (sortedLimit.length < 1) {
-        throw new EntityNotFoundError(`Такой текст не найден`);
+        [];
       }
       const res = postListMapper(sortedLimit, user);
       return res;
@@ -44,7 +46,9 @@ export class PostsService {
 
     if (search !== undefined && lastIndex !== undefined) {
       const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
-      const sorted = postsFind.filter((el) => el.pText.includes(search));
+      const sorted = postsFind.filter((el) =>
+        el.pText.toLowerCase().includes(search.toLowerCase()),
+      );
       const newArr = [];
       let i;
       sorted.forEach(async (elem) => {
@@ -65,7 +69,7 @@ export class PostsService {
       }
 
       if (newArr.length < 1) {
-        throw new EntityNotFoundError(`Такой текст не найден`);
+        [];
       }
 
       const res = postListMapper(newArr, user);
@@ -89,7 +93,7 @@ export class PostsService {
       if (sposts) {
         return postListMapper(sposts, user);
       } else {
-        throw new EntityNotFoundError(`Пост с id, не найден`);
+        [];
       }
     }
   }

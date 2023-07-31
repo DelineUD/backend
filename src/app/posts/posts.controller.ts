@@ -44,15 +44,18 @@ export class PostsController {
     description: 'список постов',
     type: [PostEntity],
   })
-  public async gettList(
+  public async getList(
     @Request() data: any,
     @Query('search') search: any,
     @Query('lastIndex') lastIndex: any,
+    @Query('group') group: any,
   ): Promise<any> {
+    console.log(group);
     const result = await this.PostsService.getPostsList(
       data,
       search,
       lastIndex,
+      group,
     );
     return result;
   }
@@ -296,8 +299,6 @@ export class PostsController {
     @Param('_id_comment') comment_ID: any,
     @Request() data: any,
   ): Promise<any> {
-    console.log(post_id);
-    console.log(comment_ID);
     const result: IcPosts = await this.PostsService.deleteComment(
       comment_ID,
       data.user._id,

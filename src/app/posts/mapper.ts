@@ -16,6 +16,7 @@ export const postListMapper = (posts: PostModel[], user: any): IPosts[] => {
     createdAt: posts.createdAt,
     updatedAt: posts.updatedAt,
     countComments: posts.countComments,
+    group: posts.group,
   }));
 };
 

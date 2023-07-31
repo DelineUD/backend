@@ -13,6 +13,8 @@ import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor
 import { UploadService } from './upload/upload.service';
 import { UploadModule } from './upload/upload.module';
 import { EventsModule } from './events/events.module';
+import { FiltersController } from './filters/filters.controller';
+import { FiltersModule } from './filters/filters.module';
 
 @Module({
   imports: [
@@ -33,8 +35,9 @@ import { EventsModule } from './events/events.module';
     PostsModule,
     UploadModule,
     EventsModule,
+    FiltersModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, FiltersController],
   providers: [
     AppService,
     {

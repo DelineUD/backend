@@ -28,14 +28,26 @@ export class PostsService {
     initUsr: any,
     search: any,
     lastIndex: string,
+    group: any,
   ): Promise<any> {
+    let sorted;
     const user = await this.usersService.findOne(initUsr.user._id);
-
     if (search !== undefined && lastIndex === undefined) {
       const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
-      const sorted = postsFind.filter((el) =>
-        el.pText.toLowerCase().includes(search.toLowerCase()),
-      );
+      if (group === undefined) {
+        sorted = postsFind.filter((el) =>
+          el.pText.toLowerCase().includes(search.toLowerCase()),
+        );
+      }
+      if (group !== undefined) {
+        sorted = postsFind.filter(
+          (el) =>
+            el.pText.toLowerCase().includes(search.toLowerCase()) &&
+            el.group !== undefined &&
+            el.group.includes(group),
+        );
+      }
+
       const sortedLimit = sorted.slice(0, 10);
       if (sortedLimit.length < 1) {
         [];
@@ -46,9 +58,19 @@ export class PostsService {
 
     if (search !== undefined && lastIndex !== undefined) {
       const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
-      const sorted = postsFind.filter((el) =>
-        el.pText.toLowerCase().includes(search.toLowerCase()),
-      );
+      if (group === undefined) {
+        sorted = postsFind.filter((el) =>
+          el.pText.toLowerCase().includes(search.toLowerCase()),
+        );
+      }
+      if (group !== undefined) {
+        sorted = postsFind.filter(
+          (el) =>
+            el.pText.toLowerCase().includes(search.toLowerCase()) &&
+            el.group !== undefined &&
+            el.group.includes(group),
+        );
+      }
       const newArr = [];
       let i;
       sorted.forEach(async (elem) => {
@@ -75,25 +97,50 @@ export class PostsService {
       const res = postListMapper(newArr, user);
       return res;
     }
-
+    //красавчик
     if (lastIndex === undefined && search === undefined) {
-      const postsStart = await this.postModel
-        .find({})
-        .limit(10)
-        .sort({ createdAt: -1 });
-      const res = postListMapper(postsStart, user);
-      return res;
+      if (group === undefined) {
+        const postsStart = await this.postModel
+          .find({})
+          .limit(10)
+          .sort({ createdAt: -1 });
+        const res = postListMapper(postsStart, user);
+        return res;
+      }
+
+      if (group !== undefined) {
+        const postsStart = await this.postModel
+          .find({ group: group })
+          .limit(10)
+          .sort({ createdAt: -1 });
+        const res = postListMapper(postsStart, user);
+        return res;
+      }
     }
 
     if (lastIndex !== undefined && search === undefined) {
-      const sposts = await this.postModel
-        .find({ _id: { $lt: lastIndex } })
-        .limit(10)
-        .sort({ createdAt: -1 });
-      if (sposts) {
-        return postListMapper(sposts, user);
-      } else {
-        [];
+      if (group === undefined) {
+        const sposts = await this.postModel
+          .find({ _id: { $lt: lastIndex } })
+          .limit(10)
+          .sort({ createdAt: -1 });
+        if (sposts) {
+          return postListMapper(sposts, user);
+        } else {
+          [];
+        }
+      }
+
+      if (group !== undefined) {
+        const sposts = await this.postModel
+          .find({ _id: { $lt: lastIndex }, group: group })
+          .limit(10)
+          .sort({ createdAt: -1 });
+        if (sposts) {
+          return postListMapper(sposts, user);
+        } else {
+          [];
+        }
       }
     }
   }

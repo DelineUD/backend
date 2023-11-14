@@ -9,10 +9,8 @@ export const residentsMapper = (user: UserModel): IResidentList => {
   return {
     _id: user._id,
     avatar: user.avatar,
-    qualification: user.qualification,
     first_name: user.first_name,
     last_name: user.last_name,
-    badge: user.badge,
   };
 };
 type ItemLabel = {
@@ -48,10 +46,6 @@ export const residentMapper = (user: UserModel): any => {
     last_name: user.last_name,
 
     avatar: user.avatar,
-
-    qualification: user.qualification,
-
-    badge: user.badge,
 
     about: user.about,
 

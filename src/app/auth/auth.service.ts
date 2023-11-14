@@ -4,19 +4,23 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import HttpStatusCode from 'http-status-typed';
-import { LoginSmsDto } from '../users/dto/login-sms.dto';
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { CreateUserDto } from '../users/dto/user.create.dto';
-import { UserDto } from '../users/dto/user.dto';
-import { UsersService } from '../users/users.service';
-import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { JwtService } from '@nestjs/jwt';
+
 import { checkUserExists } from './interfaces/checkUserExists.interface';
 import { LoginStatus } from './interfaces/login-status.interface';
-import { loginSms } from './interfaces/loginSms.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
+
+import { UserDto } from '../users/dto/user.dto';
+import { CreateUserDto } from '../users/dto/user-create.dto';
+import { LoginUserDto } from '../users/dto/user-login.dto';
+import { LoginSmsDto } from './dto/login-sms.dto';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
+
+import { UsersService } from '../users/users.service';
+import { JwtResponse } from './interfaces/login-jwt.interface';
+import { SmsResponse } from './interfaces/login-sms.interface';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +32,7 @@ export class AuthService {
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
     let status: RegistrationStatus = {
       success: true,
-      message: 'user registered or updated',
+      message: 'User registered or updated',
     };
 
     try {
@@ -42,13 +46,13 @@ export class AuthService {
     return status;
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<LoginStatus> {
+  async login(loginUserDto: LoginUserDto): Promise<LoginStatus<JwtResponse>> {
     const user = await this.usersService.findByLogin(loginUserDto);
+    console.log(user);
     const token = this._createToken(user);
     return {
-      user: user.phone,
-      _id: user._id,
-      ...token,
+      phone: user.phone,
+      data: { ...token },
     };
   }
 
@@ -60,7 +64,10 @@ export class AuthService {
     return user;
   }
 
-  private _createToken({ phone }: UserDto): any {
+  private _createToken({ phone }: UserDto): {
+    accessToken: string;
+    refreshToken: string;
+  } {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
       expiresIn: '30d',
@@ -83,12 +90,11 @@ export class AuthService {
     };
   }
 
-  async loginSms(LoginSmsDto: LoginSmsDto): Promise<loginSms> {
+  async loginSms(LoginSmsDto: LoginSmsDto): Promise<LoginStatus<SmsResponse>> {
     const user = await this.usersService.findByPhone(LoginSmsDto);
-    const token = this._createToken(user);
     return {
-      user: user.phone,
-      ...token,
+      phone: user.phone,
+      data: { vPass: 1111 },
     };
   }
 
@@ -117,7 +123,7 @@ export class AuthService {
     if (!authorization) throw new UnauthorizedException('Please sign in!');
 
     try {
-      await await this.jwtService.verifyAsync(noBearer[1]);
+      await this.jwtService.verifyAsync(noBearer[1]);
     } catch (err) {
       console.log(noBearer[1]);
       throw new UnauthorizedException('Invalid token or expired!');

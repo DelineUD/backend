@@ -1,6 +1,4 @@
-export interface LoginStatus {
+export interface LoginStatus<T> {
   phone: number;
-  accessToken: string;
-  vpass: any;
-  refreshToken: string;
+  data: T;
 }

@@ -7,20 +7,19 @@ import {
   HttpStatus,
   Post,
   Query,
-  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { LoginSmsDto } from '../users/dto/login-sms.dto';
+import { LoginSmsDto } from './dto/login-sms.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
-import { CreateUserDto } from '../users/dto/user.create.dto';
-import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/user-create.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { checkUserExists } from './interfaces/checkUserExists.interface';
+import { JwtResponse } from './interfaces/login-jwt.interface';
 import { LoginStatus } from './interfaces/login-status.interface';
-import { loginSms } from './interfaces/loginSms.interface';
+import { SmsResponse } from './interfaces/login-sms.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
@@ -44,7 +43,9 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post('login')
-  public async login(@Body() loginUserDto: LoginUserDto): Promise<LoginStatus> {
+  public async login(
+    @Body() loginUserDto: LoginUserDto,
+  ): Promise<LoginStatus<JwtResponse>> {
     return await this.authService.login(loginUserDto);
   }
 
@@ -56,22 +57,25 @@ export class AuthController {
     return await this.authService.checkUserExists(loginUserDto);
   }
 
-  @Post('login-sms') // логин по смс
-  public async loginSms(@Body() LoginSmsDto: LoginSmsDto): Promise<loginSms> {
-    if (LoginSmsDto.vpass !== 1111) {
+  @Post('login-sms')
+  public async loginSms(
+    @Body() LoginSmsDto: LoginSmsDto,
+  ): Promise<LoginStatus<SmsResponse>> {
+    if (LoginSmsDto.vPass !== 1111) {
       throw new HttpException(
-        'не верный одноразовый пароль',
+        'Неверный одноразовый пароль',
         HttpStatus.BAD_REQUEST,
       );
     }
     if (!LoginSmsDto.phone) {
       throw new HttpException(
-        'поле phone обязательно!',
+        'Поле phone обязательно!',
         HttpStatus.BAD_REQUEST,
       );
     }
     return await this.authService.loginSms(LoginSmsDto);
   }
+
   @Post('refresh')
   async getNewTokens(@Headers() data: RefreshTokenDto) {
     console.log(data);
@@ -79,7 +83,6 @@ export class AuthController {
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard())
   async getMe(@Headers() data: RefreshTokenDto) {
     return this.authService.getMe(data);
   }

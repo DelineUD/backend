@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Post,
   Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -20,7 +21,10 @@ import { LoginStatus } from './interfaces/login-status.interface';
 import { SmsResponse } from './interfaces/login-sms.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { AuthService } from './auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from './guards/jwt.guard';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -83,6 +87,8 @@ export class AuthController {
   }
 
   @Get('profile')
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   async getMe(@Headers() data: RefreshTokenDto) {
     return this.authService.getMe(data);
   }

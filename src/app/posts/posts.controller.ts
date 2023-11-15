@@ -13,7 +13,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
@@ -31,11 +30,12 @@ import { UpdateCommentPostEntity } from './entities/update-comment.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
 import { IcPosts } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
-@ApiTags('posts')
+@UseGuards(JwtAuthGuard)
 @Controller('posts')
-@UseGuards(AuthGuard('jwt'))
 export class PostsController {
   constructor(private PostsService: PostsService) {}
   @Get('list')

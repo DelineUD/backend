@@ -10,7 +10,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
@@ -22,10 +21,11 @@ import { IResidentAuth } from './interfaces/jwt.resident.auth';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
-@ApiTags('residents')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @Controller('residents')
 export class ResidentsController {
   [x: string]: any;

@@ -9,16 +9,16 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventsEntity } from './entities/events.entity';
 import { EventsService } from './events.service';
 import { IEvents } from './interfaces/events.interface';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiTags('Events')
 @ApiBearerAuth('defaultBearerAuth')
-@ApiTags('events')
+@UseGuards(JwtAuthGuard)
 @Controller('events')
-@UseGuards(AuthGuard('jwt'))
 export class EventsController {
   constructor(private EventsService: EventsService) {}
 

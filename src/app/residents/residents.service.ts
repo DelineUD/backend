@@ -24,11 +24,11 @@ export class ResidentsService {
   }
 
   async getResidentById(query: GetResidentParamsDto): Promise<IResident> {
-    const unit = await this.usersService.findOne(query).then(residentMapper);
-    return unit;
+    const resident = await this.usersService.findOne(query);
+    return residentMapper(resident);
   }
 
-  async upAvatar({ authorization }: IResidentAuth, file: any) {
+  async upAvatar({ authorization }: IResidentAuth, file: string) {
     const noBearer = authorization.split(' ');
     if (!authorization) throw new UnauthorizedException('Please sign in!');
 
@@ -47,7 +47,6 @@ export class ResidentsService {
       avatar: `https://teststand.udmobile.app:81/${file}`,
     });
     await userInDb.save();
-    const newUserInDb = await this.userModel.findOne({ _id }).exec();
-    return newUserInDb;
+    return await this.userModel.findOne({ _id }).exec();
   }
 }

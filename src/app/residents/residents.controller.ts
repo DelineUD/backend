@@ -22,6 +22,7 @@ import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { UserModel } from '../users/models/user.model';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
@@ -29,28 +30,27 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 @Controller('residents')
 export class ResidentsController {
   [x: string]: any;
+
   constructor(private residentsService: ResidentsService) {}
 
   @Get('list')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'список резидентов',
+    description: 'Список резидентов',
     type: [ResidentList],
   })
   async getList(): Promise<IResidentList[]> {
-    const result = await this.residentsService.getResidentsList();
-    return result;
+    return await this.residentsService.getResidentsList();
   }
 
   @Get(':_id')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'резидент по айди',
+    description: 'Резидент по айди',
     type: Resident,
   })
   async getById(@Param() params: GetResidentParamsDto): Promise<IResident> {
-    const result = await this.residentsService.getResidentById(params);
-    return result;
+    return await this.residentsService.getResidentById(params);
   }
 
   @Post('avatar')
@@ -65,18 +65,18 @@ export class ResidentsController {
   )
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'загрузить аватар',
+    description: 'Загрузить аватар',
     type: Resident,
   })
   async avatarUpload(
     @Headers() data: IResidentAuth,
-    @UploadedFile() file: any,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<IResidentAuth> {
-    let result: any;
-    if (file != undefined) {
+    let result: UserModel;
+    if (file !== undefined) {
       result = await this.residentsService.upAvatar(data, file.filename);
     } else {
-      throw new HttpException('no file', HttpStatus.BAD_REQUEST);
+      throw new HttpException('No file', HttpStatus.BAD_REQUEST);
     }
 
     return result;

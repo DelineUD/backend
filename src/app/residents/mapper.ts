@@ -1,22 +1,74 @@
 import { UserModel } from '../users/models/user.model';
 import { IResidentList } from './interfaces/resident.interface-list';
+import { IResident, ItemLabel } from './interfaces/resident.interface';
 
-export const residentListMapper = (user: UserModel[]): IResidentList[] => {
-  return user.map(residentsMapper);
-};
+const programsFieldsOfUser: string[] = [
+  'programms_sketchup',
+  'programms_enscape',
+  'programms_lumen',
+  'programms_autocad',
+  'programms_archicad',
+  'programms_revit',
+  'programms_3dmax',
+]; // Programs fields of user dto
 
-export const residentsMapper = (user: UserModel): IResidentList => {
-  return {
-    _id: user._id,
-    avatar: user.avatar,
-    first_name: user.first_name,
-    last_name: user.last_name,
-  };
-};
-type ItemLabel = {
-  label: string;
-  value: string;
-};
+const coursesFieldsOfUser: string[] = [
+  'courseud_masstart',
+  'courseud_prof',
+  'courseud_build',
+  'courseud_sketchup',
+  'courseud_dnd',
+]; // Courses fields of user dto
+
+const specFieldsOfUser: string[] = [
+  'specialization_creative_designer',
+  'specialization_general_practice_designer',
+  'specialization_full_cycle_designer',
+  'specialization_decorator',
+  'specialization_complect',
+  'specialization_author_control',
+  'specialization_project_manager',
+  'specialization_project_owner',
+  'specialization_studio_owner',
+  'specialization_assist',
+  'specialization_sketchup',
+  'specialization_sketch_model',
+  'specialization_enscape',
+  'specialization_sketch_mebel',
+  'specialization_enscape_viz',
+  'specialization_3dmax_viz',
+  'specialization_plan_autocad',
+  'specialization_plan_arch',
+  'specialization_plan_revit',
+  'specialization_measurement',
+]; // Specializations fields of user dto
+
+const narrowSpecFieldsOfUser: string[] = [
+  'narrow_spec_measurement',
+  'narrow_spec_measurement_create',
+  'narrow_spec_anket_tz',
+  'narrow_spec_plan_plane',
+  'narrow_spec_sketch_white',
+  'narrow_spec_concept',
+  'narrow_spec_sketch_volume',
+  'narrow_spec_viz_sketch',
+  'narrow_spec_viz_3dmax',
+  'narrow_spec_viz_other',
+  'narrow_spec_viz_enscape',
+  'narrow_spec_viz_create_schem_viz',
+  'narrow_spec_pccp',
+  'narrow_spec_sop_compl',
+  'narrow_spec_author_spec',
+  'narrow_spec_release_cpec',
+  'narrow_spec_project_manager',
+  'narrow_spec_project_owner',
+  'narrow_spec_studio_owner',
+  'narrow_spec_cmm_diz',
+  'narrow_spec_reels_maker',
+  'narrow_spec_diz_assist',
+  'narrow_spec_office_manager',
+  'narrow_spec_graph_diz',
+]; // Narrow specializations fields of user dto
 
 const getItemWithLabel = (
   user: UserModel,
@@ -33,155 +85,60 @@ const getItemWithLabel = (
     : [];
 };
 
-const getItemString = (user: UserModel, fieldName: string): string[] => {
-  return user[fieldName] ? [user[fieldName]] : [];
+const getItemString = (user: UserModel, fieldName: string): string => {
+  return user[fieldName] && user[fieldName];
 };
 
-export const residentMapper = (user: UserModel): any => {
+const toResidentFormat = (user: UserModel, fields: string[]) => {
+  return [...fields.filter((field) => getItemString(user, field))];
+};
+
+export const residentListMapper = (user: UserModel[]): IResidentList[] => {
+  return user.map(residentsMapper);
+};
+
+export const residentsMapper = (user: UserModel): IResidentList => {
   return {
     _id: user._id,
-
+    avatar: user.avatar,
     first_name: user.first_name,
-
     last_name: user.last_name,
+  };
+};
 
+export const residentMapper = (user: UserModel): IResident => {
+  return {
+    _id: user._id,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    about: user.about,
+    status: user.status,
     avatar: user.avatar,
 
-    about: user.about,
-
+    personal_information: [
+      {
+        birthday: user.birthday,
+        gender: user.gender,
+        citynru: user.citynru,
+        city_ru: user.city_ru,
+      },
+    ],
     description_fields: [
       {
-        field: 'Портфолио',
-
-        items: [
-          ...getItemWithLabel(
-            user,
-            'portfolio_3dmax_visualization',
-            'Визуализация в 3D max',
-          ),
-          ...getItemWithLabel(user, 'portfolio_archicad', 'Архикад'),
-          ...getItemWithLabel(user, 'portfolio_creative', 'Креатив'),
-          ...getItemWithLabel(user, 'portfolio_decorator', 'Декоратор'),
-          ...getItemWithLabel(user, 'portfolio_draftsman', 'Чертежи'),
-          ...getItemWithLabel(
-            user,
-            'portfolio_full_cycle_designer',
-            'Полный цикл',
-          ),
-          ...getItemWithLabel(user, 'portfolio_other', 'Разное'),
-          ...getItemWithLabel(user, 'portfolio_photoshop', 'Фотошоп'),
-          ...getItemWithLabel(user, 'portfolio_picker', 'Пикер'),
-          ...getItemWithLabel(user, 'portfolio_procreate', 'Procreate'),
-          ...getItemWithLabel(
-            user,
-            'portfolio_project_administrator',
-            'Администратор проекта',
-          ),
-          ...getItemWithLabel(
-            user,
-            'portfolio_project_manager',
-            'Менеджер проекта',
-          ),
-          ...getItemWithLabel(
-            user,
-            'portfolio_projector',
-            'Портфолио проджект',
-          ),
-          ...getItemWithLabel(user, 'portfolio_sketchup', 'Портфолио sketchup'),
-          ...getItemWithLabel(
-            user,
-            'portfolio_sketchup_dynamics',
-            'Sketchup динамичевкие сцены',
-          ),
-          ...getItemWithLabel(
-            user,
-            'portfolio_sketchup_visualization',
-            'Sketchup визуализация',
-          ),
-          ...getItemWithLabel(
-            user,
-            'portfolio_sketchup_volume',
-            'Sketchup звук',
-          ),
-          ...getItemWithLabel(
-            user,
-            'portfolio_studio_manager',
-            'Менеджер студии',
-          ),
-        ],
+        filed: 'Владение программами',
+        items: toResidentFormat(user, programsFieldsOfUser),
       },
       {
-        field: 'Контактная информация',
-        items: [
-          ...getItemWithLabel(user, 'phone', 'Телефон'),
-          ...getItemWithLabel(user, 'email', 'Email'),
-        ],
+        filed: 'Пройденные курсы',
+        items: toResidentFormat(user, coursesFieldsOfUser),
       },
       {
-        field: 'Специализация',
-        items: [
-          ...getItemString(user, 'specialization_construction_supervisor'),
-          ...getItemString(user, 'specialization_creative_designer'),
-          ...getItemString(user, 'specialization_equipment_specialist'),
-          ...getItemString(user, 'specialization_general_practice_designer'),
-          ...getItemString(user, 'specialization_project_curator'),
-          ...getItemString(user, 'specialization_project_management_assistant'),
-          ...getItemString(user, 'specialization_project_manager'),
-          ...getItemString(user, 'specialization_studio_head'),
-          ...getItemString(user, 'specialization_visual_designer'),
-        ],
+        filed: 'Специализация',
+        items: toResidentFormat(user, specFieldsOfUser),
       },
       {
-        field: 'Ищу работу',
-        items: [
-          ...getItemString(user, 'searching_work_3dmax_visualization'),
-          ...getItemString(user, 'searching_work_creative'),
-          ...getItemString(user, 'searching_work_decorator'),
-          ...getItemString(user, 'searching_work_different'),
-          ...getItemString(user, 'searching_work_different_string'),
-          ...getItemString(user, 'searching_work_draftsman'),
-          ...getItemString(user, 'searching_work_full_cycle_designer'),
-          ...getItemString(user, 'searching_work_picker'),
-          ...getItemString(user, 'searching_work_project_administrator'),
-          ...getItemString(user, 'searching_work_project_manager'),
-          ...getItemString(user, 'searching_work_projector'),
-          ...getItemString(user, 'searching_work_sketchup_dynamics'),
-          ...getItemString(user, 'searching_work_sketchup_visualization'),
-          ...getItemString(user, 'searching_work_sketchup_volume'),
-          ...getItemString(user, 'searching_work_studio_manager'),
-        ],
-      },
-      {
-        field: 'Владение программами',
-        items: [
-          ...getItemString(user, 'programms_archicad'),
-          ...getItemString(user, 'programms_different'),
-          ...getItemString(user, 'programms_different_string'),
-          ...getItemString(user, 'programms_google'),
-          ...getItemString(user, 'programms_ms_office'),
-          ...getItemString(user, 'programms_photoshop'),
-          ...getItemString(user, 'programms_procreate'),
-          ...getItemString(user, 'programms_sketchup'),
-          ...getItemString(user, 'programms_xmind'),
-          ...getItemString(user, 'programms_yandex'),
-        ],
-      },
-      {
-        field: 'Информация',
-        items: [
-          ...getItemWithLabel(user, 'birthday', 'Возраст'),
-          ...getItemWithLabel(user, 'ervice_cost', 'Стоимость услуг'),
-          ...getItemWithLabel(
-            user,
-            'distant_work',
-            'Готовность к удаленной работе',
-          ),
-          ...getItemWithLabel(
-            user,
-            'work_now',
-            'Готовность к работе прямо сейчас',
-          ),
-        ],
+        filed: 'Узкая специализация',
+        items: toResidentFormat(user, narrowSpecFieldsOfUser),
       },
     ],
   };

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { compare, genSalt, hash } from 'bcrypt';
 
 import { UserModel } from './models/user.model';
@@ -31,7 +31,7 @@ export class UsersService {
   }
 
   async findByLogin({ phone, password }: LoginUserDto): Promise<UserDto> {
-    const user = await this.userModel.findOne({ phone }).exec();
+    const user = await this.userModel.findOne({ phone, password }).exec();
 
     if (!user) {
       throw new EntityNotFoundError('User not found');
@@ -46,8 +46,8 @@ export class UsersService {
     return toUserDto(user);
   }
 
-  async findByPayload({ phone }: any): Promise<UserDto> {
-    return await this.findOne({ phone });
+  async findByPayload(payload: object): Promise<UserDto> {
+    return await this.findOne(payload);
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
@@ -74,7 +74,8 @@ export class UsersService {
     return toUserDto(user);
   }
 
-  async findByPhone({ phone }: LoginUserDto): Promise<UserDto> {
+  async findByPhone(phone: number): Promise<UserDto> {
+    console.log(phone);
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
@@ -107,5 +108,22 @@ export class UsersService {
   async updateUsr(data?: object): Promise<UserDto> {
     const user = await this.userModel.findOne(data).exec();
     return toUserDto(user);
+  }
+
+  async deleteProperty(userId: Types.ObjectId | string, prop: object) {
+    try {
+      const result = await this.userModel.updateOne(
+        { _id: userId },
+        { $unset: prop },
+      );
+
+      if (!result) {
+        throw new Error(`Failed to delete ${prop}`);
+      }
+
+      return true;
+    } catch (err) {
+      throw new Error(`Error while delete property: ${err.message}`);
+    }
   }
 }

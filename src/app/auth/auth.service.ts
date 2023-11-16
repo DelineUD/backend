@@ -1,26 +1,33 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import HttpStatusCode from 'http-status-typed';
+import { SMSService } from '../../apis/index';
 import { JwtService } from '@nestjs/jwt';
 
 import { checkUserExists } from './interfaces/checkUserExists.interface';
-import { LoginStatus } from './interfaces/login-status.interface';
+import { ILoginStatus } from './interfaces/loginStatus.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
 import { UserDto } from '../users/dto/user.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
-import { LoginSmsDto } from './dto/login-sms.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 import { UsersService } from '../users/users.service';
-import { JwtResponse } from './interfaces/login-jwt.interface';
-import { SmsResponse } from './interfaces/login-sms.interface';
+import { IJwtResponse } from './interfaces/loginJwt.interface';
+import generateOTPCode from '../shared/utils/generateOTPCode';
+import { ILoginSmsResponse } from './interfaces/loginSms.interface';
+import { ISensSmsResponse } from './interfaces/sendSms.interface';
+import { SendSmsDto } from './dto/send-sms.dto';
+import { UserModel } from '../users/models/user.model';
+import { LoginSmsDto } from './dto/login-sms.dto';
+import { IJwtPayload } from './interfaces/JwtPayload.interface';
 
 @Injectable()
 export class AuthService {
@@ -46,9 +53,8 @@ export class AuthService {
     return status;
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<LoginStatus<JwtResponse>> {
+  async login(loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
     const user = await this.usersService.findByLogin(loginUserDto);
-    console.log(user);
     const token = this._createToken(user);
     return {
       phone: user.phone,
@@ -57,7 +63,7 @@ export class AuthService {
   }
 
   async validateUser(payload: JwtPayload): Promise<UserDto> {
-    const user = await this.usersService.findByPayload(payload);
+    const user = await this.usersService.findByPayload(payload as UserModel);
     if (!user) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }
@@ -82,19 +88,56 @@ export class AuthService {
     };
   }
 
-  async checkUserExists(loginUserDto: LoginUserDto): Promise<checkUserExists> {
-    const user = await this.usersService.findByPhone(loginUserDto);
+  async checkUserExists({ phone }: LoginUserDto): Promise<checkUserExists> {
+    const user = await this.usersService.findByPhone(phone);
     return {
       phone: user.phone,
       status: HttpStatusCode.OK,
     };
   }
 
-  async loginSms(LoginSmsDto: LoginSmsDto): Promise<LoginStatus<SmsResponse>> {
-    const user = await this.usersService.findByPhone(LoginSmsDto);
+  async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
+    const user = await this.usersService.findByPhone(phone);
+
+    if (!user) {
+      throw new UnauthorizedException(`User with phone: ${phone} not found!`);
+    }
+
+    const otpCode = generateOTPCode(4);
+    const msg = `Код авторизации: ${otpCode}.`;
+    const { status, status_code } = await SMSService.send(user.phone, msg);
+
+    if (status_code === 100) {
+      await this.usersService.update({ _id: user._id }, { vPass: otpCode });
+    }
+
+    return {
+      status,
+      status_code,
+    };
+  }
+
+  async loginSms({
+    authorization,
+  }: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
+    if (!authorization) {
+      throw new BadRequestException('Invalid authorization code or expired!');
+    }
+
+    const user = await this.usersService.findByPayload({
+      vPass: authorization,
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid authorization code!');
+    }
+
+    const tokens = this._createToken(user);
+    await this.usersService.deleteProperty(user._id, { vPass: authorization });
+
     return {
       phone: user.phone,
-      data: { vPass: 1111 },
+      data: { ...tokens },
     };
   }
 
@@ -129,8 +172,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token or expired!');
     }
 
-    const result = await this.jwtService.verifyAsync(noBearer[1]);
-    const user = await this.usersService.findByPhone(result);
+    const { phone }: IJwtPayload = await this.jwtService.verifyAsync(
+      noBearer[1],
+    );
+    const user = await this.usersService.findByPhone(phone);
 
     return {
       _id: user._id,

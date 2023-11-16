@@ -1,15 +1,7 @@
-import { IsNotEmpty, IsNumber, IsPhoneNumber } from 'class-validator';
-import { UserDto } from '../../users/dto/user.dto';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class LoginSmsDto extends UserDto {
-  @IsNotEmpty()
-  @IsPhoneNumber('RU')
-  readonly phone: number;
-
-  @IsNotEmpty()
-  readonly password: string;
-
+export class LoginSmsDto {
   @IsNotEmpty()
   @IsNumber()
-  readonly vPass: number;
+  readonly authorization: number;
 }

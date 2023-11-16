@@ -20,7 +20,7 @@ import { FiltersModule } from './filters/filters.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './envs/.backend.env',
+      envFilePath: ['./envs/.backend.env', './envs/.development.env'],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

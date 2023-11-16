@@ -1,4 +1,4 @@
-export interface JwtResponse {
+export interface IJwtResponse {
   accessToken: string;
   refreshToken: string;
 }

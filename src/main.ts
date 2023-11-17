@@ -47,6 +47,6 @@ async function bootstrap() {
     ],
   });
 
-  await app.listen(3000);
+  app.listen(port).then(() => `Server has been stared on ${port}`);
 }
-bootstrap();
+bootstrap().then(() => `Bootstrap successful`);

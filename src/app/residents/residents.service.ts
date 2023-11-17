@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -24,11 +24,15 @@ export class ResidentsService {
   }
 
   async getResidentById(query: GetResidentParamsDto): Promise<IResident> {
-    const unit = await this.usersService.findOne(query).then(residentMapper);
-    return unit;
+    try {
+      const resident = await this.usersService.findOne(query);
+      return residentMapper(resident);
+    } catch (err) {
+      throw new NotFoundException(`User ${query._id} not found!`);
+    }
   }
 
-  async upAvatar({ authorization }: IResidentAuth, file: any) {
+  async upAvatar({ authorization }: IResidentAuth, file: string) {
     const noBearer = authorization.split(' ');
     if (!authorization) throw new UnauthorizedException('Please sign in!');
 
@@ -39,15 +43,18 @@ export class ResidentsService {
     }
 
     const result = await this.jwtService.verifyAsync(noBearer[1]);
-    const user = await this.usersService.findOne(result);
-    const _id = user._id;
+    const { _id } = await this.usersService.findOne(result);
+
+    if (!_id) {
+      throw new NotFoundException(`User ${_id} not found!`);
+    }
+
     const userInDb = await this.userModel.findOne({ _id }).exec();
 
     await userInDb.updateOne({
-      avatar: `https://teststand.udmobile.app:81/${file}`,
+      avatar: `${process.env.TEST_STAND}/${file}`,
     });
     await userInDb.save();
-    const newUserInDb = await this.userModel.findOne({ _id }).exec();
-    return newUserInDb;
+    return await this.userModel.findOne({ _id }).exec();
   }
 }

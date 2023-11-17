@@ -13,7 +13,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
@@ -30,14 +29,17 @@ import { PostEntity } from './entities/posts.entity';
 import { UpdateCommentPostEntity } from './entities/update-comment.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
 import { IcPosts } from './interfaces/posts.comments.interface';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PostsService } from './posts.service';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
-@ApiTags('posts')
+@UseGuards(JwtAuthGuard)
 @Controller('posts')
-@UseGuards(AuthGuard('jwt'))
 export class PostsController {
   constructor(private PostsService: PostsService) {}
+
   @Get('list')
   @ApiResponse({
     status: HttpStatus.OK,
@@ -46,18 +48,12 @@ export class PostsController {
   })
   public async getList(
     @Request() data: any,
-    @Query('search') search: any,
+    @Query('search') search: string,
     @Query('lastIndex') lastIndex: any,
     @Query('group') group: any,
   ): Promise<any> {
     console.log(group);
-    const result = await this.PostsService.getPostsList(
-      data,
-      search,
-      lastIndex,
-      group,
-    );
-    return result;
+    return await this.PostsService.getPostsList(data, search, lastIndex, group);
   }
 
   @Post('create')
@@ -71,11 +67,10 @@ export class PostsController {
     type: CreatePostEntity,
   })
   public async create(
-    @Body() createPostDto: CreatePostDto,
+    @Body()
+    createPostDto: CreatePostDto,
   ): Promise<CreatePostDto> {
-    const result = await this.PostsService.create(createPostDto);
-
-    return result;
+    return await this.PostsService.create(createPostDto);
   }
 
   @Post('update')
@@ -89,7 +84,8 @@ export class PostsController {
     type: UpdatePostEntity,
   })
   public async update(
-    @Body() updatePostDto: UpdatePostDto,
+    @Body()
+    updatePostDto: UpdatePostDto,
   ): Promise<UpdatePostDto> {
     const result: UpdatePostDto = await this.PostsService.update(updatePostDto);
 
@@ -111,7 +107,8 @@ export class PostsController {
     type: DeletePostEntity,
   })
   public async delete(
-    @Body() deletePostDto: DeletePostDto,
+    @Body()
+    deletePostDto: DeletePostDto,
   ): Promise<DeletePostDto> {
     const result: DeletePostDto = await this.PostsService.delete(deletePostDto);
 
@@ -132,8 +129,7 @@ export class PostsController {
     @Param() params: GetPostParamsDto,
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
-    const result = await this.PostsService.getPostById(params, data);
-    return result;
+    return await this.PostsService.getPostById(params, data);
   }
 
   @Post('upload-images')
@@ -145,28 +141,26 @@ export class PostsController {
   @UseInterceptors(
     FilesInterceptor('image', 4, {
       storage: diskStorage({
-        destination: '/var/www/html/teststand',
+        destination: process.env.TEST_STAND_FOLDER,
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,
     }),
   )
   public async upImages(
-    @Body() createPostDto: CreatePostDto,
-    @UploadedFiles() files,
+    @Body()
+    createPostDto: CreatePostDto,
+    @UploadedFiles()
+    files: Express.Multer.File[],
   ): Promise<CreatePostDto> {
-    let result: any;
     const response = files.filter(Boolean).map((file) => ({
       originalname: file.originalname,
       filename: file.filename,
-      url: `https://teststand.udmobile.app:81/${file.filename}`,
+      url: String(process.env.TEST_STAND + file.filename),
     }));
-
-    console.log(response);
-    result = await this.PostsService.upImages(createPostDto, response);
-
-    return result;
+    return await this.PostsService.upImages(createPostDto, response);
   }
+
   @Post(':_id/view')
   @ApiResponse({
     status: HttpStatus.OK,
@@ -174,8 +168,7 @@ export class PostsController {
     type: PostEntity,
   })
   async addView(@Param() params: any, @Request() data: any): Promise<any> {
-    const result = await this.PostsService.addView(params, data.user._id);
-    return result;
+    return await this.PostsService.addView(params, data.user._id);
   }
 
   @Post(':_id/like')
@@ -184,12 +177,8 @@ export class PostsController {
     description: 'Лайки',
     type: PostEntity,
   })
-  async liked(
-    @Param() params: GetPostParamsDto,
-    @Request() data: any,
-  ): Promise<GetPostParamsDto> {
-    const result = await this.PostsService.liked(params, data.user._id);
-    return result;
+  async liked(@Param() params: GetPostParamsDto, @Request() data: any): Promise<GetPostParamsDto> {
+    return await this.PostsService.liked(params, data.user._id);
   }
 
   @Post(':_id/comments')
@@ -207,12 +196,7 @@ export class PostsController {
     @Param() params: GetPostParamsDto,
     @Request() data: any,
   ): Promise<IcPosts> {
-    const result = await this.PostsService.createComment(
-      createComments,
-      params,
-      data.user._id,
-    );
-    return result;
+    return await this.PostsService.createComment(createComments, params, data.user._id);
   }
 
   @Get(':_id/comments')
@@ -227,10 +211,10 @@ export class PostsController {
   })
   public async CommentList(
     @Param() params: GetPostParamsDto,
-    @Request() data: any,
-  ): Promise<IcPosts[]> {
-    const result = await this.PostsService.CommentList(params, data.user._id);
-    return result;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Request() data: unknown,
+  ): Promise<unknown> {
+    return await this.PostsService.CommentList(params);
   }
 
   @Post(':_id_post/like-comment/:_id_comment/')
@@ -239,20 +223,16 @@ export class PostsController {
     description: 'Лайки',
     type: CommentListEntity,
   })
-  async Commentliked(
+  async CommentLiked(
     @Param('_id_post') post_id: any,
-    @Param('_id_comment') comment_ID: any,
+    @Param('_id_comment')
+    comment_ID: any,
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
     console.log(post_id);
     console.log(comment_ID);
-    const result = await this.PostsService.Commentliked(
-      post_id,
-      comment_ID,
-      data.user._id,
-    );
-
-    return result;
+    await this.PostsService.CommentLiked(post_id, comment_ID, data.user._id);
+    return await this.PostsService.CommentLiked(post_id, comment_ID, data.user._id);
   }
 
   @Post(':_id_post/update-comment/:_id_comment')
@@ -262,12 +242,13 @@ export class PostsController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'коммент успешно обновлен',
+    description: 'Комментарий успешно обновлен',
     type: UpdateCommentPostEntity,
   })
   public async updateComment(
     @Param('_id_post') post_id: any,
-    @Param('_id_comment') comment_ID: any,
+    @Param('_id_comment')
+    comment_ID: any,
     @Body() updateComment: IcPosts,
     @Request() data: any,
   ): Promise<IcPosts> {
@@ -296,7 +277,8 @@ export class PostsController {
   })
   public async deleteComment(
     @Param('_id_post') post_id: any,
-    @Param('_id_comment') comment_ID: any,
+    @Param('_id_comment')
+    comment_ID: any,
     @Request() data: any,
   ): Promise<any> {
     const result: IcPosts = await this.PostsService.deleteComment(

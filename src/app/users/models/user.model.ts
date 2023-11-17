@@ -2,182 +2,152 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { IUser } from '../interfaces/user.interface';
 
-@Schema({ collection: 'users', timestamps: true })
+@Schema({
+  collection: 'users',
+  timestamps: true,
+})
 export class UserModel extends Document implements IUser {
-  @Prop({ required: true })
-  phone: number;
-
-  @Prop()
-  password?: string;
-
+  // Personal Information
+  @Prop() id?: string;
   @Prop({ required: true })
   email: string;
+  @Prop({ required: true })
+  phone: number;
+  @Prop({ required: true })
+  password: string;
+  @Prop({ required: true })
+  first_name: string;
+  @Prop({ required: true })
+  last_name: string;
+  @Prop() birthday?: Date;
+  @Prop() avatar?: string;
+  @Prop() gender?: string;
+  @Prop() vPass?: number;
+  @Prop() cntry?: string;
 
-  @Prop()
-  vpass?: number;
+  // Contact Information
+  @Prop() city_ru?: string;
+  @Prop() citynru?: string;
 
-  @Prop()
-  id?: string;
-  @Prop()
-  service_cost?: string;
-  @Prop()
-  gender?: string;
-  @Prop()
-  about?: string;
-  @Prop()
-  site?: string;
-  @Prop()
-  instagram?: string;
-  @Prop()
-  vk?: string;
-  @Prop()
-  telegram?: string;
-  @Prop()
-  portfolio?: string;
-  @Prop()
-  searching_work_full_cycle_designer?: string;
-  @Prop()
-  portfolio_full_cycle_designer?: string;
-  @Prop()
-  searching_work_projector?: string;
-  @Prop()
-  portfolio_projector?: string;
-  @Prop()
-  searching_work_creative?: string;
-  @Prop()
-  portfolio_creative?: string;
-  @Prop()
-  searching_work_decorator?: string;
-  @Prop()
-  portfolio_decorator?: string;
-  @Prop()
-  searching_work_draftsman?: string;
-  @Prop()
-  portfolio_draftsman?: string;
-  @Prop()
-  searching_work_sketchup_dynamics?: string;
-  @Prop()
-  portfolio_sketchup_dynamics?: string;
-  @Prop()
-  searching_work_sketchup_volume?: string;
-  @Prop()
-  portfolio_sketchup_volume?: string;
-  @Prop()
-  searching_work_sketchup_visualization?: string;
-  @Prop()
-  portfolio_sketchup_visualization?: string;
-  @Prop()
-  searching_work_3dmax_visualization?: string;
-  @Prop()
-  portfolio_3dmax_visualization?: string;
-  @Prop()
-  searching_work_picker?: string;
-  @Prop()
-  portfolio_picker?: string;
-  @Prop()
-  searching_work_project_manager?: string;
-  @Prop()
-  portfolio_project_manager?: string;
-  @Prop()
-  searching_work_project_administrator?: string;
-  @Prop()
-  portfolio_project_administrator?: string;
-  @Prop()
-  searching_work_studio_manager?: string;
-  @Prop()
-  portfolio_studio_manager?: string;
-  @Prop()
-  searching_work_different?: string;
-  @Prop()
-  searching_work_different_string?: string;
-  @Prop()
-  portfolio_other?: string;
-  @Prop()
-  programms_sketchup?: string;
-  @Prop()
-  portfolio_sketchup?: string;
-  @Prop()
-  programms_photoshop?: string;
-  @Prop()
-  portfolio_photoshop?: string;
-  @Prop()
-  programms_procreate?: string;
-  @Prop()
-  portfolio_procreate?: string;
-  @Prop()
-  programms_archicad?: string;
-  @Prop()
-  portfolio_archicad?: string;
-  @Prop()
-  programms_google?: string;
-  @Prop()
-  programms_yandex?: string;
-  @Prop()
-  programms_xmind?: string;
-  @Prop()
-  programms_ms_office?: string;
-  @Prop()
-  programms_different?: string;
-  @Prop()
-  programms_different_string?: string;
-  @Prop()
-  work_now?: string;
-  @Prop()
-  qualification?: string;
-  @Prop()
-  distant_work?: string;
-  @Prop()
-  first_name?: string;
-  @Prop()
-  last_name?: string;
-  @Prop()
-  hide_phone?: string;
-  @Prop()
-  badge?: string;
-  @Prop()
-  role?: string;
-  @Prop()
-  birthday?: string;
-  @Prop()
-  qualification_color?: string;
-  @Prop()
-  specialization?: string;
-  @Prop()
-  specialization_general_practice_designer?: string;
-  @Prop()
-  specialization_designer_designer?: string;
-  @Prop()
-  specialization_designer_technologist?: string;
+  // Additional Information
+  @Prop() about?: string;
+  @Prop() education?: string;
+
+  // Social Media
+  @Prop() service_cost?: number;
+  @Prop() site?: string;
+  @Prop() instagram?: string;
+  @Prop() telegram?: string;
+  @Prop() vk?: string;
+
+  // Preferences
+  @Prop() hide_phone?: boolean;
+  @Prop() qualification_color?: string;
+
+  // Programs
+  @Prop() programms_sketchup?: string;
+  @Prop() programms_enscape?: string;
+  @Prop() programms_lumen?: string;
+  @Prop() programms_autocad?: string;
+  @Prop() programms_archicad?: string;
+  @Prop() programms_revit?: string;
+  @Prop() programms_3dmax?: string;
+
+  // Courses
+  @Prop() courseud_masstart?: string;
+  @Prop() courseud_prof?: string;
+  @Prop() courseud_build?: string;
+  @Prop() courseud_sketchup?: string;
+  @Prop() courseud_dnd?: string;
+
+  // Status and Specializations
+  @Prop() status?: string;
   @Prop()
   specialization_creative_designer?: string;
   @Prop()
-  specialization_visual_designer?: string;
+  specialization_general_practice_designer?: string;
   @Prop()
-  specialization_studio_head?: string;
+  specialization_full_cycle_designer?: string;
   @Prop()
-  specialization_project_curator?: string;
+  specialization_decorator?: string;
   @Prop()
-  specialization_project_management_assistant?: string;
+  specialization_complect?: string;
+  @Prop()
+  specialization_author_control?: string;
   @Prop()
   specialization_project_manager?: string;
   @Prop()
-  specialization_equipment_specialist?: string;
+  specialization_project_owner?: string;
   @Prop()
-  specialization_construction_supervisor?: string;
+  specialization_studio_owner?: string;
   @Prop()
-  cntry?: string;
+  specialization_assist?: string;
   @Prop()
-  city_ru?: string;
+  specialization_sketchup?: string;
   @Prop()
-  citynru?: string;
+  specialization_sketch_model?: string;
   @Prop()
-  status?: string;
+  specialization_enscape?: string;
   @Prop()
-  api_city?: string;
+  specialization_sketch_mebel?: string;
   @Prop()
-  position_tag?: string;
+  specialization_enscape_viz?: string;
   @Prop()
-  avatar?: string;
+  specialization_3dmax_viz?: string;
+  @Prop()
+  specialization_plan_autocad?: string;
+  @Prop()
+  specialization_plan_arch?: string;
+  @Prop()
+  specialization_plan_revit?: string;
+  @Prop()
+  specialization_measurement?: string;
+
+  // Narrow Specializations
+  @Prop()
+  narrow_spec_measurement?: string;
+  @Prop()
+  narrow_spec_measurement_create?: string;
+  @Prop() narrow_spec_anket_tz?: string;
+  @Prop()
+  narrow_spec_plan_plane?: string;
+  @Prop()
+  narrow_spec_sketch_white?: string;
+  @Prop() narrow_spec_concept?: string;
+  @Prop()
+  narrow_spec_sketch_volume?: string;
+  @Prop()
+  narrow_spec_viz_sketch?: string;
+  @Prop()
+  narrow_spec_viz_3dmax?: string;
+  @Prop()
+  narrow_spec_viz_other?: string;
+  @Prop()
+  narrow_spec_viz_enscape?: string;
+  @Prop()
+  narrow_spec_viz_create_schem_viz?: string;
+  @Prop() narrow_spec_pccp?: string;
+  @Prop()
+  narrow_spec_sop_compl?: string;
+  @Prop()
+  narrow_spec_author_spec?: string;
+  @Prop()
+  narrow_spec_release_cpec?: string;
+  @Prop()
+  narrow_spec_project_manager?: string;
+  @Prop()
+  narrow_spec_project_owner?: string;
+  @Prop()
+  narrow_spec_studio_owner?: string;
+  @Prop() narrow_spec_cmm_diz?: string;
+  @Prop()
+  narrow_spec_reels_maker?: string;
+  @Prop()
+  narrow_spec_diz_assist?: string;
+  @Prop()
+  narrow_spec_office_manager?: string;
+  @Prop()
+  narrow_spec_graph_diz?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

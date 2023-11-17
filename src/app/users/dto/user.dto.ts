@@ -1,172 +1,267 @@
-import { IsNotEmpty } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
+import { Types } from 'mongoose';
 
 export class UserDto {
-  _id?: string;
+  _id?: Types.ObjectId;
 
+  // Personal Information
   @IsNotEmpty()
-  phone: number;
-
-  @IsNotEmpty()
+  @IsEmail()
+  @IsString()
   email: string;
-
-  vpass?: number;
-
-  id?: string;
-
-  service_cost?: string;
-
-  gender?: string;
-
-  about?: string;
-
-  site?: string;
-
-  instagram?: string;
-
-  vk?: string;
-
-  telegram?: string;
-
-  portfolio?: string;
-
-  searching_work_full_cycle_designer?: string;
-
-  portfolio_full_cycle_designer?: string;
-
-  searching_work_projector?: string;
-
-  portfolio_projector?: string;
-
-  searching_work_creative?: string;
-
-  portfolio_creative?: string;
-
-  searching_work_decorator?: string;
-
-  portfolio_decorator?: string;
-
-  searching_work_draftsman?: string;
-
-  portfolio_draftsman?: string;
-
-  searching_work_sketchup_dynamics?: string;
-
-  portfolio_sketchup_dynamics?: string;
-
-  searching_work_sketchup_volume?: string;
-
-  portfolio_sketchup_volume?: string;
-
-  searching_work_sketchup_visualization?: string;
-
-  portfolio_sketchup_visualization?: string;
-
-  searching_work_3dmax_visualization?: string;
-
-  portfolio_3dmax_visualization?: string;
-
-  searching_work_picker?: string;
-
-  portfolio_picker?: string;
-
-  searching_work_project_manager?: string;
-
-  portfolio_project_manager?: string;
-
-  searching_work_project_administrator?: string;
-
-  portfolio_project_administrator?: string;
-
-  searching_work_studio_manager?: string;
-  portfolio_studio_manager?: string;
-
-  searching_work_different?: string;
-
-  searching_work_different_string?: string;
-
-  portfolio_other?: string;
-
-  programms_sketchup?: string;
-
-  portfolio_sketchup?: string;
-
-  programms_photoshop?: string;
-
-  portfolio_photoshop?: string;
-
-  programms_procreate?: string;
-
-  portfolio_procreate?: string;
-
-  programms_archicad?: string;
-
-  portfolio_archicad?: string;
-
-  programms_google?: string;
-
-  programms_yandex?: string;
-
-  programms_xmind?: string;
-
-  programms_ms_office?: string;
-
-  programms_different?: string;
-
-  programms_different_string?: string;
-
-  work_now?: string;
-
-  qualification?: string;
-
-  distant_work?: string;
-
+  @IsNotEmpty()
+  @IsPhoneNumber('RU')
+  phone: number;
+  @IsOptional() @IsString() id?: string;
+  @IsOptional()
+  @IsString()
+  password?: string;
+  @IsOptional()
+  @IsNumber()
+  vPass?: number;
+  @IsOptional()
+  @IsString()
   first_name?: string;
-
+  @IsOptional()
+  @IsString()
   last_name?: string;
-
-  hide_phone?: string;
-
-  badge?: string;
-
-  role?: string;
-
-  birthday?: string;
-
-  qualification_color?: string;
-
-  specialization?: string;
-
-  specialization_general_practice_designer?: string;
-
-  specialization_designer_designer?: string;
-
-  specialization_designer_technologist?: string;
-
-  specialization_creative_designer?: string;
-
-  specialization_visual_designer?: string;
-
-  specialization_studio_head?: string;
-
-  specialization_project_curator?: string;
-
-  specialization_project_management_assistant?: string;
-
-  specialization_project_manager?: string;
-
-  specialization_equipment_specialist?: string;
-
-  specialization_construction_supervisor?: string;
-
+  @IsOptional()
+  @IsDate()
+  birthday?: Date;
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+  @IsOptional()
+  @IsString()
+  gender?: string;
+  @IsOptional()
+  @IsString()
   cntry?: string;
 
+  // Contact Information
+  @IsOptional()
+  @IsString()
   city_ru?: string;
-
+  @IsOptional()
+  @IsString()
   citynru?: string;
 
+  // Additional Information
+  @IsOptional()
+  @IsString()
+  about?: string;
+  @IsOptional()
+  @IsString()
+  education?: string;
+
+  // Social Media
+  @IsOptional()
+  @IsNumber()
+  service_cost?: number;
+  @IsOptional()
+  @IsString()
+  site?: string;
+  @IsOptional()
+  @IsString()
+  instagram?: string;
+  @IsOptional()
+  @IsString()
+  telegram?: string;
+  @IsOptional() @IsString() vk?: string;
+
+  // Preferences
+  @IsOptional()
+  @IsBoolean()
+  hide_phone?: boolean;
+  @IsOptional()
+  @IsString()
+  qualification_color?: string;
+
+  // Programs
+  @IsOptional()
+  @IsString()
+  programms_sketchup?: string;
+  @IsOptional()
+  @IsString()
+  programms_enscape?: string;
+  @IsOptional()
+  @IsString()
+  programms_lumen?: string;
+  @IsOptional()
+  @IsString()
+  programms_autocad?: string;
+  @IsOptional()
+  @IsString()
+  programms_archicad?: string;
+  @IsOptional()
+  @IsString()
+  programms_revit?: string;
+  @IsOptional()
+  @IsString()
+  programms_3dmax?: string;
+
+  // Courses
+  @IsOptional()
+  @IsString()
+  courseud_masstart?: string;
+  @IsOptional()
+  @IsString()
+  courseud_prof?: string;
+  @IsOptional()
+  @IsString()
+  courseud_build?: string;
+  @IsOptional()
+  @IsString()
+  courseud_sketchup?: string;
+  @IsOptional()
+  @IsString()
+  courseud_dnd?: string;
+
+  // Status and Specializations
+  @IsOptional()
+  @IsString()
   status?: string;
+  @IsOptional()
+  @IsString()
+  specialization_creative_designer?: string;
+  @IsOptional()
+  @IsString()
+  specialization_general_practice_designer?: string;
+  @IsOptional()
+  @IsString()
+  specialization_full_cycle_designer?: string;
+  @IsOptional()
+  @IsString()
+  specialization_decorator?: string;
+  @IsOptional()
+  @IsString()
+  specialization_complect?: string;
+  @IsOptional()
+  @IsString()
+  specialization_author_control?: string;
+  @IsOptional()
+  @IsString()
+  specialization_project_manager?: string;
+  @IsOptional()
+  @IsString()
+  specialization_project_owner?: string;
+  @IsOptional()
+  @IsString()
+  specialization_studio_owner?: string;
+  @IsOptional()
+  @IsString()
+  specialization_assist?: string;
+  @IsOptional()
+  @IsString()
+  specialization_sketchup?: string;
+  @IsOptional()
+  @IsString()
+  specialization_sketch_model?: string;
+  @IsOptional()
+  @IsString()
+  specialization_enscape?: string;
+  @IsOptional()
+  @IsString()
+  specialization_sketch_mebel?: string;
+  @IsOptional()
+  @IsString()
+  specialization_enscape_viz?: string;
+  @IsOptional()
+  @IsString()
+  specialization_3dmax_viz?: string;
+  @IsOptional()
+  @IsString()
+  specialization_plan_autocad?: string;
+  @IsOptional()
+  @IsString()
+  specialization_plan_arch?: string;
+  @IsOptional()
+  @IsString()
+  specialization_plan_revit?: string;
+  @IsOptional()
+  @IsString()
+  specialization_measurement?: string;
 
-  api_city?: string;
-
-  position_tag?: string;
+  // Narrow Specializations
+  @IsOptional()
+  @IsString()
+  narrow_spec_measurement?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_measurement_create?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_anket_tz?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_plan_plane?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_sketch_white?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_concept?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_sketch_volume?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_viz_sketch?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_viz_3dmax?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_viz_other?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_viz_enscape?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_viz_create_schem_viz?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_pccp?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_sop_compl?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_author_spec?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_release_cpec?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_project_manager?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_project_owner?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_studio_owner?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_cmm_diz?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_reels_maker?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_diz_assist?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_office_manager?: string;
+  @IsOptional()
+  @IsString()
+  narrow_spec_graph_diz?: string;
 }

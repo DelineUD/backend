@@ -1,5 +1,5 @@
 export interface JwtPayloadProfile {
-  phone: number;
   _id: string;
+  phone: number;
   refreshToken: string;
 }

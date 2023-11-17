@@ -1,10 +1,7 @@
 import { IEvents } from './interfaces/events.interface';
 import { EventsModel } from './models/events.model';
 
-export const eventListMapper = (
-  events: EventsModel[],
-  user: any,
-): IEvents[] => {
+export const eventListMapper = (events: EventsModel[], user: any): IEvents[] => {
   return events.map((event) => ({
     _id: event._id,
     authorId: event.authorId,

@@ -1,6 +1,3 @@
-export interface LoginStatus {
-  phone: number;
-  accessToken: string;
-  vpass: any;
-  refreshToken: string;
+export interface ILoginStatus<T> {
+  data: T;
 }

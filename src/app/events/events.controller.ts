@@ -9,16 +9,17 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventsEntity } from './entities/events.entity';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { EventsService } from './events.service';
 import { IEvents } from './interfaces/events.interface';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
+@ApiTags('Events')
 @ApiBearerAuth('defaultBearerAuth')
-@ApiTags('events')
+@UseGuards(JwtAuthGuard)
 @Controller('events')
-@UseGuards(AuthGuard('jwt'))
 export class EventsController {
   constructor(private EventsService: EventsService) {}
 
@@ -34,8 +35,7 @@ export class EventsController {
   })
   public async create(@Body() createEvent: IEvents): Promise<IEvents> {
     console.log(createEvent.stopDate);
-    const result = await this.EventsService.create(createEvent);
-    return result;
+    return await this.EventsService.create(createEvent);
   }
 
   @Get('list')
@@ -45,8 +45,7 @@ export class EventsController {
     type: [EventsEntity],
   })
   public async gettList(@Request() data: any): Promise<any> {
-    const result = await this.EventsService.getEventsList(data);
-    return result;
+    return await this.EventsService.getEventsList(data);
   }
 
   @Get('by-month')
@@ -60,13 +59,7 @@ export class EventsController {
     @Query('year') year: string,
     @Request() data: any,
   ): Promise<any> {
-    const result = await this.EventsService.getEventsListByMonth(
-      month,
-      year,
-      data.user._id,
-    );
-
-    return result;
+    return await this.EventsService.getEventsListByMonth(month, year, data.user._id);
   }
 
   @Get(':_id')
@@ -75,10 +68,7 @@ export class EventsController {
     description: 'ивент по id',
     type: EventsEntity,
   })
-  async getById(
-    @Param() params: IEvents,
-    @Request() data: any,
-  ): Promise<IEvents> {
+  async getById(@Param() params: IEvents, @Request() data: any): Promise<IEvents> {
     const result = await this.EventsService.getEventById(params, data);
     return result;
   }
@@ -89,13 +79,8 @@ export class EventsController {
     description: 'Пойду',
     type: EventsEntity,
   })
-  async igo(
-    @Param('_id_event') event_id: any,
-    @Request() data: any,
-  ): Promise<IEvents> {
-    const result = await this.EventsService.EventIGo(event_id, data);
-
-    return result;
+  async igo(@Param('_id_event') event_id: any, @Request() data: any): Promise<IEvents> {
+    return await this.EventsService.EventIGo(event_id, data);
   }
 
   @Post(':_id_event/notgo/')
@@ -104,12 +89,8 @@ export class EventsController {
     description: 'Не пойду',
     type: EventsEntity,
   })
-  async notgo(
-    @Param('_id_event') event_id: any,
-    @Request() data: any,
-  ): Promise<IEvents> {
-    const result = await this.EventsService.EventINotGo(event_id, data);
-    return result;
+  async notgo(@Param('_id_event') event_id: any, @Request() data: any): Promise<IEvents> {
+    return await this.EventsService.EventINotGo(event_id, data);
   }
 
   @Post(':_id_event/favor/')
@@ -118,11 +99,7 @@ export class EventsController {
     description: 'Отметить евент звездочкой',
     type: EventsEntity,
   })
-  async favor(
-    @Param('_id_event') event_id: any,
-    @Request() data: any,
-  ): Promise<IEvents> {
-    const result = await this.EventsService.EventFavor(event_id, data);
-    return result;
+  async favor(@Param('_id_event') event_id: any, @Request() data: any): Promise<IEvents> {
+    return await this.EventsService.EventFavor(event_id, data);
   }
 }

@@ -2,7 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { IEvents } from '../interfaces/events.interface';
 
-@Schema({ collection: 'events', timestamps: true })
+@Schema({
+  collection: 'events',
+  timestamps: true,
+})
 export class EventsModel extends Document implements IEvents {
   [x: string]: any;
 

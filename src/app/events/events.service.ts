@@ -18,28 +18,20 @@ export class EventsService {
   ) {}
 
   async getEventsList(initUsr: any): Promise<any> {
-    const _id = initUsr;
     const user = await this.usersService.findOne(initUsr.user._id);
     const events = await this.eventsModel.find({}).sort({ startDate: -1 });
-    const res = eventListMapper(events, user);
-    return res;
+    return eventListMapper(events, user);
   }
 
-  async getEventsListByMonth(
-    month: any,
-    year: any,
-    initUsr: any,
-  ): Promise<any> {
+  async getEventsListByMonth(month: any, year: any, initUsr: any): Promise<unknown> {
     const events = await this.eventsModel.find({}).sort({ startDate: -1 });
 
     const queryDate = new Date(`${year}-${month}-01`);
     const newMonth = parseInt(month, 10);
     const newYaer = parseInt(year, 10);
     const ev_d = events?.filter((i) => {
-      const newStartMonth =
-        i.startDate === undefined ? 1 : i.startDate.getMonth() + 1;
-      const newStartYear =
-        i.startDate === undefined ? 1 : i.startDate.getFullYear();
+      const newStartMonth = i.startDate === undefined ? 1 : i.startDate.getMonth() + 1;
+      const newStartYear = i.startDate === undefined ? 1 : i.startDate.getFullYear();
 
       if (
         (newStartMonth === newMonth && newStartYear === newYaer) ||
@@ -48,8 +40,7 @@ export class EventsService {
         return i;
       }
     });
-    const res = eventListMapper(ev_d, initUsr);
-    return res;
+    return eventListMapper(ev_d, initUsr);
   }
   async create(eventDto: IEvents): Promise<IEvents> {
     const {
@@ -70,13 +61,10 @@ export class EventsService {
     const newStopDate = new Date(stopDate);
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (eventInDb) {
-      throw new HttpException(
-        'This ivent already created ',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('This ivent already created ', HttpStatus.BAD_REQUEST);
     }
 
-    const event: EventsModel = await new this.eventsModel({
+    const event: EventsModel = new this.eventsModel({
       authorId,
       hText,
       hImg,
@@ -134,8 +122,7 @@ export class EventsService {
       bodyText,
     });
     await eventInDb.save();
-    const newEventInDb = await this.eventsModel.findOne({ _id }).exec();
-    return newEventInDb;
+    return await this.eventsModel.findOne({ _id }).exec();
   }
 
   async delete(eventDto: IEvents): Promise<IEvents> {
@@ -166,8 +153,7 @@ export class EventsService {
     if (!eventInDb) {
       throw new EntityNotFoundError('ивент не найден');
     }
-    const res = eventMapper(eventInDb, user);
-    return res;
+    return eventMapper(eventInDb, user);
   }
 
   async EventIGo(event: any, initUser: any): Promise<IEvents> {
@@ -178,16 +164,16 @@ export class EventsService {
     if (!eventInDb) {
       throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
     }
-    let arrGoNotGo = eventInDb.iGo;
-    let checkResult;
-    let checkResultNotGo;
+    const arrGoNotGo = eventInDb.iGo;
+    let checkResult: boolean;
+    let checkResultNotGo: boolean;
 
     if (eventInDb.notGo.includes(user._id.toString())) {
       checkResultNotGo = true;
     }
 
     if (checkResultNotGo === true) {
-      let filteredArray = eventInDb.notGo.filter((f) => {
+      const filteredArray = eventInDb.notGo.filter((f) => {
         return f != user._id.toString();
       });
       await eventInDb.updateOne({
@@ -207,15 +193,12 @@ export class EventsService {
         iGo: arrGoNotGo.unshift(user._id),
       });
       await eventInDb.save();
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
 
     if (checkResult === true) {
-      let filteredArray = arrGoNotGo.filter((f) => {
+      const filteredArray = arrGoNotGo.filter((f) => {
         return f != user._id.toString();
       });
 
@@ -224,11 +207,8 @@ export class EventsService {
       });
       await eventInDb.save();
 
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
   }
 
@@ -240,15 +220,15 @@ export class EventsService {
     if (!eventInDb) {
       throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
     }
-    let arrGoNotGo = eventInDb.notGo;
-    let checkResult;
-    let checkResultItGo;
+    const arrGoNotGo = eventInDb.notGo;
+    let checkResult: boolean;
+    let checkResultItGo: boolean;
 
     if (eventInDb.iGo.includes(user._id.toString())) {
       checkResultItGo = true;
     }
     if (checkResultItGo === true) {
-      let filteredArray = eventInDb.iGo.filter((f) => {
+      const filteredArray = eventInDb.iGo.filter((f) => {
         return f != user._id.toString();
       });
       await eventInDb.updateOne({
@@ -263,11 +243,8 @@ export class EventsService {
         notGo: arrGoNotGo.unshift(user._id),
       });
       await eventInDb.save();
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
 
     arrGoNotGo.forEach((item) => {
@@ -282,15 +259,12 @@ export class EventsService {
       });
       await eventInDb.save();
 
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
 
     if (checkResult === true) {
-      let filteredArray = arrGoNotGo.filter((f) => {
+      const filteredArray = arrGoNotGo.filter((f) => {
         return f != user._id.toString();
       });
 
@@ -299,11 +273,8 @@ export class EventsService {
       });
       await eventInDb.save();
 
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
   }
 
@@ -315,19 +286,16 @@ export class EventsService {
     if (!eventInDb) {
       throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
     }
-    let arrGoNotGo = eventInDb.favor;
-    let checkResult;
+    const arrGoNotGo = eventInDb.favor;
+    let checkResult: boolean;
 
     if (arrGoNotGo.length === 0) {
       await eventInDb.updateOne({
         notGo: arrGoNotGo.unshift(user._id),
       });
       await eventInDb.save();
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
 
     arrGoNotGo.forEach((item) => {
@@ -342,15 +310,12 @@ export class EventsService {
       });
       await eventInDb.save();
 
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
+      return eventMapper(newEventInDb, user);
     }
 
     if (checkResult === true) {
-      let filteredArray = arrGoNotGo.filter((f) => {
+      const filteredArray = arrGoNotGo.filter((f) => {
         return f != user._id.toString();
       });
 
@@ -359,12 +324,9 @@ export class EventsService {
       });
       await eventInDb.save();
 
-      const newEventInDb = await this.eventsModel
-        .findOne({ _id: event })
-        .exec();
+      const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
-      const res = eventMapper(newEventInDb, user);
-      return res;
+      return eventMapper(newEventInDb, user);
     }
   }
 }

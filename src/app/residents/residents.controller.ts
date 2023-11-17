@@ -22,7 +22,6 @@ import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { UserModel } from '../users/models/user.model';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
@@ -49,7 +48,10 @@ export class ResidentsController {
     description: 'Резидент по айди',
     type: Resident,
   })
-  async getById(@Param() params: GetResidentParamsDto): Promise<IResident> {
+  async getById(
+    @Param()
+    params: GetResidentParamsDto,
+  ): Promise<IResident> {
     return await this.residentsService.getResidentById(params);
   }
 
@@ -57,7 +59,7 @@ export class ResidentsController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: '/var/www/html/teststand',
+        destination: process.env.TEST_STAND_PATH,
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,
@@ -70,15 +72,13 @@ export class ResidentsController {
   })
   async avatarUpload(
     @Headers() data: IResidentAuth,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile()
+    file: Express.Multer.File,
   ): Promise<IResidentAuth> {
-    let result: UserModel;
     if (file !== undefined) {
-      result = await this.residentsService.upAvatar(data, file.filename);
+      return await this.residentsService.upAvatar(data, file.filename);
     } else {
       throw new HttpException('No file', HttpStatus.BAD_REQUEST);
     }
-
-    return result;
   }
 }

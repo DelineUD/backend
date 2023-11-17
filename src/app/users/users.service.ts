@@ -31,7 +31,7 @@ export class UsersService {
   }
 
   async findByLogin({ phone, password }: LoginUserDto): Promise<UserDto> {
-    const user = await this.userModel.findOne({ phone, password }).exec();
+    const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
       throw new EntityNotFoundError('User not found');
@@ -75,13 +75,10 @@ export class UsersService {
   }
 
   async findByPhone(phone: number): Promise<UserDto> {
-    console.log(phone);
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
-      throw new EntityNotFoundError(
-        `Пользователь с телефоном ${phone} не найден`,
-      );
+      throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
     }
 
     return toUserDto(user);
@@ -112,10 +109,7 @@ export class UsersService {
 
   async deleteProperty(userId: Types.ObjectId | string, prop: object) {
     try {
-      const result = await this.userModel.updateOne(
-        { _id: userId },
-        { $unset: prop },
-      );
+      const result = await this.userModel.updateOne({ _id: userId }, { $unset: prop });
 
       if (!result) {
         throw new Error(`Failed to delete ${prop}`);

@@ -36,10 +36,7 @@ export const postMapper = (post: PostModel, user: any): IPosts => {
   };
 };
 
-export const commentItemMapper = (
-  postscomments: PostCommentsModel,
-  commenetAuthor: UserModel,
-) => {
+export const commentItemMapper = (postscomments: PostCommentsModel, commenetAuthor: UserModel) => {
   return {
     authorId: commenetAuthor._id,
     authorAvatar: commenetAuthor.avatar,

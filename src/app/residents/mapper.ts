@@ -70,11 +70,8 @@ const narrowSpecFieldsOfUser: string[] = [
   'narrow_spec_graph_diz',
 ]; // Narrow specializations fields of user dto
 
-const getItemWithLabel = (
-  user: UserModel,
-  fieldName: string,
-  label: string,
-): ItemLabel[] => {
+// eslint-disable-next-line
+const getItemWithLabel = (user: UserModel, fieldName: string, label: string): ItemLabel[] => {
   return user[fieldName]
     ? [
         {

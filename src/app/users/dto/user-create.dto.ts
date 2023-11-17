@@ -5,7 +5,9 @@ export class CreateUserDto {
   // Personal Information
   @IsEmail()
   @IsString()
-  @ApiProperty({ default: 'email@gmail.ru' })
+  @ApiProperty({
+    default: 'email@gmail.ru',
+  })
   readonly email: string;
   @IsPhoneNumber('RU')
   @ApiProperty({ default: 79992456800 })

@@ -24,20 +24,13 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async getPostsList(
-    initUsr: any,
-    search: any,
-    lastIndex: string,
-    group: any,
-  ): Promise<any> {
+  async getPostsList(initUsr: any, search: any, lastIndex: string, group: any): Promise<any> {
     let sorted;
     const user = await this.usersService.findOne(initUsr.user._id);
     if (search !== undefined && lastIndex === undefined) {
       const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
       if (group === undefined) {
-        sorted = postsFind.filter((el) =>
-          el.pText.toLowerCase().includes(search.toLowerCase()),
-        );
+        sorted = postsFind.filter((el) => el.pText.toLowerCase().includes(search.toLowerCase()));
       }
       if (group !== undefined) {
         sorted = postsFind.filter(
@@ -52,16 +45,13 @@ export class PostsService {
       if (sortedLimit.length < 1) {
         [];
       }
-      const res = postListMapper(sortedLimit, user);
-      return res;
+      return postListMapper(sortedLimit, user);
     }
 
     if (search !== undefined && lastIndex !== undefined) {
       const postsFind = await this.postModel.find({}).sort({ createdAt: -1 });
       if (group === undefined) {
-        sorted = postsFind.filter((el) =>
-          el.pText.toLowerCase().includes(search.toLowerCase()),
-        );
+        sorted = postsFind.filter((el) => el.pText.toLowerCase().includes(search.toLowerCase()));
       }
       if (group !== undefined) {
         sorted = postsFind.filter(
@@ -100,10 +90,7 @@ export class PostsService {
     //красавчик
     if (lastIndex === undefined && search === undefined) {
       if (group === undefined) {
-        const postsStart = await this.postModel
-          .find({})
-          .limit(10)
-          .sort({ createdAt: -1 });
+        const postsStart = await this.postModel.find({}).limit(10).sort({ createdAt: -1 });
         const res = postListMapper(postsStart, user);
         return res;
       }
@@ -121,7 +108,9 @@ export class PostsService {
     if (lastIndex !== undefined && search === undefined) {
       if (group === undefined) {
         const sposts = await this.postModel
-          .find({ _id: { $lt: lastIndex } })
+          .find({
+            _id: { $lt: lastIndex },
+          })
           .limit(10)
           .sort({ createdAt: -1 });
         if (sposts) {
@@ -133,7 +122,10 @@ export class PostsService {
 
       if (group !== undefined) {
         const sposts = await this.postModel
-          .find({ _id: { $lt: lastIndex }, group: group })
+          .find({
+            _id: { $lt: lastIndex },
+            group: group,
+          })
           .limit(10)
           .sort({ createdAt: -1 });
         if (sposts) {
@@ -146,25 +138,12 @@ export class PostsService {
   }
 
   async create(postDto: PostDto): Promise<PostDto> {
-    const {
-      _id,
-      createdAt,
-      updatedAt,
-      authorId,
-      pText,
-      stick,
-      pImg,
-      likes,
-      views,
-      group,
-    } = postDto;
+    const { _id, createdAt, updatedAt, authorId, pText, stick, pImg, likes, views, group } =
+      postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (postInDb) {
-      throw new HttpException(
-        'This post already created ',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('This post already created ', HttpStatus.BAD_REQUEST);
     }
     const post: PostModel = await new this.postModel({
       authorId,
@@ -310,7 +289,7 @@ export class PostsService {
     if (!postInDb) {
       throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
     }
-    let arrLikes = postInDb.likes;
+    const arrLikes = postInDb.likes;
 
     let checkResult;
     if (arrLikes.length === 0) {
@@ -340,7 +319,7 @@ export class PostsService {
     }
 
     if (checkResult === true) {
-      let filteredArray = arrLikes.filter((f) => {
+      const filteredArray = arrLikes.filter((f) => {
         return f != user._id.toString();
       });
       const count = filteredArray.length;
@@ -386,7 +365,7 @@ export class PostsService {
     return comment;
   }
 
-  async CommentList(paramPostID: IcPosts, initUser: any): Promise<any> {
+  async CommentList(paramPostID: IcPosts): Promise<unknown> {
     const { _id } = paramPostID;
     const postInDb = await this.postModel.findOne({ paramPostID }).exec();
 
@@ -396,34 +375,31 @@ export class PostsService {
 
     const comments = await this.postCommentsModel.find({ postID: _id });
     // const { authorId } = comments;
-    const res = Promise.all(
+    return Promise.all(
       comments
         .map(async (comment) => {
-          const commenetAuthor = await this.usersService.findOne({
+          const commentAuthor = await this.usersService.findOne({
             _id: comment.authorId,
           });
-          if (!commenetAuthor) {
+          if (!commentAuthor) {
             return null;
           }
-          return commentItemMapper(comment, commenetAuthor);
+          return commentItemMapper(comment, commentAuthor);
         })
         .filter(Boolean),
     );
-    return res;
   }
 
-  async Commentliked(post: any, comment: any, initUser: any): Promise<IcPosts> {
+  async CommentLiked(post: any, comment: any, initUser: any): Promise<IcPosts> {
     const user = await this.usersService.findOne(initUser);
 
-    const commentInDb = await this.postCommentsModel
-      .findOne({ _id: comment })
-      .exec();
+    const commentInDb = await this.postCommentsModel.findOne({ _id: comment }).exec();
     console.log(commentInDb);
     if (!commentInDb) {
       throw new EntityNotFoundError(`Коммент с id: ${comment}, не найден`);
     }
-    let arrLikes = commentInDb.likes;
-    let checkResult;
+    const arrLikes = commentInDb.likes;
+    let checkResult: boolean;
 
     if (arrLikes.length === 0) {
       await commentInDb.updateOne({
@@ -431,10 +407,7 @@ export class PostsService {
         countLikes: 1,
       });
       await commentInDb.save();
-      const newCommentInDb = await this.postCommentsModel
-        .findOne({ _id: comment })
-        .exec();
-      return newCommentInDb;
+      return await this.postCommentsModel.findOne({ _id: comment }).exec();
     }
 
     arrLikes.forEach((item) => {
@@ -449,14 +422,11 @@ export class PostsService {
         countLikes: commentInDb.countLikes + 1,
       });
       await commentInDb.save();
-      const newCommentInDb = await this.postCommentsModel
-        .findOne({ _id: comment })
-        .exec();
-      return newCommentInDb;
+      return await this.postCommentsModel.findOne({ _id: comment }).exec();
     }
 
     if (checkResult === true) {
-      let filteredArray = arrLikes.filter((f) => {
+      const filteredArray = arrLikes.filter((f) => {
         return f != user._id.toString();
       });
       const count = filteredArray.length;
@@ -465,9 +435,7 @@ export class PostsService {
         countLikes: count,
       });
       await commentInDb.save();
-      const newCommentInDb = await this.postCommentsModel
-        .findOne({ _id: comment })
-        .exec();
+      const newCommentInDb = await this.postCommentsModel.findOne({ _id: comment }).exec();
       return {
         _id: newCommentInDb._id,
         likes: newCommentInDb.likes,
@@ -476,11 +444,7 @@ export class PostsService {
     }
   }
 
-  async updateComment(
-    idComment: any,
-    updateComment: IcPosts,
-    initUser: any,
-  ): Promise<IcPosts> {
+  async updateComment(idComment: any, updateComment: IcPosts, initUser: any): Promise<IcPosts> {
     const { _id, cText, cImg } = updateComment;
 
     const postInDb = await this.postCommentsModel.findOne({ _id }).exec();
@@ -499,20 +463,11 @@ export class PostsService {
       cImg,
     });
     await postInDb.save();
-    const newPostInDb = await this.postCommentsModel
-      .findOne({ idComment })
-      .exec();
-    return newPostInDb;
+    return await this.postCommentsModel.findOne({ idComment }).exec();
   }
 
-  async deleteComment(
-    idComment: any,
-    initUser: any,
-    idPost: any,
-  ): Promise<any> {
-    const commentInDb = await this.postCommentsModel
-      .findOne({ _id: idComment })
-      .exec();
+  async deleteComment(idComment: any, initUser: any, idPost: any): Promise<any> {
+    const commentInDb = await this.postCommentsModel.findOne({ _id: idComment }).exec();
 
     if (!commentInDb) {
       throw new EntityNotFoundError('не найден пост для удаления');
@@ -549,9 +504,9 @@ export class PostsService {
     if (!postInDb) {
       throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
     }
-    let arrViews = postInDb.views;
+    const arrViews = postInDb.views;
 
-    let checkResult;
+    let checkResult: boolean;
     if (arrViews.length === 0) {
       await postInDb.updateOne({
         views: arrViews.unshift(user._id),

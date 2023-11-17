@@ -166,5 +166,7 @@ export const toUserDto = (data: UserModel): UserDto => {
     narrow_spec_diz_assist,
     narrow_spec_office_manager,
     narrow_spec_graph_diz,
-  } as UserDto & { _id: Types.ObjectId };
+  } as UserDto & {
+    _id: Types.ObjectId;
+  };
 };

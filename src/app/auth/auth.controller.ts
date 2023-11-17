@@ -14,17 +14,18 @@ import {
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
-import { RefreshTokenDto } from './dto/refreshToken.dto';
-import { checkUserExists } from './interfaces/checkUserExists.interface';
-import { IJwtResponse } from './interfaces/loginJwt.interface';
-import { ILoginStatus } from './interfaces/loginStatus.interface';
+import { GetMeDto } from './dto/get-me.dto';
+import { checkUserExists } from './interfaces/check-user-exists.interface';
+import { IJwtResponse } from './interfaces/login-jwt.interface';
+import { ILoginStatus } from './interfaces/login-status.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt.guard';
-import { ILoginSmsResponse } from './interfaces/loginSms.interface';
-import { ISensSmsResponse } from './interfaces/sendSms.interface';
+import { ILoginSmsResponse } from './interfaces/login-sms.interface';
+import { ISensSmsResponse } from './interfaces/send-sms.interface';
 import { SendSmsDto } from './dto/send-sms.dto';
+import { GetNewTokensDto } from './dto/get-new-tokens.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,11 +35,10 @@ export class AuthController {
   @UsePipes(new ValidationPipe())
   @Post('register-or-update')
   public async register(
-    @Query() createUserDto: CreateUserDto,
+    @Query()
+    createUserDto: CreateUserDto,
   ): Promise<RegistrationStatus> {
-    const result: RegistrationStatus = await this.authService.register(
-      createUserDto,
-    );
+    const result: RegistrationStatus = await this.authService.register(createUserDto);
 
     if (!result.success) {
       throw new HttpException(result.message, HttpStatus.BAD_REQUEST);
@@ -49,43 +49,34 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post('login')
-  public async login(
-    @Body() loginUserDto: LoginUserDto,
-  ): Promise<ILoginStatus<IJwtResponse>> {
+  public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
     return await this.authService.login(loginUserDto);
   }
 
   @Post('check-user-exists')
-  public async checkUserExists(
-    @Body() loginUserDto: LoginUserDto,
-  ): Promise<checkUserExists> {
+  public async checkUserExists(@Body() loginUserDto: LoginUserDto): Promise<checkUserExists> {
     return await this.authService.checkUserExists(loginUserDto);
   }
 
   @Post('send-sms')
-  public async sendSms(
-    @Body() sendSmsDto: SendSmsDto,
-  ): Promise<ISensSmsResponse> {
+  public async sendSms(@Body() sendSmsDto: SendSmsDto): Promise<ISensSmsResponse> {
     return await this.authService.sendSms(sendSmsDto);
   }
 
   @Get('login-sms')
-  public async loginSms(
-    @Headers() data: LoginSmsDto,
-  ): Promise<ILoginStatus<ILoginSmsResponse>> {
+  public async loginSms(@Headers() data: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
     return await this.authService.loginSms(data);
   }
 
   @Post('refresh')
-  async getNewTokens(@Headers() data: RefreshTokenDto) {
-    console.log(data);
+  async getNewTokens(@Body() data: GetNewTokensDto) {
     return this.authService.getNewTokens(data);
   }
 
   @Get('profile')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
-  async getMe(@Headers() data: RefreshTokenDto) {
+  async getMe(@Headers() data: GetMeDto) {
     return this.authService.getMe(data);
   }
 }

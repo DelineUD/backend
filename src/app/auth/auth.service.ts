@@ -9,25 +9,27 @@ import HttpStatusCode from 'http-status-typed';
 import { SMSService } from '../../apis/index';
 import { JwtService } from '@nestjs/jwt';
 
-import { checkUserExists } from './interfaces/checkUserExists.interface';
-import { ILoginStatus } from './interfaces/loginStatus.interface';
+import { checkUserExists } from './interfaces/check-user-exists.interface';
+import { ILoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
 import { UserDto } from '../users/dto/user.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
-import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { GetMeDto } from './dto/get-me.dto';
 
 import { UsersService } from '../users/users.service';
-import { IJwtResponse } from './interfaces/loginJwt.interface';
+import { IJwtResponse } from './interfaces/login-jwt.interface';
 import generateOTPCode from '../shared/utils/generateOTPCode';
-import { ILoginSmsResponse } from './interfaces/loginSms.interface';
-import { ISensSmsResponse } from './interfaces/sendSms.interface';
+import { ILoginSmsResponse } from './interfaces/login-sms.interface';
+import { ISensSmsResponse } from './interfaces/send-sms.interface';
 import { SendSmsDto } from './dto/send-sms.dto';
 import { UserModel } from '../users/models/user.model';
 import { LoginSmsDto } from './dto/login-sms.dto';
-import { IJwtPayload } from './interfaces/JwtPayload.interface';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
+import { IAuthToken } from './interfaces/auth-tokens.interface';
+import { GetNewTokensDto } from './dto/get-new-tokens.dto';
 
 @Injectable()
 export class AuthService {
@@ -57,7 +59,6 @@ export class AuthService {
     const user = await this.usersService.findByLogin(loginUserDto);
     const token = this._createToken(user);
     return {
-      phone: user.phone,
       data: { ...token },
     };
   }
@@ -70,10 +71,7 @@ export class AuthService {
     return user;
   }
 
-  private _createToken({ phone }: UserDto): {
-    accessToken: string;
-    refreshToken: string;
-  } {
+  private _createToken({ phone }: UserDto): IAuthToken {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
       expiresIn: '30d',
@@ -100,7 +98,7 @@ export class AuthService {
     const user = await this.usersService.findByPhone(phone);
 
     if (!user) {
-      throw new UnauthorizedException(`User with phone: ${phone} not found!`);
+      throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
     }
 
     const otpCode = generateOTPCode(4);
@@ -117,64 +115,57 @@ export class AuthService {
     };
   }
 
-  async loginSms({
-    authorization,
-  }: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
+  async loginSms({ authorization }: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
     if (!authorization) {
       throw new BadRequestException('Invalid authorization code or expired!');
     }
 
-    const user = await this.usersService.findByPayload({
-      vPass: authorization,
-    });
+    const data = authorization.split(' ');
+    const payload: { phone: number; vPass: number } = { phone: +data[0], vPass: +data[1] };
+
+    const user = await this.usersService.findByPayload(payload);
 
     if (!user) {
       throw new UnauthorizedException('Invalid authorization code!');
     }
 
     const tokens = this._createToken(user);
-    await this.usersService.deleteProperty(user._id, { vPass: authorization });
+    await this.usersService.deleteProperty(user._id, { vPass: payload.vPass });
 
     return {
-      phone: user.phone,
       data: { ...tokens },
     };
   }
 
-  async getNewTokens({ refreshtoken }: RefreshTokenDto) {
-    if (!refreshtoken) throw new UnauthorizedException('Please sign in!');
+  async getNewTokens({ refreshToken }: GetNewTokensDto) {
+    if (!refreshToken) throw new UnauthorizedException('Please sign in!');
 
     try {
-      await this.jwtService.verifyAsync(refreshtoken);
+      await this.jwtService.verifyAsync(refreshToken);
     } catch (err) {
-      throw new UnauthorizedException(
-        'Invalid token or expired! Please Login again!',
-      );
+      throw new UnauthorizedException('Invalid token or expired! Please Login again!');
     }
-    const result = await this.jwtService.verifyAsync(refreshtoken);
-    const user = await this.usersService.findByPhone(result);
+    const { phone }: IJwtPayload = await this.jwtService.verifyAsync(refreshToken);
+    const user = await this.usersService.findByPhone(phone);
 
-    const token = this._createToken(user);
+    const tokens = this._createToken(user);
     return {
-      result,
-      ...token,
+      ...tokens,
     };
   }
 
-  async getMe({ authorization }: RefreshTokenDto) {
-    const noBearer = authorization.split(' ');
+  async getMe({ authorization }: GetMeDto) {
     if (!authorization) throw new UnauthorizedException('Please sign in!');
 
+    const noBearer = authorization.split(' ')[1];
+
     try {
-      await this.jwtService.verifyAsync(noBearer[1]);
+      await this.jwtService.verifyAsync(noBearer);
     } catch (err) {
-      console.log(noBearer[1]);
       throw new UnauthorizedException('Invalid token or expired!');
     }
 
-    const { phone }: IJwtPayload = await this.jwtService.verifyAsync(
-      noBearer[1],
-    );
+    const { phone }: IJwtPayload = await this.jwtService.verifyAsync(noBearer);
     const user = await this.usersService.findByPhone(phone);
 
     return {

@@ -12,7 +12,7 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiResponse } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
-import { editFileName, imageFileFilter } from '../upload/upload.service';
+import { editFileName, imageFileFilter } from './upload.service';
 import { UploadImgEntity } from './entities/upload-img.entity';
 
 @Controller('upload')
@@ -27,13 +27,15 @@ export class UploadController {
       fileFilter: imageFileFilter,
     }),
   )
-  async uploadedFile(@UploadedFile() file) {
-    const response = {
+  async uploadedFile(
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    return {
       originalname: file.originalname,
       filename: file.filename,
-      url: `www.ya.ru/${file.filename}`,
+      url: String(process.env.YA_URL + file.filename),
     };
-    return response;
   }
 
   @Post('upload-images')
@@ -51,13 +53,16 @@ export class UploadController {
       fileFilter: imageFileFilter,
     }),
   )
-  async uploadMultipleFiles(@UploadedFiles() files) {
+  async uploadMultipleFiles(
+    @UploadedFiles()
+    files: Express.Multer.File[],
+  ) {
     const response = [];
     files.forEach((file) => {
       const fileReponse = {
         originalname: file.originalname,
         filename: file.filename,
-        url: `https://teststand.udmobile.app:81/${file.filename}`,
+        url: String(process.env.TEST_STAND + file.filename),
       };
       response.push(fileReponse);
     });
@@ -66,6 +71,8 @@ export class UploadController {
 
   @Get(':imgpath')
   seeUploadedFile(@Param('imgpath') image, @Res() res) {
-    return res.sendFile(image, { root: './files' });
+    return res.sendFile(image, {
+      root: './files',
+    });
   }
 }

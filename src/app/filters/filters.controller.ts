@@ -5,8 +5,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 @UseGuards(JwtAuthGuard)
 export class FiltersController {
   @Get('posts')
-  public async getList(@Request() data: any): Promise<any> {
-    const result = [
+  public async getList(@Request() data: any): Promise<unknown> {
+    console.log(data);
+    return [
       {
         name: 'group',
         values: [
@@ -26,6 +27,5 @@ export class FiltersController {
         multi: false,
       },
     ];
-    return result;
   }
 }

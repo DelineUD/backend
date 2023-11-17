@@ -2,7 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { IcPosts } from '../interfaces/posts.comments.interface';
 
-@Schema({ collection: 'postscomments', timestamps: true })
+@Schema({
+  collection: 'postscomments',
+  timestamps: true,
+})
 export class PostCommentsModel extends Document implements IcPosts {
   [x: string]: any;
   @Prop({ required: true })
@@ -30,5 +33,4 @@ export class PostCommentsModel extends Document implements IcPosts {
   isLiked?: boolean;
 }
 
-export const PostCommentsSchema =
-  SchemaFactory.createForClass(PostCommentsModel);
+export const PostCommentsSchema = SchemaFactory.createForClass(PostCommentsModel);

@@ -20,7 +20,7 @@ import { IJwtResponse } from './interfaces/login-jwt.interface';
 import { ILoginStatus } from './interfaces/login-status.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { ILoginSmsResponse } from './interfaces/login-sms.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
@@ -63,14 +63,18 @@ export class AuthController {
     return await this.authService.sendSms(sendSmsDto);
   }
 
-  @Get('login-sms')
-  public async loginSms(@Headers() data: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
-    return await this.authService.loginSms(data);
-  }
-
   @Post('refresh')
   async getNewTokens(@Body() data: GetNewTokensDto) {
     return this.authService.getNewTokens(data);
+  }
+
+  @Get('login-sms')
+  @ApiHeader({
+    name: 'User-Login-Data',
+    description: 'User-Login-Data: phone code',
+  })
+  public async loginSms(@Headers() headers: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
+    return await this.authService.loginSms(headers);
   }
 
   @Get('profile')

@@ -102,7 +102,7 @@ export class AuthService {
     }
 
     const otpCode = generateOTPCode(4);
-    const msg = `Код авторизации: ${otpCode}.`;
+    const msg = `Код авторизации: ${otpCode}`;
     const { status, status_code } = await SMSService.send(user.phone, msg);
 
     if (status_code === 100) {
@@ -115,18 +115,22 @@ export class AuthService {
     };
   }
 
-  async loginSms({ authorization }: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
-    if (!authorization) {
-      throw new BadRequestException('Invalid authorization code or expired!');
+  async loginSms(headers: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
+    const loginData = headers['user-login-data'].split(' ');
+
+    if (!loginData || loginData.length < 2) {
+      throw new BadRequestException('Invalid login data: is empty or incorrect!');
     }
 
-    const data = authorization.split(' ');
-    const payload: { phone: number; vPass: number } = { phone: +data[0], vPass: +data[1] };
+    const payload: { phone: number; vPass: number } = {
+      phone: +loginData[0],
+      vPass: +loginData[1],
+    };
 
     const user = await this.usersService.findByPayload(payload);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid authorization code!');
+      throw new UnauthorizedException('Invalid login data!');
     }
 
     const tokens = this._createToken(user);

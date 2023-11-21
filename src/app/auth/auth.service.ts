@@ -5,31 +5,31 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import HttpStatusCode from 'http-status-typed';
 import { SMSService } from '../../apis/index';
-import { JwtService } from '@nestjs/jwt';
 
 import { checkUserExists } from './interfaces/check-user-exists.interface';
 import { ILoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 
-import { UserDto } from '../users/dto/user.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
+import { UserDto } from '../users/dto/user.dto';
 import { GetMeDto } from './dto/get-me.dto';
 
-import { UsersService } from '../users/users.service';
-import { IJwtResponse } from './interfaces/login-jwt.interface';
 import generateOTPCode from '../shared/utils/generateOTPCode';
+import { UserModel } from '../users/models/user.model';
+import { UsersService } from '../users/users.service';
+import { GetNewTokensDto } from './dto/get-new-tokens.dto';
+import { LoginSmsDto } from './dto/login-sms.dto';
+import { SendSmsDto } from './dto/send-sms.dto';
+import { IAuthToken } from './interfaces/auth-tokens.interface';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
+import { IJwtResponse } from './interfaces/login-jwt.interface';
 import { ILoginSmsResponse } from './interfaces/login-sms.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { SendSmsDto } from './dto/send-sms.dto';
-import { UserModel } from '../users/models/user.model';
-import { LoginSmsDto } from './dto/login-sms.dto';
-import { IJwtPayload } from './interfaces/jwt-payload.interface';
-import { IAuthToken } from './interfaces/auth-tokens.interface';
-import { GetNewTokensDto } from './dto/get-new-tokens.dto';
 
 @Injectable()
 export class AuthService {
@@ -130,7 +130,7 @@ export class AuthService {
     const user = await this.usersService.findByPayload(payload);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid login data!');
+      throw new BadRequestException('Invalid login data!');
     }
 
     const tokens = this._createToken(user);

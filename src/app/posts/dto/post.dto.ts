@@ -9,8 +9,6 @@ export class PostDto {
 
   pText?: string;
 
-  stick?: boolean;
-
   pImg?: Array<string>;
 
   likes?: Array<string>;

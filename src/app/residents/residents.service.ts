@@ -52,7 +52,7 @@ export class ResidentsService {
     const userInDb = await this.userModel.findOne({ _id }).exec();
 
     await userInDb.updateOne({
-      avatar: `${process.env.TEST_STAND}/${file}`,
+      avatar: `${process.env.STATIC_PATH}/${file}`,
     });
     await userInDb.save();
     return await this.userModel.findOne({ _id }).exec();

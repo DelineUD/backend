@@ -90,7 +90,7 @@ export class PostsController {
     const result: UpdatePostDto = await this.PostsService.update(updatePostDto);
 
     if (!result) {
-      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
     }
 
     return result;
@@ -113,7 +113,7 @@ export class PostsController {
     const result: DeletePostDto = await this.PostsService.delete(deletePostDto);
 
     if (!result) {
-      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
     }
 
     return result;
@@ -122,7 +122,7 @@ export class PostsController {
   @Get(':_id')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'пост по id',
+    description: 'Пост по id',
     type: PostEntity,
   })
   async getById(
@@ -259,7 +259,7 @@ export class PostsController {
     );
 
     if (!result) {
-      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
     }
 
     return result;
@@ -288,7 +288,7 @@ export class PostsController {
     );
 
     if (!result) {
-      throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
     }
 
     return result;

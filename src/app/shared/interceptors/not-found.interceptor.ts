@@ -18,7 +18,7 @@ export class NotFoundInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) => {
         if (error instanceof EntityNotFoundError) {
-          throw new NotFoundException(error.message);
+          throw new NotFoundException(`Не найдено ${error.message}!`);
         } else {
           throw error;
         }

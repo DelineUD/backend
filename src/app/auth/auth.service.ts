@@ -68,7 +68,7 @@ export class AuthService {
   async validateUser(payload: JwtPayload): Promise<UserDto> {
     const user = await this.usersService.findByPayload(payload as UserModel);
     if (!user) {
-      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Невалидный токен', HttpStatus.UNAUTHORIZED);
     }
     return user;
   }
@@ -121,14 +121,12 @@ export class AuthService {
     const loginData = headers['user-login-data'].split(' ');
 
     if (!loginData || loginData.length < 2) {
-      throw new BadRequestException('Invalid login data: is empty or incorrect!');
+      throw new BadRequestException('Неверные данные для входа: пусто или неверно!');
     }
     const payload: { phone: number; vPass: number } = {
       phone: +loginData[0],
       vPass: +loginData[1],
     };
-
-    console.log(payload);
 
     const user = await this.usersService.findByPayload({ phone: payload.phone });
     if ((!user && user.vPass !== payload.vPass) || payload.vPass !== 1221) {
@@ -144,12 +142,12 @@ export class AuthService {
   }
 
   async getNewTokens({ refreshToken }: GetNewTokensDto) {
-    if (!refreshToken) throw new UnauthorizedException('Please sign in!');
+    if (!refreshToken) throw new UnauthorizedException('Пожалуйста авторизуйтесь!');
 
     try {
       await this.jwtService.verifyAsync(refreshToken);
     } catch (err) {
-      throw new UnauthorizedException('Invalid token or expired! Please Login again!');
+      throw new UnauthorizedException('Неверный токен или срок его действия истек! Пожалуйста, авторизуйтесь снова!');
     }
     const { phone }: IJwtPayload = await this.jwtService.verifyAsync(refreshToken);
     const user = await this.usersService.findByPhone(phone);
@@ -161,14 +159,14 @@ export class AuthService {
   }
 
   async getMe({ authorization }: GetMeDto) {
-    if (!authorization) throw new UnauthorizedException('Please sign in!');
+    if (!authorization) throw new UnauthorizedException('Пожалуйста авторизуйтесь!');
 
     const noBearer = authorization.split(' ')[1];
 
     try {
       await this.jwtService.verifyAsync(noBearer);
     } catch (err) {
-      throw new UnauthorizedException('Invalid token or expired!');
+      throw new UnauthorizedException('Неверный токен или срок его действия истек!');
     }
 
     const { phone }: IJwtPayload = await this.jwtService.verifyAsync(noBearer);

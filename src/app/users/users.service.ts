@@ -34,13 +34,13 @@ export class UsersService {
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
-      throw new EntityNotFoundError('User not found');
+      throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
     }
 
     const areEqual = await compare(password, user.password);
 
     if (!areEqual) {
-      throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Неверные учетные данные!', HttpStatus.BAD_REQUEST);
     }
 
     return toUserDto(user);
@@ -78,7 +78,7 @@ export class UsersService {
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
-      throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
+      throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
     }
 
     return toUserDto(user);
@@ -112,12 +112,12 @@ export class UsersService {
       const result = await this.userModel.updateOne({ _id: userId }, { $unset: prop });
 
       if (!result) {
-        throw new Error(`Failed to delete ${prop}`);
+        throw new Error(`Пользователь с id: ${userId} не найден!`);
       }
 
       return true;
     } catch (err) {
-      throw new Error(`Error while delete property: ${err.message}`);
+      throw new Error(`Ошибка при удалении: ${err.message}!`);
     }
   }
 }

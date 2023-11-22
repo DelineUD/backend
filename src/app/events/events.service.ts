@@ -61,7 +61,7 @@ export class EventsService {
     const newStopDate = new Date(stopDate);
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (eventInDb) {
-      throw new HttpException('This ivent already created ', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Это событие уже существует!', HttpStatus.CONFLICT);
     }
 
     const event: EventsModel = new this.eventsModel({
@@ -103,11 +103,11 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Ивен с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Событие с id: ${_id} не найдено!`);
     }
 
     if (authorId !== eventInDb.authorId) {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('У вас нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
     await eventInDb.updateOne({
@@ -130,19 +130,19 @@ export class EventsService {
 
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (!eventInDb) {
-      throw new EntityNotFoundError('не найден ивент для удаления');
+      throw new EntityNotFoundError('Событие не найдено!');
     } else if (authorId === eventInDb.authorId) {
       await eventInDb.deleteOne({
         _id,
       });
 
       if (eventInDb) {
-        throw new HttpException('OK Deleted', HttpStatus.NO_CONTENT);
+        throw new HttpException('Успешно удалено!', HttpStatus.NO_CONTENT);
       }
 
       return eventInDb;
     } else {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('У вас нет доступа!', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -151,7 +151,7 @@ export class EventsService {
     const user = await this.usersService.findOne(initUsr.user._id);
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (!eventInDb) {
-      throw new EntityNotFoundError('ивент не найден');
+      throw new EntityNotFoundError(`Событие с id: ${_id} не найдено!`);
     }
     return eventMapper(eventInDb, user);
   }
@@ -162,7 +162,7 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
+      throw new EntityNotFoundError(`Событие с id: ${event} не найдено!`);
     }
     const arrGoNotGo = eventInDb.iGo;
     let checkResult: boolean;
@@ -218,7 +218,7 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
+      throw new EntityNotFoundError(`Событие с id: ${event} не найдено!`);
     }
     const arrGoNotGo = eventInDb.notGo;
     let checkResult: boolean;
@@ -235,7 +235,6 @@ export class EventsService {
         iGo: filteredArray,
       });
       await eventInDb.save();
-      console.log('da');
     }
 
     if (arrGoNotGo.length === 0) {
@@ -284,7 +283,7 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Ивент с id: ${event}, не найден`);
+      throw new EntityNotFoundError(`Событие с id: ${event} не найдено!`);
     }
     const arrGoNotGo = eventInDb.favor;
     let checkResult: boolean;

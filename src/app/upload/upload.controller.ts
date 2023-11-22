@@ -62,7 +62,7 @@ export class UploadController {
       const fileReponse = {
         originalname: file.originalname,
         filename: file.filename,
-        url: String(process.env.STATIC_PATH + file.filename),
+        url: `${process.env.STATIC_PATH}/${file.filename}`,
       };
       response.push(fileReponse);
     });

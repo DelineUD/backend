@@ -160,7 +160,7 @@ export class PostsController {
     const response = files.filter(Boolean).map((file) => ({
       originalname: file.originalname,
       filename: file.filename,
-      url: String(process.env.STATIC_PATH + file.filename),
+      url: `${process.env.STATIC_PATH}/${file.filename}`,
     }));
     return await this.PostsService.upImages(createPostDto, response);
   }

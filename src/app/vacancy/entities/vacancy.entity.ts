@@ -1,6 +1,7 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AuthorStatus } from '../consts';
+import { IUser } from '../../users/interfaces/user.interface';
 
 @Schema({
   collection: 'vacancy',
@@ -16,11 +17,11 @@ export class Vacancy extends Document {
   @Prop() minCost?: number;
   @Prop() maxCost?: number;
   @Prop({ required: true }) feedbackLink: string;
-  @Prop({ required: true }) authorId: string;
   @Prop() specializations: string[];
   @Prop() narrowSpecializations: string[];
   @Prop() programs: string[];
   @Prop() courses: string[];
+  @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: string | Types.ObjectId | IUser;
 }
 
 export const VacancySchema = SchemaFactory.createForClass(Vacancy);

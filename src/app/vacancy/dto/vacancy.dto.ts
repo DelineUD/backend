@@ -1,5 +1,8 @@
+import { Types } from 'mongoose';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+
 import { AuthorStatus } from '../consts';
+import { IUser } from '../../users/interfaces/user.interface';
 
 export class VacancyDto {
   // Personal information
@@ -15,7 +18,7 @@ export class VacancyDto {
 
   // Share information
   @IsString() readonly feedbackLink: string;
-  @IsString() readonly authorId: string;
+  readonly author: string | Types.ObjectId | IUser;
 
   // Specializations
   @IsOptional() @IsString() readonly specialization_creative_designer?: string;

@@ -1,4 +1,3 @@
-import { VacancyDto } from './dto/vacancy.dto';
 import { IVacancy } from './interfaces/vacancy.interface';
 
 import { groupDtoFields } from '../shared/helpers/groupDto';
@@ -8,8 +7,9 @@ import {
   allPrograms,
   allSpecializations,
 } from '../shared/consts';
+import { CreateVacancyDto } from './dto/create-vacancy.dto';
 
-export const vacancyMapper = (dto: VacancyDto): IVacancy => {
+export const vacancyMapper = (dto: CreateVacancyDto): IVacancy => {
   return {
     id: dto.id,
     title: dto.title,
@@ -20,7 +20,7 @@ export const vacancyMapper = (dto: VacancyDto): IVacancy => {
     maxCost: dto.maxCost,
 
     feedbackLink: dto.feedbackLink,
-    authorId: dto.authorId,
+    author: dto.author,
 
     specializations: groupDtoFields(dto, allSpecializations),
     narrowSpecializations: groupDtoFields(dto, allNarrowSpecializations),

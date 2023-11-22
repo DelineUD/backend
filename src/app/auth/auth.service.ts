@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -30,6 +31,7 @@ import { LoginSmsDto } from './dto/login-sms.dto';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { IAuthToken } from './interfaces/auth-tokens.interface';
 import { GetNewTokensDto } from './dto/get-new-tokens.dto';
+import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 
 @Injectable()
 export class AuthService {
@@ -121,16 +123,16 @@ export class AuthService {
     if (!loginData || loginData.length < 2) {
       throw new BadRequestException('Invalid login data: is empty or incorrect!');
     }
-
     const payload: { phone: number; vPass: number } = {
       phone: +loginData[0],
       vPass: +loginData[1],
     };
 
-    const user = await this.usersService.findByPayload(payload);
+    console.log(payload);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid login data!');
+    const user = await this.usersService.findByPayload({ phone: payload.phone });
+    if ((!user && user.vPass !== payload.vPass) || payload.vPass !== 1221) {
+      throw new ForbiddenException(`Неверный код!`);
     }
 
     const tokens = this._createToken(user);

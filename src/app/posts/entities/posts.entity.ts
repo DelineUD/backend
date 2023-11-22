@@ -20,12 +20,6 @@ export class PostEntity {
   pText: string;
 
   @ApiProperty({
-    example: false,
-    description: 'прилеплен',
-  })
-  stick: boolean;
-
-  @ApiProperty({
     example: 'картинки',
     description: 'картинки',
   })

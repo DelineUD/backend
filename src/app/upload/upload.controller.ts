@@ -47,7 +47,7 @@ export class UploadController {
   @UseInterceptors(
     FilesInterceptor('image', 4, {
       storage: diskStorage({
-        destination: '/var/www/html/teststand',
+        destination: process.env.STATIC_PATH_FOLDER,
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,
@@ -62,7 +62,7 @@ export class UploadController {
       const fileReponse = {
         originalname: file.originalname,
         filename: file.filename,
-        url: String(process.env.TEST_STAND + file.filename),
+        url: String(process.env.STATIC_PATH + file.filename),
       };
       response.push(fileReponse);
     });

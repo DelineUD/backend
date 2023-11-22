@@ -16,6 +16,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { editFileName, imageFileFilter } from '../upload/upload.service';
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
@@ -29,16 +30,14 @@ import { PostEntity } from './entities/posts.entity';
 import { UpdateCommentPostEntity } from './entities/update-comment.entity';
 import { UpdatePostEntity } from './entities/update-posts.entity';
 import { IcPosts } from './interfaces/posts.comments.interface';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PostsService } from './posts.service';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
 export class PostsController {
-  constructor(private PostsService: PostsService) {}
+  constructor(private postsService: PostsService) {}
 
   @Get('list')
   @ApiResponse({
@@ -53,7 +52,7 @@ export class PostsController {
     @Query('group') group: any,
   ): Promise<any> {
     console.log(group);
-    return await this.PostsService.getPostsList(data, search, lastIndex, group);
+    return await this.postsService.getPostsList(data, search, lastIndex, group);
   }
 
   @Post('create')
@@ -70,7 +69,7 @@ export class PostsController {
     @Body()
     createPostDto: CreatePostDto,
   ): Promise<CreatePostDto> {
-    return await this.PostsService.create(createPostDto);
+    return await this.postsService.create(createPostDto);
   }
 
   @Post('update')
@@ -87,7 +86,7 @@ export class PostsController {
     @Body()
     updatePostDto: UpdatePostDto,
   ): Promise<UpdatePostDto> {
-    const result: UpdatePostDto = await this.PostsService.update(updatePostDto);
+    const result: UpdatePostDto = await this.postsService.update(updatePostDto);
 
     if (!result) {
       throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
@@ -110,7 +109,7 @@ export class PostsController {
     @Body()
     deletePostDto: DeletePostDto,
   ): Promise<DeletePostDto> {
-    const result: DeletePostDto = await this.PostsService.delete(deletePostDto);
+    const result: DeletePostDto = await this.postsService.delete(deletePostDto);
 
     if (!result) {
       throw new HttpException('Some error', HttpStatus.BAD_REQUEST);
@@ -129,7 +128,7 @@ export class PostsController {
     @Param() params: GetPostParamsDto,
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
-    return await this.PostsService.getPostById(params, data);
+    return await this.postsService.getPostById(params, data);
   }
 
   @Post('upload-images')
@@ -158,7 +157,7 @@ export class PostsController {
       filename: file.filename,
       url: String(process.env.TEST_STAND + file.filename),
     }));
-    return await this.PostsService.upImages(createPostDto, response);
+    return await this.postsService.upImages(createPostDto, response);
   }
 
   @Post(':_id/view')
@@ -168,7 +167,7 @@ export class PostsController {
     type: PostEntity,
   })
   async addView(@Param() params: any, @Request() data: any): Promise<any> {
-    return await this.PostsService.addView(params, data.user._id);
+    return await this.postsService.addView(params, data.user._id);
   }
 
   @Post(':_id/like')
@@ -178,7 +177,7 @@ export class PostsController {
     type: PostEntity,
   })
   async liked(@Param() params: GetPostParamsDto, @Request() data: any): Promise<GetPostParamsDto> {
-    return await this.PostsService.liked(params, data.user._id);
+    return await this.postsService.liked(params, data.user._id);
   }
 
   @Post(':_id/comments')
@@ -196,7 +195,7 @@ export class PostsController {
     @Param() params: GetPostParamsDto,
     @Request() data: any,
   ): Promise<IcPosts> {
-    return await this.PostsService.createComment(createComments, params, data.user._id);
+    return await this.postsService.createComment(createComments, params, data.user._id);
   }
 
   @Get(':_id/comments')
@@ -214,7 +213,7 @@ export class PostsController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Request() data: unknown,
   ): Promise<unknown> {
-    return await this.PostsService.CommentList(params);
+    return await this.postsService.CommentList(params);
   }
 
   @Post(':_id_post/like-comment/:_id_comment/')
@@ -229,10 +228,7 @@ export class PostsController {
     comment_ID: any,
     @Request() data: any,
   ): Promise<GetPostParamsDto> {
-    console.log(post_id);
-    console.log(comment_ID);
-    await this.PostsService.CommentLiked(post_id, comment_ID, data.user._id);
-    return await this.PostsService.CommentLiked(post_id, comment_ID, data.user._id);
+    return await this.postsService.CommentLiked(post_id, comment_ID, data.user._id);
   }
 
   @Post(':_id_post/update-comment/:_id_comment')
@@ -252,7 +248,7 @@ export class PostsController {
     @Body() updateComment: IcPosts,
     @Request() data: any,
   ): Promise<IcPosts> {
-    const result: IcPosts = await this.PostsService.updateComment(
+    const result: IcPosts = await this.postsService.updateComment(
       comment_ID,
       updateComment,
       data.user._id,
@@ -281,7 +277,7 @@ export class PostsController {
     comment_ID: any,
     @Request() data: any,
   ): Promise<any> {
-    const result: IcPosts = await this.PostsService.deleteComment(
+    const result: IcPosts = await this.postsService.deleteComment(
       comment_ID,
       data.user._id,
       post_id,

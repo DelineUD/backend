@@ -1,11 +1,12 @@
+import { Types } from 'mongoose';
+import { IUser } from '../../users/interfaces/user.interface';
+
 export interface IPosts {
   _id?: string;
 
-  authorId?: string;
+  author?: string | Types.ObjectId | IUser;
 
   pText?: string;
-
-  stick?: boolean;
 
   pImg?: Array<string>;
 

@@ -11,5 +11,5 @@ export class DeletePostEntity {
     example: 'id автора',
     description: 'id автора',
   })
-  authorId: string;
+  author: string;
 }

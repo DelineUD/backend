@@ -11,19 +11,13 @@ export class PostEntity {
     example: 'id автора',
     description: 'id автора',
   })
-  authorId: string;
+  author: string;
 
   @ApiProperty({
     example: 'боди текст',
     description: 'боди текст',
   })
   pText: string;
-
-  @ApiProperty({
-    example: false,
-    description: 'прилеплен',
-  })
-  stick: boolean;
 
   @ApiProperty({
     example: 'картинки',

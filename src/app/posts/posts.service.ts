@@ -12,6 +12,7 @@ import { IcPosts } from './interfaces/posts.comments.interface';
 import { commentItemMapper, postListMapper, postMapper } from './mapper';
 import { PostCommentsModel } from './models/posts.comments.model';
 import { PostModel } from './models/posts.model';
+import { IPosts } from './interfaces/posts.interface';
 
 @Injectable()
 export class PostsService {
@@ -43,7 +44,7 @@ export class PostsService {
 
       const sortedLimit = sorted.slice(0, 10);
       if (sortedLimit.length < 1) {
-        [];
+        return [];
       }
       return postListMapper(sortedLimit, user);
     }
@@ -81,18 +82,16 @@ export class PostsService {
       }
 
       if (newArr.length < 1) {
-        [];
+        return [];
       }
 
-      const res = postListMapper(newArr, user);
-      return res;
+      return postListMapper(newArr, user);
     }
     //красавчик
     if (lastIndex === undefined && search === undefined) {
       if (group === undefined) {
         const postsStart = await this.postModel.find({}).limit(10).sort({ createdAt: -1 });
-        const res = postListMapper(postsStart, user);
-        return res;
+        return postListMapper(postsStart, user);
       }
 
       if (group !== undefined) {
@@ -100,8 +99,7 @@ export class PostsService {
           .find({ group: group })
           .limit(10)
           .sort({ createdAt: -1 });
-        const res = postListMapper(postsStart, user);
-        return res;
+        return postListMapper(postsStart, user);
       }
     }
 
@@ -131,26 +129,24 @@ export class PostsService {
         if (sposts) {
           return postListMapper(sposts, user);
         } else {
-          [];
+          return [];
         }
       }
     }
   }
 
-  async create(postDto: PostDto): Promise<PostDto> {
-    const { _id, createdAt, updatedAt, authorId, pText, stick, pImg, likes, views, group } =
-      postDto;
+  async create(postDto: PostDto): Promise<IcPosts> {
+    const { _id, createdAt, updatedAt, author, pText, pImg, likes, views, group } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (postInDb) {
       throw new HttpException('Запись уже существует!', HttpStatus.BAD_REQUEST);
     }
-    const post: PostModel = await new this.postModel({
-      authorId,
+    const post: PostModel = new this.postModel({
+      author,
       createdAt,
       updatedAt,
       pText,
-      stick,
       pImg,
       likes,
       views,
@@ -163,8 +159,8 @@ export class PostsService {
     return post;
   }
 
-  async update(postDto: UpdatePostDto): Promise<UpdatePostDto> {
-    const { _id, authorId, pText, stick, pImg, group } = postDto;
+  async update(postDto: UpdatePostDto): Promise<IcPosts> {
+    const { _id, author, pText, pImg, group } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
@@ -172,30 +168,28 @@ export class PostsService {
       throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
 
-    if (authorId !== postInDb.authorId) {
+    if (author !== postInDb.author) {
       throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
     await postInDb.updateOne({
       _id,
-      authorId,
+      author,
       pText,
-      stick,
       group,
       pImg,
     });
     await postInDb.save();
-    const newPostInDb = await this.postModel.findOne({ _id }).exec();
-    return newPostInDb;
+    return await this.postModel.findOne({ _id }).exec();
   }
 
-  async delete(postDto: DeletePostDto): Promise<DeletePostDto> {
-    const { _id, authorId } = postDto;
+  async delete(postDto: DeletePostDto): Promise<IPosts> {
+    const { _id, author } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (!postInDb) {
       throw new EntityNotFoundError('Запись не найдена!');
-    } else if (authorId === postInDb.authorId) {
+    } else if (author === postInDb.author) {
       await postInDb.deleteOne({
         _id,
       });
@@ -210,27 +204,29 @@ export class PostsService {
     }
   }
 
-  async getPostById(getPostParamsDto: any, initUsr: any): Promise<any> {
+  async getPostById(getPostParamsDto: any, initUsr: any): Promise<IPosts> {
     const _id = getPostParamsDto._id;
     const user = await this.usersService.findOne(initUsr.user._id);
-    const postInDb = await this.postModel.findOne({ _id }).exec();
+    const postInDb = await this.postModel
+      .findOne({ _id })
+      .populate('author', '_id, first_name last_name avatar')
+      .exec();
     if (!postInDb) {
       throw new EntityNotFoundError('Запись не найдена!');
     }
 
-    const res = postMapper(postInDb, user);
-    return res;
+    return postMapper(postInDb, user);
   }
 
-  async upImages(postDto: PostDto, file: any): Promise<PostDto> {
-    const { _id, authorId } = postDto;
+  async upImages(postDto: PostDto, file: any): Promise<IcPosts> {
+    const { _id, author } = postDto;
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
       throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
 
-    if (authorId !== postInDb.authorId) {
+    if (author !== postInDb.author) {
       throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
@@ -239,8 +235,7 @@ export class PostsService {
         pImg: file,
       });
       await postInDb.save();
-      const newPostInDb = await this.postModel.findOne({ _id }).exec();
-      return newPostInDb;
+      return await this.postModel.findOne({ _id }).exec();
     }
 
     if (file?.length && postInDb.pImg?.length) {
@@ -250,8 +245,7 @@ export class PostsService {
       });
 
       await postInDb.save();
-      const newPostInDb = await this.postModel.findOne({ _id }).exec();
-      return newPostInDb;
+      return await this.postModel.findOne({ _id }).exec();
     }
   }
 
@@ -280,7 +274,7 @@ export class PostsService {
   //   return newPostInDb;
   // }
 
-  async liked(postDto: UpdatePostDto, initUser: any): Promise<UpdatePostDto> {
+  async liked(postDto: GetPostParamsDto, initUser: any): Promise<IcPosts> {
     const { _id } = postDto;
 
     const user = await this.usersService.findOne(initUser);
@@ -298,8 +292,7 @@ export class PostsService {
         countLikes: 1,
       });
       await postInDb.save();
-      const newPostInDb = await this.postModel.findOne({ _id }).exec();
-      return newPostInDb;
+      return await this.postModel.findOne({ _id }).exec();
     }
 
     arrLikes.forEach((item) => {
@@ -314,8 +307,7 @@ export class PostsService {
         countLikes: postInDb.countLikes + 1,
       });
       await postInDb.save();
-      const newPostInDb = await this.postModel.findOne({ _id }).exec();
-      return newPostInDb;
+      return await this.postModel.findOne({ _id }).exec();
     }
 
     if (checkResult === true) {

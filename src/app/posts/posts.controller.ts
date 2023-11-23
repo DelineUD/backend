@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { editFileName, imageFileFilter } from '../upload/upload.service';
 import { CreatePostDto } from './dto/create.post.dto';
@@ -32,6 +32,7 @@ import { IcPosts } from './interfaces/posts.comments.interface';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { IPosts } from './interfaces/posts.interface';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
@@ -69,7 +70,7 @@ export class PostsController {
   public async create(
     @Body()
     createPostDto: CreatePostDto,
-  ): Promise<CreatePostDto> {
+  ): Promise<IcPosts> {
     return await this.PostsService.create(createPostDto);
   }
 
@@ -86,8 +87,8 @@ export class PostsController {
   public async update(
     @Body()
     updatePostDto: UpdatePostDto,
-  ): Promise<UpdatePostDto> {
-    const result: UpdatePostDto = await this.PostsService.update(updatePostDto);
+  ): Promise<IcPosts> {
+    const result: IcPosts = await this.PostsService.update(updatePostDto);
 
     if (!result) {
       throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
@@ -109,8 +110,8 @@ export class PostsController {
   public async delete(
     @Body()
     deletePostDto: DeletePostDto,
-  ): Promise<DeletePostDto> {
-    const result: DeletePostDto = await this.PostsService.delete(deletePostDto);
+  ): Promise<IPosts> {
+    const result: IcPosts = await this.PostsService.delete(deletePostDto);
 
     if (!result) {
       throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
@@ -125,10 +126,8 @@ export class PostsController {
     description: 'Пост по id',
     type: PostEntity,
   })
-  async getById(
-    @Param() params: GetPostParamsDto,
-    @Request() data: any,
-  ): Promise<GetPostParamsDto> {
+  @ApiParam({ name: '_id', required: true })
+  async getById(@Param() params: GetPostParamsDto, @Request() data: any): Promise<IPosts> {
     return await this.PostsService.getPostById(params, data);
   }
 
@@ -152,7 +151,7 @@ export class PostsController {
     createPostDto: CreatePostDto,
     @UploadedFiles()
     files: Express.Multer.File[],
-  ): Promise<CreatePostDto> {
+  ): Promise<IcPosts> {
     const response = files.filter(Boolean).map((file) => ({
       originalname: file.originalname,
       filename: file.filename,

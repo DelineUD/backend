@@ -2,32 +2,26 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePostEntity {
   @ApiProperty({
-    example: 'id автора',
+    type: String,
     description: 'id автора',
   })
   authorId: string;
 
   @ApiProperty({
-    example: 'боди текст',
-    description: 'боди текст',
+    type: String,
+    description: 'Текст комментария',
   })
   pText: string;
 
   @ApiProperty({
-    example: false,
-    description: 'прилеплен',
-  })
-  stick: boolean;
-
-  @ApiProperty({
-    example: 'картинки',
-    description: 'картинки',
+    type: String,
+    description: 'Картинка',
   })
   pImg: string;
 
   @ApiProperty({
-    example: 'группа',
-    description: 'группа',
+    type: String,
+    description: 'Группа',
   })
   group: string;
 }

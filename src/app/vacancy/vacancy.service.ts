@@ -102,7 +102,7 @@ export class VacancyService {
      
       return { acknowledged: true, deletedCount: 1, removed: deletedVacancy as IVacancy };
     } catch (err) {
-      throw new InternalServerErrorException(`Внутренняя ошибка сервера: ${(err as Error).message}`);
+      throw err
     }
   }
 }

@@ -3,13 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
+import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
+import { vacancyMapper } from './mapper';
+
 import { Vacancy } from './entities/vacancy.entity';
+import { IVacancy } from './interfaces/vacancy.interface';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
-import { vacancyMapper } from './mapper';
-import { IVacancy } from './interfaces/vacancy.interface';
-import { DeleteResult } from 'mongodb';
-import { IRemoveVacancy } from './interfaces/remove-vacancy.interface';
 
 @Injectable()
 export class VacancyService {
@@ -22,7 +22,8 @@ export class VacancyService {
     try {
       return (await this.vacancyModel.create(vacancyMapper(createVacancyDto))) as IVacancy;
     } catch (err) {
-      throw new InternalServerErrorException(`Внутренняя ошибка сервера: ${(err as Error).message}`);
+      console.error(`Ошибка при создании вакансии: ${(err as Error).message}`);
+      throw new InternalServerErrorException('Внутренняя ошибка сервера');
     }
   }
 
@@ -31,12 +32,13 @@ export class VacancyService {
       const vacancies = await this.vacancyModel.find().exec();
 
       if (!vacancies.length) {
-        throw new EntityNotFoundError(`Вакансии не неайдены!`);
+        throw new EntityNotFoundError('Вакансии не найдены');
       }
 
       return vacancies as IVacancy[];
     } catch (err) {
-      throw new EntityNotFoundError(`Вакансии не неайдены!`);
+      console.error(`Ошибка при поиске вакансий: ${(err as Error).message}`);
+      throw new EntityNotFoundError('Вакансии не найдены');
     }
   }
 
@@ -48,31 +50,32 @@ export class VacancyService {
         .exec();
 
       if (!vacancies.length) {
-        throw new EntityNotFoundError(`Вакансии пользователя с ${userId} не найдены!`);
+        throw new EntityNotFoundError(`Вакансии пользователя с ${userId} не найдены`);
       }
 
       return vacancies as IVacancy[];
     } catch (err) {
-      throw new EntityNotFoundError(`Вакансии пользователя с ${userId} не найдены!`);
+      console.error(`Ошибка при поиске вакансий пользователя: ${(err as Error).message}`);
+      throw new EntityNotFoundError(`Вакансии пользователя с ${userId} не найдены`);
     }
   }
 
   async findByUserId(params: { userId: string; id: string }): Promise<IVacancy> {
+    const { userId, id } = params;
     try {
       const vacancy = await this.vacancyModel
-        .findOne({ ...params })
+        .findOne({ author: userId, id })
         .populate('author', '_id first_name last_name avatar')
         .exec();
 
       if (!vacancy) {
-        throw new EntityNotFoundError(`Вакансия с ${params.id} не найдена!`);
+        throw new EntityNotFoundError(`Вакансия с ${id} не найдена`);
       }
-
-      console.log('Vacancy found:', vacancy);
 
       return vacancy as IVacancy;
     } catch (err) {
-      throw new EntityNotFoundError(`Вакансия с ${params.id} не найдена!`);
+      console.error(`Ошибка при поиске вакансии по ID: ${(err as Error).message}`);
+      throw new EntityNotFoundError(`Вакансия с ${id} не найдена`);
     }
   }
 
@@ -81,28 +84,30 @@ export class VacancyService {
       const vacancy = await this.vacancyModel.findOne({ authorId: userId, id });
 
       if (!vacancy) {
-        throw new EntityNotFoundError(`Вакансия с ${id} не найдена!`);
+        throw new EntityNotFoundError(`Вакансия с ${id} не найдена`);
       }
 
       return (await vacancy
         .updateOne({ author: { _id: userId }, id }, { ...updateVacancyDto })
         .exec()) as IVacancy;
     } catch (err) {
-      throw new InternalServerErrorException(`Внутренняя ошибка сервера: ${(err as Error).message}`);
+      console.error(`Ошибка при обновлении вакансии: ${(err as Error).message}`);
+      throw new InternalServerErrorException('Внутренняя ошибка сервера');
     }
   }
 
-  async remove(userId: string, id: string): Promise<IRemoveVacancy> {
+  async remove(userId: string, id: string): Promise<IRemoveEntity<IVacancy>> {
     try {
       const deletedVacancy = await this.vacancyModel.findOneAndDelete({ authorId: userId, id });
 
       if (!deletedVacancy) {
-        throw new EntityNotFoundError(`Вакансия с ${id} не найдена!`);
+        throw new EntityNotFoundError(`Вакансия с ${id} не найдена`);
       }
-     
+
       return { acknowledged: true, deletedCount: 1, removed: deletedVacancy as IVacancy };
     } catch (err) {
-      throw new InternalServerErrorException(`Внутренняя ошибка сервера: ${(err as Error).message}`);
+      console.error(`Ошибка при удалении вакансии: ${(err as Error).message}`);
+      throw new InternalServerErrorException('Внутренняя ошибка сервера');
     }
   }
 }

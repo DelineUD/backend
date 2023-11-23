@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { AuthorStatus } from '../consts';
 import { IUser } from '../../users/interfaces/user.interface';
@@ -9,7 +9,7 @@ export class VacancyDto {
   @IsString() readonly id: string;
   @IsString() readonly title: string;
   @IsOptional() @IsString() readonly description?: string;
-  @IsNotEmpty() readonly remote: boolean;
+  @IsBooleanString() readonly remote: boolean;
   @IsString() readonly status: AuthorStatus;
   @IsOptional() @IsString() readonly city?: string;
   @IsOptional() @IsString() readonly gender?: string;

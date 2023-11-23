@@ -18,6 +18,7 @@ import { EventsModule } from './events/events.module';
 import { FiltersController } from './filters/filters.controller';
 import { FiltersModule } from './filters/filters.module';
 import { VacancyModule } from './vacancy/vacancy.module';
+import { ResumesModule } from './resumes/resumes.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { VacancyModule } from './vacancy/vacancy.module';
     EventsModule,
     FiltersModule,
     VacancyModule,
+    ResumesModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [

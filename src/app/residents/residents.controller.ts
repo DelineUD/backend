@@ -78,7 +78,7 @@ export class ResidentsController {
     if (file !== undefined) {
       return await this.residentsService.upAvatar(data, file.filename);
     } else {
-      throw new HttpException('No file', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Нет файла!', HttpStatus.BAD_REQUEST);
     }
   }
 }

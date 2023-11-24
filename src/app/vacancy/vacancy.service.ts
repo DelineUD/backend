@@ -22,7 +22,7 @@ export class VacancyService {
     try {
       return (await this.vacancyModel.create(vacancyMapper(createVacancyDto))) as IVacancy;
     } catch (err) {
-      throw new InternalServerErrorException(`Internal server error: ${(err as Error).message}`);
+      throw new InternalServerErrorException(`Внутренняя ошибка сервера: ${(err as Error).message}`);
     }
   }
 
@@ -88,7 +88,7 @@ export class VacancyService {
         .updateOne({ author: { _id: userId }, id }, { ...updateVacancyDto })
         .exec()) as IVacancy;
     } catch (err) {
-      throw new InternalServerErrorException(`Internal server error: ${(err as Error).message}`);
+      throw new InternalServerErrorException(`Внутренняя ошибка сервера: ${(err as Error).message}`);
     }
   }
 
@@ -99,11 +99,10 @@ export class VacancyService {
       if (!deletedVacancy) {
         throw new EntityNotFoundError(`Вакансия с ${id} не найдена!`);
       }
-      console.log(deletedVacancy);
-      // Вернуть количество удаленных записей (в данном случае всегда 1)
+     
       return { acknowledged: true, deletedCount: 1, removed: deletedVacancy as IVacancy };
     } catch (err) {
-      throw new InternalServerErrorException(`Internal server error: ${(err as Error).message}`);
+      throw err
     }
   }
 }

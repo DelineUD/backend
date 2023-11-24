@@ -141,7 +141,7 @@ export class PostsService {
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (postInDb) {
-      throw new HttpException('This post already created ', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Запись уже существует!', HttpStatus.BAD_REQUEST);
     }
     const post: PostModel = new this.postModel({
       authorId,
@@ -166,11 +166,11 @@ export class PostsService {
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
 
     if (authorId !== postInDb.authorId) {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
     await postInDb.updateOne({
@@ -191,19 +191,19 @@ export class PostsService {
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (!postInDb) {
-      throw new EntityNotFoundError('не найден пост для удаления');
+      throw new EntityNotFoundError('Запись не найдена!');
     } else if (authorId === postInDb.authorId) {
       await postInDb.deleteOne({
         _id,
       });
 
       if (postInDb) {
-        throw new HttpException('OK Deleted', HttpStatus.NO_CONTENT);
+        throw new HttpException('Успешно удалено!', HttpStatus.NO_CONTENT);
       }
 
       return postInDb;
     } else {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -212,7 +212,7 @@ export class PostsService {
     const user = await this.usersService.findOne(initUsr.user._id);
     const postInDb = await this.postModel.findOne({ _id }).exec();
     if (!postInDb) {
-      throw new EntityNotFoundError('пост не найден');
+      throw new EntityNotFoundError('Запись не найдена!');
     }
 
     const res = postMapper(postInDb, user);
@@ -224,11 +224,11 @@ export class PostsService {
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
 
     if (authorId !== postInDb.authorId) {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
     if (file?.length && !postInDb.pImg.length) {
@@ -284,7 +284,7 @@ export class PostsService {
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
     const arrLikes = postInDb.likes;
 
@@ -344,7 +344,7 @@ export class PostsService {
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
 
     const comment: PostCommentsModel = new this.postCommentsModel({
@@ -367,7 +367,7 @@ export class PostsService {
     const postInDb = await this.postModel.findOne({ paramPostID }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Запись с id: ${_id} не найден!`);
     }
 
     const comments = await this.postCommentsModel.find({ postID: _id });
@@ -391,7 +391,6 @@ export class PostsService {
     const user = await this.usersService.findOne(initUser);
 
     const commentInDb = await this.postCommentsModel.findOne({ _id: comment_id }).exec();
-    console.log(commentInDb);
     if (!commentInDb) {
       throw new EntityNotFoundError(`Коммент с id: ${comment_id}, не найден`);
     }
@@ -447,11 +446,11 @@ export class PostsService {
     const postInDb = await this.postCommentsModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Коммент с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Комментарий с id: ${_id} не найден!`);
     }
 
     if (initUser.toString() !== postInDb.authorId) {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
     await postInDb.updateOne({
@@ -467,7 +466,7 @@ export class PostsService {
     const commentInDb = await this.postCommentsModel.findOne({ _id: idComment }).exec();
 
     if (!commentInDb) {
-      throw new EntityNotFoundError('не найден пост для удаления');
+      throw new EntityNotFoundError(`Комментарий с id: ${idComment} не найден!`);
     } else if (initUser.toString() === commentInDb.authorId) {
       await commentInDb.deleteOne({
         _id: idComment,
@@ -475,12 +474,12 @@ export class PostsService {
       await this.deleteMinus(idPost);
 
       if (!commentInDb) {
-        throw new HttpException('OK Deleted', HttpStatus.NO_CONTENT);
+        throw new HttpException('Успешно удалено!', HttpStatus.NO_CONTENT);
       }
 
       return commentInDb;
     } else {
-      throw new HttpException('You are not author !', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Нет доступа!', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -499,7 +498,7 @@ export class PostsService {
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
-      throw new EntityNotFoundError(`Пост с id: ${_id}, не найден`);
+      throw new EntityNotFoundError(`Записб с id: ${_id} не найдена!`);
     }
     const arrViews = postInDb.views;
 

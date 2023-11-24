@@ -28,25 +28,25 @@ export class ResidentsService {
       const resident = await this.usersService.findOne(query);
       return residentMapper(resident);
     } catch (err) {
-      throw new NotFoundException(`User ${query._id} not found!`);
+      throw new NotFoundException(`Пользователь ${query._id} не найден!`);
     }
   }
 
   async upAvatar({ authorization }: IResidentAuth, file: string) {
     const noBearer = authorization.split(' ');
-    if (!authorization) throw new UnauthorizedException('Please sign in!');
+    if (!authorization) throw new UnauthorizedException('Пожалуйста авторизйтесь!');
 
     try {
       await this.jwtService.verifyAsync(noBearer[1]);
     } catch (err) {
-      throw new UnauthorizedException('Invalid token or expired!');
+      throw new UnauthorizedException('Неверный токен или срок его действия истек!');
     }
 
     const result = await this.jwtService.verifyAsync(noBearer[1]);
     const { _id } = await this.usersService.findOne(result);
 
     if (!_id) {
-      throw new NotFoundException(`User ${_id} not found!`);
+      throw new NotFoundException(`Пользователь ${_id} не найден!`);
     }
 
     const userInDb = await this.userModel.findOne({ _id }).exec();

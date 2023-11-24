@@ -1,15 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UsePipes,
-  ValidationPipe,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'mongodb';
@@ -18,6 +18,10 @@ import { ResumesService } from './resumes.service';
 import { UserId } from '../shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CreateResumeDto } from './dto/create-resume.dto';
+import { IResume } from './interfaces/resume.interface';
+import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
+import { UpdateResumeDto } from './dto/update-resume.dto';
+import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -40,7 +44,7 @@ export class ResumesController {
    * @returns - Все резюме.
    */
   @Get('list')
-  async findAll(): Promise<any> {
+  async findAll(): Promise<IResume[]> {
     return await this.resumesService.findAll();
   }
 
@@ -50,8 +54,9 @@ export class ResumesController {
    * @returns - Список всех резюме пользователя.
    */
   @Get('list/:userId')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'userId', description: 'User ID' })
-  async findAllByUserId(@Param() params: { userId: string }): Promise<any> {
+  async findAllByUserId(@Param() params: IFindAllResumeParams): Promise<IResume[]> {
     return await this.resumesService.findAllByUserId(params);
   }
 
@@ -62,10 +67,11 @@ export class ResumesController {
    * @returns - Найденное резюме.
    */
   @Get(':userId/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'id', description: 'Resume ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
-  async findOneByIds(@Param() params: { userId: string; id: string }): Promise<any> {
-    return await this.resumesService.findOneByIds(params);
+  async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResume> {
+    return await this.resumesService.findOneById(params);
   }
 
   /**
@@ -78,26 +84,27 @@ export class ResumesController {
   @Patch(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'id', description: 'Resume ID' })
   async update(
     @UserId() userId: string,
     @Param('id') id: string,
-    @Body() updateResumeDto: any,
-  ): Promise<any> {
+    @Body() updateResumeDto: UpdateResumeDto,
+  ): Promise<IResume> {
     return this.resumesService.update(userId, id, updateResumeDto);
   }
 
   /**
    * Удаление резюме пользователя.
-   * @param userId - id резюме.
-   * @param id - id резюме.
+   * @param userId - _id автора.
+   * @param id - id резюме
    * @returns - Резюме пользователя.
    */
   @Delete(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @ApiParam({ name: 'id', description: 'Resume ID' })
-  async remove(@UserId() userId: string, @Param('id') id: string): Promise<DeleteResult> {
+  async remove(@UserId() userId: string, @Param('id') id: string): Promise<IRemoveEntity<IResume>> {
     return this.resumesService.remove(userId, id);
   }
 }

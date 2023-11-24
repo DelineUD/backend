@@ -8,10 +8,16 @@ import { IResume } from './interfaces/resume.interface';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { InjectModel } from '@nestjs/mongoose';
+import { UsersService } from '../users/users.service';
+import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
+import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
 
 @Injectable()
 export class ResumesService {
-  constructor(@InjectModel(Resume.name) private readonly resumeModel: Model<Resume>) {}
+  constructor(
+    @InjectModel(Resume.name) private readonly resumeModel: Model<Resume>,
+    private readonly usersService: UsersService,
+  ) {}
 
   async create(createResumeDto: CreateResumeDto): Promise<IResume> {
     try {
@@ -27,64 +33,79 @@ export class ResumesService {
       const resumes = await this.resumeModel.find().exec();
 
       if (!resumes.length) {
-        throw new EntityNotFoundError(`Резюме не найдены`);
+        return [];
       }
 
       return resumes;
     } catch (err) {
       console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
-      throw new EntityNotFoundError(`Резюме не найдены`);
+      throw new InternalServerErrorException(`Внутрення ошибка сервера!`);
     }
   }
 
-  async findAllByUserId(params: { userId: string }) {
-    const { userId } = params;
+  async findAllByUserId(params: IFindAllResumeParams) {
     try {
+      const { userId } = params;
+
+      const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
       const resumes = await this.resumeModel
         .find({ author: userId })
         .populate('author', 'first_name last_name')
         .exec();
 
       if (!resumes.length) {
-        throw new EntityNotFoundError(`Список резюме пользователя ${userId}`);
+        return [];
       }
 
       return resumes;
     } catch (err) {
-      console.error(`Ошибка при поиске резюме пользователя: ${(err as Error).message}`);
-      throw new EntityNotFoundError(`Список резюме пользователя ${userId}`);
+      console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
+      throw err;
     }
   }
 
-  async findOneByIds(params: { userId: string; id: string }) {
-    const { userId, id } = params;
+  async findOneById(params: IFindOneResumeParams) {
     try {
+      const { userId, id } = params;
+
+      const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
       const resume = await this.resumeModel
         .findOne({ author: userId, id })
         .populate('author')
         .exec();
-
       if (!resume) {
-        throw new EntityNotFoundError(`Резюме ${id} не найдено`);
+        throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
       return resume;
     } catch (err) {
-      console.error(`Ошибка при поиске резюме по ID: ${(err as Error).message}`);
-      throw new EntityNotFoundError(`Резюме ${id} не найдено`);
+      console.error(`Ошибка при поиске резюме по id: ${(err as Error).message}`);
+      throw err;
     }
   }
 
   async update(userId: string, id: string, updateResumeDto: UpdateResumeDto) {
     try {
+      const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
       const resume = await this.resumeModel.findByIdAndUpdate(
         { author: userId, id },
         { ...updateResumeDto },
         { new: true, runValidators: true },
       );
-
       if (!resume) {
-        throw new EntityNotFoundError(`Резюме с ${id} не найдено`);
+        throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
       return resume;
@@ -94,12 +115,16 @@ export class ResumesService {
     }
   }
 
-  async remove(userId: string, id: string): Promise<DeleteResult & { removed: IResume }> {
+  async remove(userId: string, id: string): Promise<IRemoveEntity<IResume>> {
     try {
-      const deletedResume = await this.resumeModel.findOneAndDelete({ author: userId, id });
+      const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
 
+      const deletedResume = await this.resumeModel.findOneAndDelete({ author: userId, id });
       if (!deletedResume) {
-        throw new EntityNotFoundError(`Резюме с ${id} не найдено`);
+        throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
       return { acknowledged: true, deletedCount: 1, removed: deletedResume };

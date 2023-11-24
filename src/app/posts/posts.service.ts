@@ -21,7 +21,6 @@ export class PostsService {
     private readonly postModel: Model<PostModel>,
     @InjectModel(PostCommentsModel.name)
     private readonly postCommentsModel: Model<PostCommentsModel>,
-    private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
 
@@ -135,7 +134,7 @@ export class PostsService {
     }
   }
 
-  async create(postDto: PostDto): Promise<IcPosts> {
+  async create(postDto: PostDto): Promise<IPosts> {
     const { _id, createdAt, updatedAt, author, pText, pImg, likes, views, group } = postDto;
 
     const postInDb = await this.postModel.findOne({ _id }).exec();
@@ -331,22 +330,22 @@ export class PostsService {
 
   async createComment(
     createComments: IcPosts,
-    paramPostID: GetPostParamsDto,
-    initUser: any,
+    paramPostId: GetPostParamsDto,
+    userId: string,
   ): Promise<IcPosts> {
     const { cText, cImg } = createComments;
-    const { _id } = paramPostID;
+    const { _id } = paramPostId;
     const postInDb = await this.postModel.findOne({ _id }).exec();
 
     if (!postInDb) {
       throw new EntityNotFoundError(`Запись с id: ${_id} не найдена!`);
     }
 
-    const comment: PostCommentsModel = await new this.postCommentsModel({
-      authorId: initUser,
+    const comment: PostCommentsModel = new this.postCommentsModel({
+      authorId: userId,
       cText,
       cImg,
-      postID: paramPostID,
+      postID: paramPostId,
     });
     await comment.save();
 
@@ -357,7 +356,7 @@ export class PostsService {
     return comment;
   }
 
-  async CommentList(paramPostID: IcPosts): Promise<unknown> {
+  async commentList(paramPostID: IcPosts): Promise<unknown> {
     const { _id } = paramPostID;
     const postInDb = await this.postModel.findOne({ paramPostID }).exec();
 
@@ -382,13 +381,12 @@ export class PostsService {
     );
   }
 
-  async CommentLiked(post: any, comment: any, initUser: any): Promise<IcPosts> {
+  async commentLiked(post: any, comment_id: any, initUser: any): Promise<IcPosts> {
     const user = await this.usersService.findOne(initUser);
 
-    const commentInDb = await this.postCommentsModel.findOne({ _id: comment }).exec();
-    console.log(commentInDb);
+    const commentInDb = await this.postCommentsModel.findOne({ _id: comment_id }).exec();
     if (!commentInDb) {
-      throw new EntityNotFoundError(`Комментарий с id: ${comment} не найден!`);
+      throw new EntityNotFoundError(`Коммент с id: ${comment_id}, не найден`);
     }
     const arrLikes = commentInDb.likes;
     let checkResult: boolean;
@@ -399,7 +397,7 @@ export class PostsService {
         countLikes: 1,
       });
       await commentInDb.save();
-      return await this.postCommentsModel.findOne({ _id: comment }).exec();
+      return await this.postCommentsModel.findOne({ _id: comment_id }).exec();
     }
 
     arrLikes.forEach((item) => {
@@ -414,7 +412,7 @@ export class PostsService {
         countLikes: commentInDb.countLikes + 1,
       });
       await commentInDb.save();
-      return await this.postCommentsModel.findOne({ _id: comment }).exec();
+      return await this.postCommentsModel.findOne({ _id: comment_id }).exec();
     }
 
     if (checkResult === true) {
@@ -427,7 +425,7 @@ export class PostsService {
         countLikes: count,
       });
       await commentInDb.save();
-      const newCommentInDb = await this.postCommentsModel.findOne({ _id: comment }).exec();
+      const newCommentInDb = await this.postCommentsModel.findOne({ _id: comment_id }).exec();
       return {
         _id: newCommentInDb._id,
         likes: newCommentInDb.likes,

@@ -59,7 +59,7 @@ export class ResidentsController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: process.env.TEST_STAND_PATH,
+        destination: process.env.STATIC_PATH_FOLDER,
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,

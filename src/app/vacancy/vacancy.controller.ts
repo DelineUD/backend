@@ -14,13 +14,14 @@ import {
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { UserId } from '../shared/decorators/user-id.decorator';
+import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
 import { VacancyService } from './vacancy.service';
 
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { IVacancy } from './interfaces/vacancy.interface';
-import { DeleteResult } from 'mongodb';
+import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 
 @ApiTags('Vacancy')
 @Controller('vacancy')
@@ -53,8 +54,9 @@ export class VacancyController {
    * @returns - Список вакансий пользователя.
    */
   @Get('list/:userId')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'userId', description: 'User ID' })
-  async findAllByUserId(@Param() params: { userId: string }): Promise<IVacancy[]> {
+  async findAllByUserId(@Param() params: IFindAllVacancyParams): Promise<IVacancy[]> {
     return await this.vacancyService.findAllByUserId(params);
   }
 
@@ -65,9 +67,10 @@ export class VacancyController {
    * @returns - Найденная вакансия.
    */
   @Get(':userId/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'id', description: 'Vacancy ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
-  async findByUserId(@Param() params: { userId: string; id: string }): Promise<IVacancy> {
+  async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancy> {
     return await this.vacancyService.findByUserId(params);
   }
 
@@ -81,6 +84,7 @@ export class VacancyController {
   @Patch(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'id', description: 'Vacancy ID' })
   async update(
     @UserId() userId: string,
@@ -99,8 +103,12 @@ export class VacancyController {
   @Delete(':id')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'id', description: 'Vacancy ID' })
-  async remove(@UserId() userId: string, @Param('id') id: string): Promise<DeleteResult> {
+  async remove(
+    @UserId() userId: string,
+    @Param('id') id: string,
+  ): Promise<IRemoveEntity<IVacancy>> {
     return this.vacancyService.remove(userId, id);
   }
 }

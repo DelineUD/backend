@@ -12,6 +12,8 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -32,6 +34,8 @@ import { IcPosts } from './interfaces/posts.comments.interface';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { UserDto } from '../users/dto/user.dto';
+import { PostCreateCommentDto } from './dto/post-create-comment.dto';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
@@ -141,7 +145,7 @@ export class PostsController {
   @UseInterceptors(
     FilesInterceptor('image', 4, {
       storage: diskStorage({
-        destination: process.env.TEST_STAND_FOLDER,
+        destination: process.env.STATIC_PATH_FOLDER,
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,
@@ -156,7 +160,7 @@ export class PostsController {
     const response = files.filter(Boolean).map((file) => ({
       originalname: file.originalname,
       filename: file.filename,
-      url: String(process.env.TEST_STAND + file.filename),
+      url: `${process.env.STATIC_PATH}/${file.filename}`,
     }));
     return await this.PostsService.upImages(createPostDto, response);
   }
@@ -167,7 +171,7 @@ export class PostsController {
     description: 'Просмотры',
     type: PostEntity,
   })
-  async addView(@Param() params: any, @Request() data: any): Promise<any> {
+  async addView(@Param() params: any, @Request() data: { user: { _id: string } }): Promise<any> {
     return await this.PostsService.addView(params, data.user._id);
   }
 
@@ -177,44 +181,49 @@ export class PostsController {
     description: 'Лайки',
     type: PostEntity,
   })
-  async liked(@Param() params: GetPostParamsDto, @Request() data: any): Promise<GetPostParamsDto> {
+  async liked(
+    @Param() params: GetPostParamsDto,
+    @Request()
+    data: {
+      user: { _id: string };
+    },
+  ): Promise<GetPostParamsDto> {
     return await this.PostsService.liked(params, data.user._id);
   }
 
+  /**
+   * Создание нового комментария к посту.
+   * @param createComments - Данные для создания поста.
+   * @param params - Параметры запроса.
+   * @param data - Данные запроса.
+   * @returns Созданный комментарий.
+   */
   @Post(':_id/comments')
+  @UsePipes(new ValidationPipe())
   @ApiBody({
-    description: 'Новывй коммент',
-    type: CreatePostEntity,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Коммент успешно создан',
-    type: CreatePostEntity,
+    description: 'Новый комментарий',
+    type: PostCreateCommentDto,
   })
   public async createComment(
-    @Body() createComments: IcPosts,
+    @Body() createComments: PostCreateCommentDto,
     @Param() params: GetPostParamsDto,
-    @Request() data: any,
+    @Request() { user }: { user: { _id: string } },
   ): Promise<IcPosts> {
-    return await this.PostsService.createComment(createComments, params, data.user._id);
+    return await this.PostsService.createComment(createComments, params, user._id);
   }
 
   @Get(':_id/comments')
-  @ApiBody({
-    description: 'Список комментов',
-    type: CommentListEntity,
-  })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Список комментов',
+    description: 'Список комментариев',
     type: CommentListEntity,
   })
-  public async CommentList(
+  public async commentList(
     @Param() params: GetPostParamsDto,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Request() data: unknown,
   ): Promise<unknown> {
-    return await this.PostsService.CommentList(params);
+    return await this.PostsService.commentList(params);
   }
 
   @Post(':_id_post/like-comment/:_id_comment/')
@@ -223,16 +232,13 @@ export class PostsController {
     description: 'Лайки',
     type: CommentListEntity,
   })
-  async CommentLiked(
-    @Param('_id_post') post_id: any,
+  async commentLiked(
+    @Param('_id_post') post_id: string,
     @Param('_id_comment')
-    comment_ID: any,
-    @Request() data: any,
+    comment_id: string,
+    @Request() data: { user: { _id: string } },
   ): Promise<GetPostParamsDto> {
-    console.log(post_id);
-    console.log(comment_ID);
-    await this.PostsService.CommentLiked(post_id, comment_ID, data.user._id);
-    return await this.PostsService.CommentLiked(post_id, comment_ID, data.user._id);
+    return await this.PostsService.commentLiked(post_id, comment_id, data.user._id);
   }
 
   @Post(':_id_post/update-comment/:_id_comment')

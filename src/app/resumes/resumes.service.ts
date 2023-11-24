@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { DeleteResult } from 'mongodb';
 import { Model } from 'mongoose';
 
 import { Resume } from './entities/resume.entity';

@@ -12,7 +12,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { DeleteResult } from 'mongodb';
 import { ResumesService } from './resumes.service';
 
 import { UserId } from '../shared/decorators/user-id.decorator';

@@ -35,7 +35,7 @@ import { IcPosts } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { IPosts } from './interfaces/posts.interface';
-
+import { PostCreateCommentDto } from './dto/post-create-comment.dto';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')

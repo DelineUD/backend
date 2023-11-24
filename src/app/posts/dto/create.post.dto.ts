@@ -1,20 +1,8 @@
-import { IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto {
-  @IsString()
-  @ApiProperty({ default: '' })
-  authorId?: string;
-
-  @IsString()
-  @ApiProperty({ default: 'Текст поста' })
-  pText?: string;
-
-  @IsString()
-  @ApiProperty({ default: 'Группа 1' })
-  group?: string;
-
-  @ApiProperty({ default: 'Картинка' })
-  @IsString()
-  pImg?: Array<string>;
+  @IsNotEmpty() author: string;
+  @IsOptional() @IsString() pText?: string;
+  @IsOptional() @IsString() group?: string;
+  @IsOptional() pImg?: Array<string>;
 }

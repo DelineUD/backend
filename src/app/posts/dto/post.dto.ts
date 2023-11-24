@@ -1,7 +1,7 @@
 export class PostDto {
   _id?: string;
 
-  authorId?: string;
+  author?: string;
 
   createdAt?: string;
 

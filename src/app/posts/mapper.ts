@@ -23,12 +23,12 @@ export const postListMapper = (posts: PostModel[], user: any): IPosts[] => {
 export const postMapper = (post: PostModel, user: any): IPosts => {
   return {
     _id: post._id,
-    authorId: post.authorId,
+    author: post.author,
     pText: post.pText,
     pImg: post.pImg,
     countLikes: post.countLikes ?? 0,
     views_count: post.views.length,
-    isViewed: post.views.includes(user._id) ? true : false,
+    isViewed: post.views.includes(user._id),
     isLiked: post.likes.includes(user._id),
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,

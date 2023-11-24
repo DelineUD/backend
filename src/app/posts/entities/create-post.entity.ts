@@ -5,7 +5,7 @@ export class CreatePostEntity {
     type: String,
     description: 'id автора',
   })
-  authorId: string;
+  author: string;
 
   @ApiProperty({
     type: String,

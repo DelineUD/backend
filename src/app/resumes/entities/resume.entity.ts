@@ -1,7 +1,7 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { IUser } from '../../users/interfaces/user.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 @Schema({
   collection: 'resumes',

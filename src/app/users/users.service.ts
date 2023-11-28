@@ -1,11 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { compare, genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { compare, genSalt, hash } from 'bcrypt';
 
 import { UserModel } from './models/user.model';
-import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
-import { toUserDto } from '../shared/mapper';
+
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+
+import { toUserDto } from '@shared/mapper';
 
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';

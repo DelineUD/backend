@@ -1,6 +1,7 @@
-import { AuthorStatus } from '../consts';
 import { Types } from 'mongoose';
-import { IUser } from '../../users/interfaces/user.interface';
+
+import { AuthorStatus } from '../consts';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 export interface IVacancy {
   _id?: Types.ObjectId;

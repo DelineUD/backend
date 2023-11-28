@@ -1,4 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+
 import { ResumeDto } from './resume.dto';
 
 export class CreateResumeDto extends PartialType(ResumeDto) {

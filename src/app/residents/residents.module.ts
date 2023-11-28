@@ -3,13 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
-import { AuthModule } from '../auth/auth.module';
-import { AuthService } from '../auth/auth.service';
-import { JwtStrategy } from '../auth/jwt.strategy';
+
 import { UserModel, UserSchema } from '../users/models/user.model';
 import { UsersModule } from '../users/users.module';
-import { ResidentsController } from './residents.controller';
+import { AuthModule } from '../auth/auth.module';
+import { AuthService } from '../auth/auth.service';
 import { ResidentsService } from './residents.service';
+import { ResidentsController } from './residents.controller';
+
+import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
 @Module({
   imports: [

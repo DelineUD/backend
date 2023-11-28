@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { IsBooleanString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { AuthorStatus } from '../consts';
-import { IUser } from '../../users/interfaces/user.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 export class VacancyDto {
   // Personal information

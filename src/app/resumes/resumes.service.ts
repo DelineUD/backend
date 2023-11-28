@@ -1,12 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Model } from 'mongoose';
 
+import { InjectModel } from '@nestjs/mongoose';
+
 import { Resume } from './entities/resume.entity';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { IResume } from './interfaces/resume.interface';
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
 import { UpdateResumeDto } from './dto/update-resume.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '../users/users.service';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
@@ -51,10 +52,7 @@ export class ResumesService {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const resumes = await this.resumeModel
-        .find({ author: userId })
-        .populate('author', 'first_name last_name')
-        .exec();
+      const resumes = await this.resumeModel.find({ author: userId }).populate('author', 'first_name last_name').exec();
 
       if (!resumes.length) {
         return [];
@@ -76,10 +74,7 @@ export class ResumesService {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const resume = await this.resumeModel
-        .findOne({ author: userId, id })
-        .populate('author')
-        .exec();
+      const resume = await this.resumeModel.findOne({ author: userId, id }).populate('author').exec();
       if (!resume) {
         throw new EntityNotFoundError(`Резюме не найдено`);
       }

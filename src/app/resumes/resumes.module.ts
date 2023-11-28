@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+
 import { Resume, ResumeSchema } from './entities/resume.entity';
 import { ResumesController } from './resumes.controller';
 import { ResumesService } from './resumes.service';

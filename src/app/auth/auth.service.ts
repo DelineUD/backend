@@ -6,38 +6,39 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import HttpStatusCode from 'http-status-typed';
-import { SMSService } from '../../apis/index';
+
 import { JwtService } from '@nestjs/jwt';
 
-import { checkUserExists } from './interfaces/check-user-exists.interface';
+import { UserModel } from '../users/models/user.model';
+import { UsersService } from '../users/users.service';
+
 import { ILoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
+import { IJwtResponse } from './interfaces/login-jwt.interface';
+import { ILoginSmsResponse } from './interfaces/login-sms.interface';
+import { ISensSmsResponse } from './interfaces/send-sms.interface';
+import { IJwtPayload } from './interfaces/jwt-payload.interface';
+import { IAuthToken } from './interfaces/auth-tokens.interface';
+import { IUser } from '../users/interfaces/user.interface';
 
 import { UserDto } from '../users/dto/user.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { GetMeDto } from './dto/get-me.dto';
-
-import { UsersService } from '../users/users.service';
-import { IJwtResponse } from './interfaces/login-jwt.interface';
-import generateOTPCode from '../shared/utils/generateOTPCode';
-import { ILoginSmsResponse } from './interfaces/login-sms.interface';
-import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { SendSmsDto } from './dto/send-sms.dto';
-import { UserModel } from '../users/models/user.model';
 import { LoginSmsDto } from './dto/login-sms.dto';
-import { IJwtPayload } from './interfaces/jwt-payload.interface';
-import { IAuthToken } from './interfaces/auth-tokens.interface';
 import { GetNewTokensDto } from './dto/get-new-tokens.dto';
-import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
+import { SendSmsDto } from './dto/send-sms.dto';
+
+import generateOTPCode from '../shared/utils/generateOTPCode';
+import { SmsService } from '@shared/services/sms.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly smsService: SmsService,
   ) {}
 
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
@@ -88,16 +89,8 @@ export class AuthService {
     };
   }
 
-  async checkUserExists({ phone }: LoginUserDto): Promise<checkUserExists> {
-    const user = await this.usersService.findByPhone(phone);
-    return {
-      phone: user.phone,
-      status: HttpStatusCode.OK,
-    };
-  }
-
   async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
-    const user = await this.usersService.findByPhone(phone);
+    const user = (await this.usersService.findByPhone(phone)) as IUser;
 
     if (!user) {
       throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
@@ -105,7 +98,7 @@ export class AuthService {
 
     const otpCode = generateOTPCode(4);
     const msg = `Код авторизации: ${otpCode}`;
-    const { status, status_code } = await SMSService.send(user.phone, msg);
+    const { status, status_code } = await this.smsService.send(user.phone, msg);
 
     if (status_code === 100) {
       await this.usersService.update({ _id: user._id }, { vPass: otpCode });
@@ -128,7 +121,7 @@ export class AuthService {
       vPass: +loginData[1],
     };
 
-    const user = await this.usersService.findByPayload({ phone: payload.phone });
+    const user = (await this.usersService.findByPayload({ phone: payload.phone })) as IUser;
     if ((!user && user.vPass !== payload.vPass) || payload.vPass !== 1221) {
       throw new ForbiddenException(`Неверный код!`);
     }
@@ -170,7 +163,7 @@ export class AuthService {
     }
 
     const { phone }: IJwtPayload = await this.jwtService.verifyAsync(noBearer);
-    const user = await this.usersService.findByPhone(phone);
+    const user = (await this.usersService.findByPhone(phone)) as IUser;
 
     return {
       _id: user._id,

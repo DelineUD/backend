@@ -1,7 +1,9 @@
 import { IsEmail, IsPhoneNumber, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-export class CreateUserDto {
+import { UserDto } from './user.dto';
+
+export class CreateUserDto extends PartialType(UserDto) {
   // Personal Information
   @IsEmail()
   @IsString()

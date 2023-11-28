@@ -4,8 +4,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { NotFoundInterceptor } from './shared/interceptors/not-found.interceptor';
-import { getMongoConfig } from '../config/db-connect.config';
+import { NotFoundInterceptor } from '@shared/interceptors/not-found.interceptor';
+import { getMongoConfig } from '@/config/db-connect.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 

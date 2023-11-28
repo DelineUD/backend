@@ -11,20 +11,22 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { LoginSmsDto } from './dto/login-sms.dto';
+import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+
+import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt.guard';
+
+import { ILoginSmsResponse } from './interfaces/login-sms.interface';
+import { RegistrationStatus } from './interfaces/regisration-status.interface';
+import { ISensSmsResponse } from './interfaces/send-sms.interface';
+import { IJwtResponse } from './interfaces/login-jwt.interface';
+import { ILoginStatus } from './interfaces/login-status.interface';
+
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { GetMeDto } from './dto/get-me.dto';
-import { checkUserExists } from './interfaces/check-user-exists.interface';
-import { IJwtResponse } from './interfaces/login-jwt.interface';
-import { ILoginStatus } from './interfaces/login-status.interface';
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from './guards/jwt.guard';
-import { ILoginSmsResponse } from './interfaces/login-sms.interface';
-import { ISensSmsResponse } from './interfaces/send-sms.interface';
 import { SendSmsDto } from './dto/send-sms.dto';
+import { LoginSmsDto } from './dto/login-sms.dto';
 import { GetNewTokensDto } from './dto/get-new-tokens.dto';
 
 @ApiTags('Auth')
@@ -51,11 +53,6 @@ export class AuthController {
   @Post('login')
   public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
     return await this.authService.login(loginUserDto);
-  }
-
-  @Post('check-user-exists')
-  public async checkUserExists(@Body() loginUserDto: LoginUserDto): Promise<checkUserExists> {
-    return await this.authService.checkUserExists(loginUserDto);
   }
 
   @Post('send-sms')

@@ -18,6 +18,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
+
 import { editFileName, imageFileFilter } from '../upload/upload.service';
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
@@ -256,11 +257,7 @@ export class PostsController {
     @Body() updateComment: IcPosts,
     @Request() data: any,
   ): Promise<IcPosts> {
-    const result: IcPosts = await this.PostsService.updateComment(
-      comment_ID,
-      updateComment,
-      data.user._id,
-    );
+    const result: IcPosts = await this.PostsService.updateComment(comment_ID, updateComment, data.user._id);
 
     if (!result) {
       throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
@@ -285,11 +282,7 @@ export class PostsController {
     comment_ID: any,
     @Request() data: any,
   ): Promise<any> {
-    const result: IcPosts = await this.PostsService.deleteComment(
-      comment_ID,
-      data.user._id,
-      post_id,
-    );
+    const result: IcPosts = await this.PostsService.deleteComment(comment_ID, data.user._id, post_id);
 
     if (!result) {
       throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);

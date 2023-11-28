@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
-import { UserId } from '../shared/decorators/user-id.decorator';
-import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { VacancyService } from './vacancy.service';
 
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -105,10 +105,7 @@ export class VacancyController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'id', description: 'Vacancy ID' })
-  async remove(
-    @UserId() userId: string,
-    @Param('id') id: string,
-  ): Promise<IRemoveEntity<IVacancy>> {
+  async remove(@UserId() userId: string, @Param('id') id: string): Promise<IRemoveEntity<IVacancy>> {
     return this.vacancyService.remove(userId, id);
   }
 }

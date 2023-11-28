@@ -13,6 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
+
 import { editFileName, imageFileFilter } from '../upload/upload.service';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { Resident } from './entities/resident.entity';

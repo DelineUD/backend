@@ -22,7 +22,6 @@ import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { IAuthToken } from './interfaces/auth-tokens.interface';
 import { IUser } from '../users/interfaces/user.interface';
 
-import { UserDto } from '../users/dto/user.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { GetMeDto } from './dto/get-me.dto';
@@ -48,7 +47,7 @@ export class AuthService {
     };
 
     try {
-      await this.usersService.create(userDto);
+      await this.usersService.createOrUpdate(userDto);
     } catch (err) {
       status = {
         success: false,
@@ -60,13 +59,13 @@ export class AuthService {
 
   async login(loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
     const user = await this.usersService.findByLogin(loginUserDto);
-    const token = this._createToken(user);
+    const token = this._createToken(user.phone);
     return {
       data: { ...token },
     };
   }
 
-  async validateUser(payload: JwtPayload): Promise<UserDto> {
+  async validateUser(payload: JwtPayload): Promise<IUser> {
     const user = await this.usersService.findByPayload(payload as UserModel);
     if (!user) {
       throw new HttpException('Невалидный токен', HttpStatus.UNAUTHORIZED);
@@ -74,7 +73,7 @@ export class AuthService {
     return user;
   }
 
-  private _createToken({ phone }: UserDto): IAuthToken {
+  private _createToken(phone: number): IAuthToken {
     const user: JwtPayload = { phone };
     const accessToken = this.jwtService.sign(user, {
       expiresIn: '30d',
@@ -90,7 +89,7 @@ export class AuthService {
   }
 
   async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
-    const user = (await this.usersService.findByPhone(phone)) as IUser;
+    const user = await this.usersService.findByPhone(phone);
 
     if (!user) {
       throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
@@ -121,12 +120,12 @@ export class AuthService {
       vPass: +loginData[1],
     };
 
-    const user = (await this.usersService.findByPayload({ phone: payload.phone })) as IUser;
-    if ((!user && user.vPass !== payload.vPass) || payload.vPass !== 1221) {
+    const user = await this.usersService.findByPayload({ phone: payload.phone });
+    if ((!user && user.vPass !== payload.vPass) || payload.vPass !== Number(process.env.QUICK_CODE)) {
       throw new ForbiddenException(`Неверный код!`);
     }
 
-    const tokens = this._createToken(user);
+    const tokens = this._createToken(user.phone);
     await this.usersService.deleteProperty(user._id, { vPass: payload.vPass });
 
     return {
@@ -145,7 +144,7 @@ export class AuthService {
     const { phone }: IJwtPayload = await this.jwtService.verifyAsync(refreshToken);
     const user = await this.usersService.findByPhone(phone);
 
-    const tokens = this._createToken(user);
+    const tokens = this._createToken(user.phone);
     return {
       ...tokens,
     };
@@ -163,7 +162,7 @@ export class AuthService {
     }
 
     const { phone }: IJwtPayload = await this.jwtService.verifyAsync(noBearer);
-    const user = (await this.usersService.findByPhone(phone)) as IUser;
+    const user = await this.usersService.findByPhone(phone);
 
     return {
       _id: user._id,

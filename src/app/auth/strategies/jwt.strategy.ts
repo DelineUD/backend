@@ -2,9 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { UserDto } from '@app/users/dto/user.dto';
 import { AuthService } from '../auth.service';
 import { JwtPayloadProfile } from '../interfaces/payload-profile.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayloadProfile): Promise<UserDto> {
+  async validate(payload: JwtPayloadProfile): Promise<IUser> {
     const user = await this.authService.validateUser(payload);
     if (!user) {
       throw new HttpException('Невалидный токен!', HttpStatus.UNAUTHORIZED);

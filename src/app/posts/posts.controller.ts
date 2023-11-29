@@ -15,15 +15,15 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 
 import { editFileName, imageFileFilter } from '../upload/upload.service';
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { GetPostParamsDto } from './dto/get-post-params.dto';
-import { UpdatePostDto } from './dto/update.post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentListEntity } from './entities/comment-list.entity';
 import { CreatePostEntity } from './entities/create-post.entity';
 import { DeleteCommentPostEntity } from './entities/delete-comment.entity';
@@ -37,6 +37,10 @@ import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { IPosts } from './interfaces/posts.interface';
 import { PostCreateCommentDto } from './dto/post-create-comment.dto';
+import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { IPostsFindQuery } from '@app/posts/interfaces/posts-find-query.interface';
+import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
@@ -45,85 +49,70 @@ import { PostCreateCommentDto } from './dto/post-create-comment.dto';
 export class PostsController {
   constructor(private PostsService: PostsService) {}
 
-  @Get('list')
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'список постов',
-    type: [PostEntity],
-  })
-  public async getList(
-    @Request() data: any,
-    @Query('search') search: string,
-    @Query('lastIndex') lastIndex: any,
-    @Query('group') group: any,
-  ): Promise<any> {
-    console.log(group);
-    return await this.PostsService.getPostsList(data, search, lastIndex, group);
-  }
-
+  /**
+   * Создание поста.
+   * @param createPostDto - Данные для создания поста.
+   * @return - Созданный пост
+   */
   @Post('create')
-  @ApiBody({
-    description: 'Новывй пост',
-    type: CreatePostEntity,
-  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Пост успешно создан',
     type: CreatePostEntity,
   })
-  public async create(
-    @Body()
-    createPostDto: CreatePostDto,
-  ): Promise<IcPosts> {
+  public async create(@Body() createPostDto: CreatePostDto): Promise<IPosts> {
     return await this.PostsService.create(createPostDto);
   }
 
-  @Post('update')
-  @ApiBody({
-    description: 'Обновление поста',
-    type: UpdatePostEntity,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Пост успешно обновлен',
-    type: UpdatePostEntity,
-  })
-  public async update(
-    @Body()
-    updatePostDto: UpdatePostDto,
-  ): Promise<IcPosts> {
-    const result: IcPosts = await this.PostsService.update(updatePostDto);
-
-    if (!result) {
-      throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
-    }
-
-    return result;
-  }
-
+  /**
+   * Удаление поста.
+   * @param userId - id пользователя.
+   * @param deletePostDto - Данные для удаления поста.
+   * @return - Удаленные данные
+   */
   @Delete('delete')
-  @ApiBody({
-    description: 'Удаление поста',
-    type: DeletePostEntity,
-  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Пост успешно удаленн',
     type: DeletePostEntity,
   })
-  public async delete(
-    @Body()
-    deletePostDto: DeletePostDto,
-  ): Promise<IPosts> {
-    const result: IcPosts = await this.PostsService.delete(deletePostDto);
-
-    if (!result) {
-      throw new HttpException('Запись не найдена!', HttpStatus.BAD_REQUEST);
-    }
-
-    return result;
+  public async delete(@UserId() userId: string, @Body() deletePostDto: DeletePostDto): Promise<IRemoveEntity<IPosts>> {
+    return await this.PostsService.delete(userId, deletePostDto);
   }
 
+  /**
+   * Обновление поста.
+   * @param userId - id пользователя.
+   * @param updatePostDto - Данные для обноввления поста.
+   * @return - Обновленный пост
+   */
+  @Post('update')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Пост успешно обновлен',
+    type: UpdatePostEntity,
+  })
+  public async update(@UserId() userId: string, @Body() updatePostDto: UpdatePostDto): Promise<IcPosts> {
+    return await this.PostsService.update(userId, updatePostDto);
+  }
+
+  /**
+   * Нахожднение всех постов.
+   * @param userId - id пользователя.
+   * @param queryParams - Данные для нахождения поста.
+   * @return - Созданный пост
+   */
+  @Get('list')
+  public async findAll(@UserId() userId: string, @Query() queryParams: IPostsFindQuery): Promise<IPosts[]> {
+    return await this.PostsService.findAll(userId, queryParams);
+  }
+
+  /**
+   * Получние поста по id.
+   * @param userId - id пользователя.
+   * @param params - Данные для нахождения поста.
+   * @returns - Пост.
+   */
   @Get(':_id')
   @ApiResponse({
     status: HttpStatus.OK,
@@ -131,18 +120,39 @@ export class PostsController {
     type: PostEntity,
   })
   @ApiParam({ name: '_id', required: true })
-  async getById(@Param() params: GetPostParamsDto, @Request() data: any): Promise<IPosts> {
-    return await this.PostsService.getPostById(params, data);
+  async getById(@UserId() userId: string, @Param() params: GetPostParamsDto): Promise<IPosts> {
+    return await this.PostsService.getPostById(userId, params);
   }
 
+  /**
+   * Загрузка изображений для поста.
+   * @param uploadFilesDto - Данные поста для загрузки.
+   * @param files - Файлы.
+   * @returns - Обновленный пост.
+   */
   @Post('upload-images')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Загрузка картинок',
     type: PostEntity,
   })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        postId: { type: 'string' },
+        authorId: { type: 'string' },
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(
-    FilesInterceptor('image', 4, {
+    FilesInterceptor('file', 4, {
       storage: diskStorage({
         destination: process.env.STATIC_PATH_FOLDER,
         filename: editFileName,
@@ -150,18 +160,11 @@ export class PostsController {
       fileFilter: imageFileFilter,
     }),
   )
-  public async upImages(
-    @Body()
-    createPostDto: CreatePostDto,
-    @UploadedFiles()
-    files: Express.Multer.File[],
-  ): Promise<IcPosts> {
-    const response = files.filter(Boolean).map((file) => ({
-      originalname: file.originalname,
-      filename: file.filename,
-      url: `${process.env.STATIC_PATH}/${file.filename}`,
-    }));
-    return await this.PostsService.upImages(createPostDto, response);
+  public async uploadImages(
+    @Body() uploadFilesDto: PostUploadDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<IPosts> {
+    return await this.PostsService.uploadImages(uploadFilesDto, files);
   }
 
   @Post(':_id/view')
@@ -174,20 +177,20 @@ export class PostsController {
     return await this.PostsService.addView(params, data.user._id);
   }
 
+  /**
+   * Лайк на пост.
+   * @param userId - id пользователя.
+   * @param params - Данные для нахождения поста.
+   * @returns - Обновленный пост.
+   */
   @Post(':_id/like')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Лайки',
     type: PostEntity,
   })
-  async liked(
-    @Param() params: GetPostParamsDto,
-    @Request()
-    data: {
-      user: { _id: string };
-    },
-  ): Promise<GetPostParamsDto> {
-    return await this.PostsService.liked(params, data.user._id);
+  async liked(@UserId() userId: string, @Param() params: GetPostParamsDto): Promise<IPosts> {
+    return await this.PostsService.liked(userId, params);
   }
 
   /**
@@ -195,7 +198,7 @@ export class PostsController {
    * @param createComments - Данные для создания поста.
    * @param params - Параметры запроса.
    * @param data - Данные запроса.
-   * @returns Созданный комментарий.
+   * @returns - Созданный комментарий.
    */
   @Post(':_id/comments')
   @UsePipes(new ValidationPipe())

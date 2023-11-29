@@ -3,16 +3,16 @@ import { UserModel } from '../users/models/user.model';
 import { IPosts } from './interfaces/posts.interface';
 import { PostCommentsModel } from './models/posts.comments.model';
 
-export const postListMapper = (posts: PostModel[], user: any): IPosts[] => {
+export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
   return posts.map((posts) => ({
     _id: posts._id,
-    authorId: posts.authorId,
+    author: posts.author,
     pText: posts.pText,
     pImg: posts.pImg,
     countLikes: posts.countLikes ?? 0,
     views_count: posts.views.length,
-    isLiked: posts.likes.includes(user._id),
-    isViewed: posts.views.includes(user._id) ? true : false,
+    isLiked: posts.likes.includes(String(user._id)),
+    isViewed: posts.views.includes(String(user._id)),
     createdAt: posts.createdAt,
     updatedAt: posts.updatedAt,
     countComments: posts.countComments,
@@ -20,7 +20,7 @@ export const postListMapper = (posts: PostModel[], user: any): IPosts[] => {
   }));
 };
 
-export const postMapper = (post: PostModel, user: any): IPosts => {
+export const postMapper = (post: IPosts, user: UserModel): IPosts => {
   return {
     _id: post._id,
     author: post.author,
@@ -28,8 +28,8 @@ export const postMapper = (post: PostModel, user: any): IPosts => {
     pImg: post.pImg,
     countLikes: post.countLikes ?? 0,
     views_count: post.views.length,
-    isViewed: post.views.includes(user._id),
-    isLiked: post.likes.includes(user._id),
+    isViewed: post.views.includes(String(user._id)),
+    isLiked: post.likes.includes(String(user._id)),
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     countComments: post.countComments,

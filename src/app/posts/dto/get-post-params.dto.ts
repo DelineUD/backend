@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class GetPostParamsDto {
-  @ApiProperty({ default: '655cf785a1fc023840786396' })
+  @ApiProperty({ default: '' })
+  @IsString()
+  @IsNotEmpty()
   _id?: string;
-  views?: number;
 }

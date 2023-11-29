@@ -1,8 +1,14 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-export class CreatePostDto {
-  @IsNotEmpty() author: string;
-  @IsOptional() @IsString() pText?: string;
-  @IsOptional() @IsString() group?: string;
-  @IsOptional() pImg?: Array<string>;
+import { PostDto } from '@app/posts/dto/post.dto';
+
+export class CreatePostDto extends PartialType(PostDto) {
+  @ApiProperty({ default: '' })
+  author: string;
+  @ApiProperty({ default: 'Новый пост' })
+  pText?: string;
+  @ApiProperty({ default: 'Новое' })
+  group?: string;
+  @ApiProperty({ default: [] })
+  pImg?: Array<string>;
 }

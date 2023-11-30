@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+
 import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
+
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { GetPostParamsDto } from './dto/get-post-params.dto';
@@ -34,9 +36,7 @@ export class PostsService {
       if (group !== undefined) {
         sorted = postsFind.filter(
           (el) =>
-            el.pText.toLowerCase().includes(search.toLowerCase()) &&
-            el.group !== undefined &&
-            el.group.includes(group),
+            el.pText.toLowerCase().includes(search.toLowerCase()) && el.group !== undefined && el.group.includes(group),
         );
       }
 
@@ -55,9 +55,7 @@ export class PostsService {
       if (group !== undefined) {
         sorted = postsFind.filter(
           (el) =>
-            el.pText.toLowerCase().includes(search.toLowerCase()) &&
-            el.group !== undefined &&
-            el.group.includes(group),
+            el.pText.toLowerCase().includes(search.toLowerCase()) && el.group !== undefined && el.group.includes(group),
         );
       }
       const newArr = [];
@@ -93,10 +91,7 @@ export class PostsService {
       }
 
       if (group !== undefined) {
-        const postsStart = await this.postModel
-          .find({ group: group })
-          .limit(10)
-          .sort({ createdAt: -1 });
+        const postsStart = await this.postModel.find({ group: group }).limit(10).sort({ createdAt: -1 });
         return postListMapper(postsStart, user);
       }
     }
@@ -327,11 +322,7 @@ export class PostsService {
     }
   }
 
-  async createComment(
-    createComments: IcPosts,
-    paramPostId: GetPostParamsDto,
-    userId: string,
-  ): Promise<IcPosts> {
+  async createComment(createComments: IcPosts, paramPostId: GetPostParamsDto, userId: string): Promise<IcPosts> {
     const { cText, cImg } = createComments;
     const { _id } = paramPostId;
     const postInDb = await this.postModel.findOne({ _id }).exec();

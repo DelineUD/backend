@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+
 import { IcPosts } from '../interfaces/posts.comments.interface';
 
 @Schema({

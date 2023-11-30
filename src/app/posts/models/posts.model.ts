@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+
 import { IPosts } from '../interfaces/posts.interface';
 import { IUser } from '../../users/interfaces/user.interface';
 

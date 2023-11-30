@@ -9,9 +9,7 @@ const getMongoOptions = () => ({
   useUnifiedTopology: true,
 });
 
-export const getMongoConfig = async (
-  configService: ConfigService,
-): Promise<MongooseModuleOptions> => {
+export const getMongoConfig = async (configService: ConfigService): Promise<MongooseModuleOptions> => {
   return {
     uri: getMongoString(configService),
     ...getMongoOptions(),

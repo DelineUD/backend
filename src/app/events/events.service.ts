@@ -2,7 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
+
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { IEvents } from './interfaces/events.interface';
 import { eventListMapper, eventMapper } from './mapper';
@@ -42,20 +43,9 @@ export class EventsService {
     });
     return eventListMapper(ev_d, initUsr);
   }
+
   async create(eventDto: IEvents): Promise<IEvents> {
-    const {
-      _id,
-      authorId,
-      hText,
-      hImg,
-      startDate,
-      stopDate,
-      addr,
-      category,
-      access,
-      format,
-      bodyText,
-    } = eventDto;
+    const { _id, authorId, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);
@@ -83,19 +73,7 @@ export class EventsService {
   }
 
   async update(eventDto: IEvents): Promise<IEvents> {
-    const {
-      _id,
-      authorId,
-      hText,
-      hImg,
-      startDate,
-      stopDate,
-      addr,
-      category,
-      access,
-      format,
-      bodyText,
-    } = eventDto;
+    const { _id, authorId, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);

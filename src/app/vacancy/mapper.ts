@@ -1,12 +1,7 @@
 import { IVacancy } from './interfaces/vacancy.interface';
 
-import { groupDtoFields } from '../shared/helpers/groupDto';
-import {
-  allCourses,
-  allNarrowSpecializations,
-  allPrograms,
-  allSpecializations,
-} from '../shared/consts';
+import { groupDtoFields } from '@helpers/groupDto';
+import { allCourses, allNarrowSpecializations, allPrograms, allSpecializations } from '@shared/consts';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 
 export const vacancyMapper = (dto: CreateVacancyDto): IVacancy => {

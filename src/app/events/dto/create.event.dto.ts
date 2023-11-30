@@ -1,15 +1,5 @@
-import { IsNotEmpty } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
 
-export class CreatePostDto {
-  @IsNotEmpty()
-  authorId?: string;
+import { EventDto } from '@app/events/dto/event.dto';
 
-  @IsNotEmpty()
-  pText?: string;
-
-  group?: string;
-
-  pImg?: Array<string>;
-
-  stick?: boolean;
-}
+export class CreatePostDto extends PartialType(EventDto) {}

@@ -2,8 +2,8 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { EntityNotFoundError } from '../shared/interceptors/not-found.interceptor';
-import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { vacancyMapper } from './mapper';
 
 import { Vacancy } from './entities/vacancy.entity';
@@ -106,9 +106,7 @@ export class VacancyService {
         throw new EntityNotFoundError(`Вакансия не найдена`);
       }
 
-      return (await vacancy
-        .updateOne({ author: { _id: userId }, id }, { ...updateVacancyDto })
-        .exec()) as IVacancy;
+      return (await vacancy.updateOne({ author: { _id: userId }, id }, { ...updateVacancyDto }).exec()) as IVacancy;
     } catch (err) {
       console.error(`Ошибка при обновлении вакансии: ${(err as Error).message}`);
       throw err;

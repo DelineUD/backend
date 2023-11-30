@@ -1,18 +1,6 @@
-import {
-  IsBoolean,
-  IsDate,
-  IsEmail,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-} from 'class-validator';
-import { Types } from 'mongoose';
+import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class UserDto {
-  _id?: Types.ObjectId;
-
   // Personal Information
   @IsNotEmpty()
   @IsEmail()

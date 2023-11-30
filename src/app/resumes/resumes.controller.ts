@@ -12,15 +12,16 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+
 import { ResumesService } from './resumes.service';
 
-import { UserId } from '../shared/decorators/user-id.decorator';
+import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { IResume } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { UpdateResumeDto } from './dto/update-resume.dto';
-import { IRemoveEntity } from '../shared/interfaces/remove-entity.interface';
+import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 
 @ApiTags('Resumes')
 @Controller('resumes')

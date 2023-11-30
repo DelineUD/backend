@@ -3,7 +3,5 @@ export function groupDtoFields(dto: Record<string, any>, fields: string[]) {
     return dto[fieldName];
   };
 
-  return fields
-    .filter((field) => getItemString(dto, field))
-    .map((field) => getItemString(dto, field));
+  return fields.filter((field) => getItemString(dto, field)).map((field) => getItemString(dto, field));
 }

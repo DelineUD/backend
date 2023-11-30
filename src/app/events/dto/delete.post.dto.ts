@@ -1,9 +1,5 @@
-import { IsNotEmpty } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
 
-export class DeletePostDto {
-  @IsNotEmpty()
-  authorId?: string;
+import { EventDto } from '@app/events/dto/event.dto';
 
-  @IsNotEmpty()
-  _id: string;
-}
+export class DeletePostDto extends PartialType(EventDto) {}

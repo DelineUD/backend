@@ -34,8 +34,8 @@ export interface IUser {
   hide_phone?: boolean;
   qualification_color?: string;
 
-  courses_newapp: string[];
-  programs_newapp: string[];
-  specialization_newapp: string[];
-  narrow_spec_newapp: string[];
+  courses_new_app: string[];
+  programs_new_app: string[];
+  specialization_new_app: string[];
+  narrow_spec_new_app: string[];
 }

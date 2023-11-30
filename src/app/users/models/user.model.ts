@@ -47,16 +47,16 @@ export class UserModel extends Document implements IUser {
   @Prop() qualification_color?: string;
 
   // Courses
-  @Prop() courses_newapp: string[];
+  @Prop() courses_new_app: string[];
 
   // Programs
-  @Prop() programs_newapp: string[];
+  @Prop() programs_new_app: string[];
 
   // Specializations
-  @Prop() specialization_newapp: string[];
+  @Prop() specialization_new_app: string[];
 
   // Narrow Specializations
-  @Prop() narrow_spec_newapp: string[];
+  @Prop() narrow_spec_new_app: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

@@ -103,20 +103,20 @@ export class UserDto {
   // Courses
   @IsOptional()
   @IsString()
-  courses_newapp?: string;
+  courses_new_app?: string;
 
   // Programs
   @IsOptional()
   @IsString()
-  programs_newapp?: string;
+  programs_new_app?: string;
 
   // Specializations
   @IsOptional()
   @IsString()
-  specialization_newapp?: string;
+  specialization_new_app?: string;
 
   // Narrow Specializations
   @IsOptional()
   @IsString()
-  narrow_spec_newapp?: string;
+  narrow_spec_new_app?: string;
 }

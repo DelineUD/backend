@@ -3,12 +3,12 @@ import { IUser } from '@app/users/interfaces/user.interface';
 import { splitDtoField } from '@helpers/splitDto';
 
 export const userMapper = (dto: UserDto): IUser => {
-  const { courses_newapp, programs_newapp, specialization_newapp, narrow_spec_newapp, ...rest } = dto;
+  const { courses_new_app, programs_new_app, specialization_new_app, narrow_spec_new_app, ...rest } = dto;
   return {
     ...rest,
-    courses_newapp: splitDtoField(courses_newapp),
-    programs_newapp: splitDtoField(programs_newapp),
-    specialization_newapp: splitDtoField(specialization_newapp),
-    narrow_spec_newapp: splitDtoField(narrow_spec_newapp),
+    courses_new_app: splitDtoField(courses_new_app),
+    programs_new_app: splitDtoField(programs_new_app),
+    specialization_new_app: splitDtoField(specialization_new_app),
+    narrow_spec_new_app: splitDtoField(narrow_spec_new_app),
   } as IUser;
 };

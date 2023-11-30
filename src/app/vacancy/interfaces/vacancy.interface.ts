@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+
 import { IUser } from '@app/users/interfaces/user.interface';
 
 export interface IVacancy {

@@ -25,11 +25,11 @@ export class CreateUserDto extends PartialType(UserDto) {
   readonly birthday: Date;
 
   @ApiProperty({ default: 'Курс 1, Курс 2', required: false })
-  readonly courses_newapp?: string;
+  readonly courses_new_app?: string;
   @ApiProperty({ default: 'Программа 1, Программа 2', required: false })
-  readonly programs_newapp?: string;
+  readonly programs_new_app?: string;
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
-  readonly specialization_newapp?: string;
+  readonly specialization_new_app?: string;
   @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
-  readonly narrow_spec_newapp?: string;
+  readonly narrow_spec_new_app?: string;
 }

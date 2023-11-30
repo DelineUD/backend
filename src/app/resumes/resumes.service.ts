@@ -21,20 +21,23 @@ export class ResumesService {
     private readonly usersService: UsersService,
   ) {}
 
-  async update(userId: string, resumeDto: ICrudResumeParams): Promise<IResume[]> {
+  async update(userId: string, resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { author: userId, ...resumeDto } as ResumeDto;
-      const normalizedDto = normalizeDto(dto, '_resume') as unknown as ResumeDto[];
+      const dto = { author: userId, ...resumeParams } as ResumeDto;
+      const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
       const resumesMapped = normalizedDto.map((r) => resumeMapper(r));
 
-      await this.resumeModel.deleteMany({ author: userId });
+      await Promise.all([
+        await this.resumeModel.deleteMany({ author: userId }),
+        await this.resumeModel.create(...resumesMapped),
+      ]);
 
-      return this.resumeModel.create(...resumesMapped);
+      return await this.resumeModel.find({ ...resumesMapped });
     } catch (err) {
       console.error(`Ошибка при обновлении резюме: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при обновлении резюме!');

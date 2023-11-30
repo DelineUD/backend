@@ -16,16 +16,16 @@ export class ResumesController {
 
   /**
    * Создание или обновление резюме.
-   * @param resumeDto - Данные для резюме.
    * @param userId - id пользователя.
+   * @param resumeParams - Данные для резюме.
    * @returns - Резюме.
    */
   @Post('update')
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(@UserId() userId: string, @Query() resumeDto: ICrudResumeParams): Promise<IResume | IResume[]> {
-    return await this.resumesService.update(userId, resumeDto);
+  async create(@UserId() userId: string, @Query() resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
+    return await this.resumesService.update(userId, resumeParams);
   }
 
   /**

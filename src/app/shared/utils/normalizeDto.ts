@@ -1,13 +1,22 @@
-import { ResumeDto } from '@app/resumes/dto/resume.dto';
+import { INormalizeDto } from '@shared/interfaces/normalize-dto.interface';
 
-function normalizeDto(dto: ResumeDto, prefix: string): Record<string, string>[] {
+/**
+ * Утилита для приведение данных с гет к виду модели.
+ * @param dto - данные c гет { author: string, id: string, ... }.
+ * @param prefix - Префикс параметров с гет (_prefix1).
+ * @returns - Массив нормализованных моделей.
+ */
+
+function normalizeDto<T extends INormalizeDto>(dto: T, prefix: string): INormalizeDto[] {
   const { author, ...rest } = dto;
-  const entities: Record<string, string>[] = [];
+  const entities: INormalizeDto[] = [];
 
+  // Сортировка ключей dto по префиксу и добавление в массив сущностей под своим индексом
   Object.keys(rest).forEach((key) => {
-    const count = +key[key.length - 1] - 1;
-    const prefixHere = `${prefix}${count + 1}`;
+    const count = +key[key.length - 1] - 1; // Индекс сущности
+    const prefixHere = `${prefix}${count + 1}`; // Префикс с индексом
 
+    // Определяем нужный префикс
     if (key.endsWith(prefixHere)) {
       entities[count] = {
         ...entities[count],
@@ -17,6 +26,7 @@ function normalizeDto(dto: ResumeDto, prefix: string): Record<string, string>[] 
     }
   });
 
+  // Сущности у которых есть id
   return entities.filter((e) => e.id);
 }
 

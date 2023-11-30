@@ -1,7 +1,41 @@
 import { Types } from 'mongoose';
 
-import { UserDto } from '../dto/user.dto';
-
-export interface IUser extends UserDto {
+export interface IUser {
   _id?: Types.ObjectId;
+
+  email: string;
+  phone: number;
+  password: string;
+  first_name: string;
+  last_name: string;
+  birthday?: Date;
+  avatar?: string;
+  gender?: string;
+  badge?: string;
+  cntry?: string;
+  vPass?: number;
+
+  city_ru?: string;
+  citynru?: string;
+
+  about?: string;
+  education?: string;
+  qualification?: string;
+  ready_communicate?: boolean;
+  remote_work?: boolean;
+  status?: string;
+
+  service_cost?: number;
+  site?: string;
+  instagram?: string;
+  telegram?: string;
+  vk?: string;
+
+  hide_phone?: boolean;
+  qualification_color?: string;
+
+  courses_new_app: string[];
+  programs_new_app: string[];
+  specialization_new_app: string[];
+  narrow_spec_new_app: string[];
 }

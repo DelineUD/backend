@@ -1,4 +1,15 @@
-import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsBooleanString,
+  IsDate,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsNumberString,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class UserDto {
   // Personal Information
@@ -14,7 +25,7 @@ export class UserDto {
   @IsString()
   password?: string;
   @IsOptional()
-  @IsNumber()
+  @IsNumberString()
   vPass?: number;
   @IsOptional()
   @IsString()
@@ -24,6 +35,7 @@ export class UserDto {
   last_name?: string;
   @IsOptional()
   @IsDate()
+  @Transform(({ value }) => new Date(value))
   birthday?: Date;
   @IsOptional()
   @IsString()
@@ -50,10 +62,22 @@ export class UserDto {
   @IsOptional()
   @IsString()
   education?: string;
+  @IsOptional()
+  @IsString()
+  qualification?: string;
+  @IsOptional()
+  @IsString()
+  ready_communicate?: boolean;
+  @IsOptional()
+  @IsBooleanString()
+  remote_work?: boolean;
+  @IsOptional()
+  @IsString()
+  status?: string;
 
   // Social Media
   @IsOptional()
-  @IsNumber()
+  @IsNumberString()
   service_cost?: number;
   @IsOptional()
   @IsString()
@@ -64,192 +88,35 @@ export class UserDto {
   @IsOptional()
   @IsString()
   telegram?: string;
-  @IsOptional() @IsString() vk?: string;
+  @IsOptional()
+  @IsString()
+  vk?: string;
 
   // Preferences
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   hide_phone?: boolean;
   @IsOptional()
   @IsString()
   qualification_color?: string;
 
-  // Programs
-  @IsOptional()
-  @IsString()
-  programms_sketchup?: string;
-  @IsOptional()
-  @IsString()
-  programms_enscape?: string;
-  @IsOptional()
-  @IsString()
-  programms_lumen?: string;
-  @IsOptional()
-  @IsString()
-  programms_autocad?: string;
-  @IsOptional()
-  @IsString()
-  programms_archicad?: string;
-  @IsOptional()
-  @IsString()
-  programms_revit?: string;
-  @IsOptional()
-  @IsString()
-  programms_3dmax?: string;
-
   // Courses
   @IsOptional()
   @IsString()
-  courseud_masstart?: string;
-  @IsOptional()
-  @IsString()
-  courseud_prof?: string;
-  @IsOptional()
-  @IsString()
-  courseud_build?: string;
-  @IsOptional()
-  @IsString()
-  courseud_sketchup?: string;
-  @IsOptional()
-  @IsString()
-  courseud_dnd?: string;
+  courses_new_app?: string;
 
-  // Status and Specializations
+  // Programs
   @IsOptional()
   @IsString()
-  status?: string;
+  programs_new_app?: string;
+
+  // Specializations
   @IsOptional()
   @IsString()
-  specialization_creative_designer?: string;
-  @IsOptional()
-  @IsString()
-  specialization_general_practice_designer?: string;
-  @IsOptional()
-  @IsString()
-  specialization_full_cycle_designer?: string;
-  @IsOptional()
-  @IsString()
-  specialization_decorator?: string;
-  @IsOptional()
-  @IsString()
-  specialization_complect?: string;
-  @IsOptional()
-  @IsString()
-  specialization_author_control?: string;
-  @IsOptional()
-  @IsString()
-  specialization_project_manager?: string;
-  @IsOptional()
-  @IsString()
-  specialization_project_owner?: string;
-  @IsOptional()
-  @IsString()
-  specialization_studio_owner?: string;
-  @IsOptional()
-  @IsString()
-  specialization_assist?: string;
-  @IsOptional()
-  @IsString()
-  specialization_sketchup?: string;
-  @IsOptional()
-  @IsString()
-  specialization_sketch_model?: string;
-  @IsOptional()
-  @IsString()
-  specialization_enscape?: string;
-  @IsOptional()
-  @IsString()
-  specialization_sketch_mebel?: string;
-  @IsOptional()
-  @IsString()
-  specialization_enscape_viz?: string;
-  @IsOptional()
-  @IsString()
-  specialization_3dmax_viz?: string;
-  @IsOptional()
-  @IsString()
-  specialization_plan_autocad?: string;
-  @IsOptional()
-  @IsString()
-  specialization_plan_arch?: string;
-  @IsOptional()
-  @IsString()
-  specialization_plan_revit?: string;
-  @IsOptional()
-  @IsString()
-  specialization_measurement?: string;
+  specialization_new_app?: string;
 
   // Narrow Specializations
   @IsOptional()
   @IsString()
-  narrow_spec_measurement?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_measurement_create?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_anket_tz?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_plan_plane?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_sketch_white?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_concept?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_sketch_volume?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_viz_sketch?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_viz_3dmax?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_viz_other?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_viz_enscape?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_viz_create_schem_viz?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_pccp?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_sop_compl?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_author_spec?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_release_cpec?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_project_manager?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_project_owner?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_studio_owner?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_cmm_diz?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_reels_maker?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_diz_assist?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_office_manager?: string;
-  @IsOptional()
-  @IsString()
-  narrow_spec_graph_diz?: string;
+  narrow_spec_new_app?: string;
 }

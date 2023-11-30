@@ -1,24 +1,17 @@
 import { Types } from 'mongoose';
 
-import { AuthorStatus } from '../consts';
 import { IUser } from '@app/users/interfaces/user.interface';
 
 export interface IVacancy {
   _id?: Types.ObjectId;
 
+  // Vacancy information
   id: string;
-  title: string;
-  remote: boolean;
-  status: AuthorStatus;
-  gender: string;
-  minCost: number;
-  maxCost: number;
-
-  feedbackLink: string;
+  name: string;
+  qualification: string[];
+  narrow_spec: string[];
+  need_programs: string[];
+  remote_work: boolean;
+  service_cost?: number;
   author: string | Types.ObjectId | IUser;
-
-  specializations: string[];
-  narrowSpecializations: string[];
-  programs: string[];
-  courses: string[];
 }

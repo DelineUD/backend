@@ -5,12 +5,12 @@ import { Model, Types } from 'mongoose';
 
 import { UserModel } from './models/user.model';
 
-import { userMapper } from '@shared/mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IUser } from '@app/users/interfaces/user.interface';
 
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';
+import { userMapper } from '@app/users/users.mapper';
 
 @Injectable()
 export class UsersService {
@@ -20,7 +20,7 @@ export class UsersService {
   ) {}
 
   async getUsers(): Promise<UserModel[]> {
-    return await this.userModel.find({});
+    return this.userModel.find({});
   }
 
   async findOne(where): Promise<UserModel> {
@@ -78,10 +78,6 @@ export class UsersService {
     }
 
     return user;
-  }
-
-  async findById(where): Promise<UserModel> {
-    return await this.userModel.findOne(where).exec();
   }
 
   async update(where, newData): Promise<UserModel> {

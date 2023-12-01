@@ -6,12 +6,11 @@ import { Model, Types } from 'mongoose';
 import { UserModel } from './models/user.model';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-
-import { toUserDto } from '@shared/mapper';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';
-import { UserDto } from './dto/user.dto';
+import { userMapper } from '@app/users/users.mapper';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +20,7 @@ export class UsersService {
   ) {}
 
   async getUsers(): Promise<UserModel[]> {
-    return await this.userModel.find({});
+    return this.userModel.find({});
   }
 
   async findOne(where): Promise<UserModel> {
@@ -32,7 +31,7 @@ export class UsersService {
     }
   }
 
-  async findByLogin({ phone, password }: LoginUserDto): Promise<UserDto> {
+  async findByLogin({ phone, password }: LoginUserDto): Promise<IUser> {
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
@@ -45,49 +44,40 @@ export class UsersService {
       throw new HttpException('Неверные учетные данные!', HttpStatus.BAD_REQUEST);
     }
 
-    return toUserDto(user);
+    return user;
   }
 
-  async findByPayload(payload: object): Promise<UserDto> {
+  async findByPayload(payload: object): Promise<IUser> {
     return await this.findOne(payload);
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const salt = await genSalt(10);
-    const hashPassword = await hash(createUserDto.password, salt);
-    const phone = createUserDto.phone;
+  async createOrUpdate(createUserDto: CreateUserDto): Promise<IUser> {
+    try {
+      const { phone } = createUserDto;
 
-    let user = await this.userModel.findOne({ phone }).exec();
+      const salt = await genSalt(10);
+      const hashPassword = await hash(createUserDto.password, salt);
 
-    if (!user) {
-      user = new this.userModel({
-        ...createUserDto,
-        phone,
-        password: hashPassword,
-      });
-    } else {
-      user.updateOne({
-        ...createUserDto,
-        password: hashPassword,
-      });
+      const user = await this.userModel.findOne({ phone });
+
+      if (!user) {
+        return await this.userModel.create({ ...userMapper(createUserDto), password: hashPassword });
+      }
+
+      return await user.updateOne({ ...userMapper(createUserDto), password: hashPassword }).exec();
+    } catch (err) {
+      throw err;
     }
-
-    await user.save();
-    return toUserDto(user);
   }
 
-  async findByPhone(phone: number): Promise<UserDto> {
+  async findByPhone(phone: number): Promise<IUser> {
     const user = await this.userModel.findOne({ phone }).exec();
 
     if (!user) {
       throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
     }
 
-    return toUserDto(user);
-  }
-
-  async findById(where): Promise<UserModel> {
-    return await this.userModel.findOne(where).exec();
+    return user;
   }
 
   async update(where, newData): Promise<UserModel> {
@@ -102,11 +92,6 @@ export class UsersService {
     }
 
     return user;
-  }
-
-  async updateUsr(data?: object): Promise<UserDto> {
-    const user = await this.userModel.findOne(data).exec();
-    return toUserDto(user);
   }
 
   async deleteProperty(userId: Types.ObjectId | string, prop: object) {

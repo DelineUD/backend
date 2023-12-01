@@ -34,7 +34,7 @@ import { GetNewTokensDto } from './dto/get-new-tokens.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new ValidationPipe({ transform: true }))
   @Post('register-or-update')
   public async register(
     @Query()

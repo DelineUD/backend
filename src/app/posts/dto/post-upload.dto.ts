@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class PostUploadDto {
-  @IsString() @IsNotEmpty() postId: string;
-  @IsString() @IsNotEmpty() authorId: string;
+  @IsMongoId() @IsNotEmpty() postId: string;
+  @IsMongoId() @IsNotEmpty() authorId: string;
 }

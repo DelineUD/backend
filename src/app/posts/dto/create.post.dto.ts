@@ -3,8 +3,6 @@ import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { PostDto } from '@app/posts/dto/post.dto';
 
 export class CreatePostDto extends PartialType(PostDto) {
-  @ApiProperty({ default: '' })
-  author: string;
   @ApiProperty({ default: 'Новый пост' })
   pText?: string;
   @ApiProperty({ default: 'Новое' })

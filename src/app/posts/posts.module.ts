@@ -21,14 +21,12 @@ import { PostsService } from './posts.service';
         schema: PostsSchema,
       },
     ]),
-
     MongooseModule.forFeature([
       {
         name: PostCommentsModel.name,
         schema: PostCommentsSchema,
       },
     ]),
-
     AuthModule,
     UsersModule,
     PassportModule.register({

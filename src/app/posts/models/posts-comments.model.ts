@@ -5,7 +5,7 @@ import { ICPosts } from '../interfaces/posts.comments.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
 
 @Schema({
-  collection: 'postscomments',
+  collection: 'posts_comments',
   timestamps: true,
 })
 export class PostCommentsModel extends Document implements ICPosts {

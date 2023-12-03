@@ -13,6 +13,6 @@ export class CreatePostCommentDto extends PartialType(PostCommentDto) {
   cText?: string;
 
   @IsString()
-  @ApiProperty({ default: 'Картинка' })
+  @ApiProperty({ default: [] })
   cImg?: Array<string>;
 }

@@ -30,8 +30,6 @@ import { CreatePostCommentDto } from './dto/create-post-comment.dto';
 import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
-import { IPostsFindComments } from '@app/posts/interfaces/posts-find-comments.interface';
-import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
@@ -201,20 +199,30 @@ export class PostsController {
     type: 'string',
     description: 'Системный идентификатор поста',
   })
-  public async commentList(@Param() params: IPostsFindComments): Promise<ICPosts[]> {
+  public async commentList(@Param() params: IPostsFindParams): Promise<ICPosts[]> {
     return await this.postsService.commentList(params);
   }
 
   /**
    * Лайк для комментария к посту.
    * @param userId - id пользователя.
-   * @param commentLikeDto - Данные для поиска комментария.
+   * @param params - Данные для поиска комментария.
    * @returns - Созданный комментарий.
    */
-  @Patch('comments/:commentId/like')
+  @Patch(':postId/comments/:commentId/like')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async commentLiked(@UserId() userId: string, @Body() commentLikeDto: PostCommentLikeDto): Promise<ICPosts> {
-    return await this.postsService.commentLike(userId, commentLikeDto);
+  @ApiParam({
+    name: 'postId',
+    type: 'string',
+    description: 'Системный идентификатор поста',
+  })
+  @ApiParam({
+    name: 'commentId',
+    type: 'string',
+    description: 'Системный идентификатор комментария',
+  })
+  async commentLiked(@UserId() userId: string, @Param() params: IPostsCommentsFindParams): Promise<ICPosts> {
+    return await this.postsService.commentLike(userId, params);
   }
 
   /**

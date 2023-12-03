@@ -8,13 +8,12 @@ import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { postListMapper, postMapper } from './posts.mapper';
-import { PostCommentsModel } from './models/posts.comments.model';
+import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
 import { IPosts } from './interfaces/posts.interface';
 import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
-import { IPostsFindComments } from '@app/posts/interfaces/posts-find-comments.interface';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
 import { ICPosts } from '@app/posts/interfaces/posts.comments.interface';
 import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
@@ -247,7 +246,7 @@ export class PostsService {
     }
   }
 
-  async commentList(params: IPostsFindComments): Promise<ICPosts[]> {
+  async commentList(params: IPostsFindParams): Promise<ICPosts[]> {
     try {
       const { postId } = params;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
@@ -271,9 +270,9 @@ export class PostsService {
     }
   }
 
-  async commentLike(userId: string, commentLikeDto: PostCommentLikeDto): Promise<ICPosts> {
+  async commentLike(userId: string, params: PostCommentLikeDto): Promise<ICPosts> {
     try {
-      const { postId, commentId } = commentLikeDto;
+      const { postId, commentId } = params;
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {

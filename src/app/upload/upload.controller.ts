@@ -10,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 
 import { editFileName, imageFileFilter } from './upload.service';
@@ -71,7 +71,12 @@ export class UploadController {
   }
 
   @Get(':imgpath')
-  seeUploadedFile(@Param('imgpath') image, @Res() res) {
+  @ApiParam({
+    name: 'imgpath',
+    description: 'Ссылка на изображение',
+    required: true,
+  })
+  seeUploadedFile(@Param('imgpath') image: string, @Res() res) {
     return res.sendFile(image, {
       root: './files',
     });

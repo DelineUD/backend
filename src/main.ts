@@ -1,3 +1,5 @@
+import * as express from 'express';
+import { join } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -47,7 +49,9 @@ async function bootstrap() {
       'http://localhost',
     ],
   });
+  app.use('/static', express.static(process.env.STATIC_PATH_FOLDER));
 
   app.listen(port).then(() => `Server has been stared on ${port}`);
 }
+
 bootstrap().then(() => `Bootstrap successful`);

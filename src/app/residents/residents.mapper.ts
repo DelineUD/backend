@@ -1,8 +1,8 @@
 import { UserModel } from '../users/models/user.model';
 import { IResidentList } from './interfaces/resident.interface-list';
-import { IResident, ItemLabel } from './interfaces/resident.interface';
-import { allCourses, allNarrowSpecializations, allPrograms, allSpecializations } from '../shared/consts';
-import { groupDtoFields } from '../shared/helpers/groupDto';
+import { IResident } from './interfaces/resident.interface';
+import { allCourses, allNarrowSpecializations, allPrograms, allSpecializations } from '@shared/consts';
+import { groupDtoFields } from '@helpers/groupDto';
 
 const programsFieldsOfUser: string[] = [...allPrograms]; // Programs fields of user dto
 const coursesFieldsOfUser: string[] = [...allCourses]; // Courses fields of user dto

@@ -68,7 +68,7 @@ export class PostsService {
     }
   }
 
-  async delete(userId: string, postDto: DeletePostDto): Promise<IRemoveEntity<IPosts>> {
+  async delete(userId: string, postDto: DeletePostDto): Promise<IRemoveEntity<string>> {
     try {
       const { postId } = postDto;
 
@@ -86,7 +86,7 @@ export class PostsService {
       return {
         acknowledged: true,
         deletedCount: 1,
-        removed: deletedPost,
+        removed: deletedPost._id,
       };
     } catch (err) {
       throw err;
@@ -148,33 +148,36 @@ export class PostsService {
     }
   }
 
-  async uploadImages(uploadFilesDto: PostUploadDto, files: Express.Multer.File[]): Promise<IPosts> {
+  async uploadImages(userId: string, uploadFilesDto: PostUploadDto, files: Express.Multer.File[]): Promise<IPosts> {
     try {
-      const { postId, authorId } = uploadFilesDto;
+      const { postId } = uploadFilesDto;
 
-      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
-      if (!postInDb) {
+      const post = await this.postModel.findOne({ _id: postId }).exec();
+      if (!post) {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
 
-      if (authorId !== postInDb.author) {
+      if (userId !== post.author) {
         throw new BadRequestException('Нет доступа!');
       }
 
-      if (files?.length && !postInDb.pImg.length) {
-        await postInDb.updateOne({
-          pImg: files,
+      const filesToNames = files.map((file) => file.filename);
+      console.log(files);
+
+      if (files?.length && !post.pImg.length) {
+        await post.updateOne({
+          pImg: filesToNames,
         });
-        await postInDb.save();
+        await post.save();
         return await this.postModel.findOne({ _id: postId }).exec();
       }
 
-      if (files?.length && postInDb.pImg?.length) {
-        await postInDb.updateOne({
-          pImg: [...postInDb.pImg, ...files],
+      if (files?.length && post.pImg?.length) {
+        await post.updateOne({
+          pImg: [...post.pImg, ...filesToNames],
         });
 
-        await postInDb.save();
+        await post.save();
         return await this.postModel.findOne({ _id: postId }).exec();
       }
 
@@ -347,7 +350,7 @@ export class PostsService {
     }
   }
 
-  async deleteComment(userId: string, deleteCommentDto: DeletePostCommentDto): Promise<IRemoveEntity<ICPosts>> {
+  async deleteComment(userId: string, deleteCommentDto: DeletePostCommentDto): Promise<IRemoveEntity<string>> {
     try {
       const { commentId, postId } = deleteCommentDto;
 
@@ -360,7 +363,7 @@ export class PostsService {
       return {
         acknowledged: true,
         deletedCount: 1,
-        removed: comment,
+        removed: comment._id,
       };
     } catch (err) {
       throw err;

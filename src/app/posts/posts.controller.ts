@@ -63,7 +63,7 @@ export class PostsController {
    */
   @Delete('delete')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async delete(@UserId() userId: string, @Body() deletePostDto: DeletePostDto): Promise<IRemoveEntity<IPosts>> {
+  public async delete(@UserId() userId: string, @Body() deletePostDto: DeletePostDto): Promise<IRemoveEntity<string>> {
     return await this.postsService.delete(userId, deletePostDto);
   }
 
@@ -106,6 +106,7 @@ export class PostsController {
 
   /**
    * Загрузка изображений для поста.
+   * @param userId - Идентификатор пользователя
    * @param uploadFilesDto - Данные поста для загрузки.
    * @param files - Файлы.
    * @returns - Обновленный пост.
@@ -118,7 +119,6 @@ export class PostsController {
       type: 'object',
       properties: {
         postId: { type: 'string' },
-        authorId: { type: 'string' },
         file: {
           type: 'string',
           format: 'binary',
@@ -136,10 +136,11 @@ export class PostsController {
     }),
   )
   public async uploadImages(
+    @UserId() userId: string,
     @Body() uploadFilesDto: PostUploadDto,
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<IPosts> {
-    return await this.postsService.uploadImages(uploadFilesDto, files);
+    return await this.postsService.uploadImages(userId, uploadFilesDto, files);
   }
 
   /**
@@ -252,7 +253,7 @@ export class PostsController {
   public async deleteComment(
     @UserId() userId: string,
     @Body() deleteCommentDto: DeletePostCommentDto,
-  ): Promise<IRemoveEntity<ICPosts>> {
+  ): Promise<IRemoveEntity<string>> {
     return await this.postsService.deleteComment(userId, deleteCommentDto);
   }
 }

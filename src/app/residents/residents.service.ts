@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,7 +9,8 @@ import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResidentAuth } from './interfaces/jwt.resident.auth';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
-import { residentListMapper, residentMapper } from './mapper';
+import { residentListMapper, residentMapper } from './residents.mapper';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
 @Injectable()
 export class ResidentsService {
@@ -29,33 +30,30 @@ export class ResidentsService {
       const resident = await this.usersService.findOne(query);
       return residentMapper(resident);
     } catch (err) {
-      throw new NotFoundException(`Пользователь ${query._id} не найден!`);
+      throw new NotFoundException(`Пользователь не найден!`);
     }
   }
 
-  async upAvatar({ authorization }: IResidentAuth, file: string) {
-    const noBearer = authorization.split(' ');
-    if (!authorization) throw new UnauthorizedException('Пожалуйста авторизйтесь!');
-
+  async uploadAvatar(userId: string, file: Express.Multer.File): Promise<string> {
     try {
-      await this.jwtService.verifyAsync(noBearer[1]);
+      if (!file) {
+        throw new BadRequestException('Файл не найден!');
+      }
+
+      const resident = await this.userModel
+        .findOneAndUpdate({
+          _id: userId,
+          avatar: file.filename,
+        })
+        .exec();
+      if (!resident) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+      console.log(file);
+
+      return file.filename;
     } catch (err) {
-      throw new UnauthorizedException('Неверный токен или срок его действия истек!');
+      throw err;
     }
-
-    const result = await this.jwtService.verifyAsync(noBearer[1]);
-    const { _id } = await this.usersService.findOne(result);
-
-    if (!_id) {
-      throw new NotFoundException(`Пользователь ${_id} не найден!`);
-    }
-
-    const userInDb = await this.userModel.findOne({ _id }).exec();
-
-    await userInDb.updateOne({
-      avatar: `${process.env.STATIC_PATH}/${file}`,
-    });
-    await userInDb.save();
-    return await this.userModel.findOne({ _id }).exec();
   }
 }

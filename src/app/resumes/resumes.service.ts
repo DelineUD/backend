@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -21,7 +21,7 @@ export class ResumesService {
     private readonly usersService: UsersService,
   ) {}
 
-  async update(userId: string, resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
+  async update(userId: Types.ObjectId, resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {

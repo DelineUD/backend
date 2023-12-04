@@ -1,12 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { UserModel } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
-import { IResidentAuth } from './interfaces/jwt.resident.auth';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { residentListMapper, residentMapper } from './residents.mapper';
@@ -34,7 +33,7 @@ export class ResidentsService {
     }
   }
 
-  async uploadAvatar(userId: string, file: Express.Multer.File): Promise<string> {
+  async uploadAvatar(userId: Types.ObjectId, file: Express.Multer.File): Promise<string> {
     try {
       if (!file) {
         throw new BadRequestException('Файл не найден!');
@@ -43,7 +42,7 @@ export class ResidentsService {
       const resident = await this.userModel
         .findOneAndUpdate({
           _id: userId,
-          avatar: file.filename,
+          avatar: `${process.env.STATIC_PATH}/${file.filename}`,
         })
         .exec();
       if (!resident) {

@@ -1,14 +1,15 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class IFindAllVacancyParams {
   @ApiProperty({ default: '' })
   @IsString({ message: 'userId должен быть строкой!' })
-  userId: string; // User _id
+  userId: Types.ObjectId; // User _id
 }
 
 export class IFindOneVacancyParams extends PartialType(IFindAllVacancyParams) {
   @ApiProperty({ default: '' })
   @IsString({ message: 'id должен быть строкой!' })
-  id: string; // Vacancy id
+  id: Types.ObjectId; // Vacancy id
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsMongoId, IsString } from 'class-validator';
+import { IsArray, IsMongoId, IsString } from 'class-validator';
 
 import { PostCommentDto } from '@app/posts/dto/post-comment.dto';
 
@@ -12,7 +12,7 @@ export class CreatePostCommentDto extends PartialType(PostCommentDto) {
   @ApiProperty({ default: 'Текст комментария...' })
   cText?: string;
 
-  @IsString()
-  @ApiProperty({ default: [] })
-  cImg?: Array<string>;
+  @IsArray()
+  @ApiProperty({ default: '' })
+  cImg?: string[];
 }

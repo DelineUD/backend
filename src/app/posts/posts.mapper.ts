@@ -1,5 +1,6 @@
 import { UserModel } from '../users/models/user.model';
 import { IPosts } from './interfaces/posts.interface';
+import { PostModel } from '@app/posts/models/posts.model';
 
 export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
   return posts.map((posts) => ({
@@ -18,7 +19,7 @@ export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
   }));
 };
 
-export const postMapper = (post: IPosts, user: UserModel): IPosts => {
+export const postMapper = (post: PostModel, user: UserModel): IPosts => {
   return {
     _id: post._id,
     author: post.author,

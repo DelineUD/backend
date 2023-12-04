@@ -16,9 +16,19 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
+import { Types } from 'mongoose';
 
-import { editFileName, imageFileFilter } from '../upload/upload.service';
+import { fileStorage } from '@shared/storage';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
+import { imageFileFilter } from '@utils/imageFileFilter';
+import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
+import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
+import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
+import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
+import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
+import { IPostsCommentsFindParams } from '@app/posts/interfaces/posts-comments-find.interface';
+
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -27,14 +37,6 @@ import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { IPosts } from './interfaces/posts.interface';
 import { CreatePostCommentDto } from './dto/create-post-comment.dto';
-import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
-import { UserId } from '@shared/decorators/user-id.decorator';
-import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
-import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
-import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
-import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
-import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
-import { IPostsCommentsFindParams } from '@app/posts/interfaces/posts-comments-find.interface';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
@@ -51,7 +53,7 @@ export class PostsController {
    */
   @Post('create')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async create(@UserId() userId: string, @Body() createPostDto: CreatePostDto): Promise<IPosts> {
+  public async create(@UserId() userId: Types.ObjectId, @Body() createPostDto: CreatePostDto): Promise<IPosts> {
     return await this.postsService.create(userId, createPostDto);
   }
 
@@ -63,7 +65,10 @@ export class PostsController {
    */
   @Delete('delete')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async delete(@UserId() userId: string, @Body() deletePostDto: DeletePostDto): Promise<IRemoveEntity<string>> {
+  public async delete(
+    @UserId() userId: Types.ObjectId,
+    @Body() deletePostDto: DeletePostDto,
+  ): Promise<IRemoveEntity<string>> {
     return await this.postsService.delete(userId, deletePostDto);
   }
 
@@ -75,7 +80,7 @@ export class PostsController {
    */
   @Post('update')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async update(@UserId() userId: string, @Body() updatePostDto: UpdatePostDto): Promise<IPosts> {
+  public async update(@UserId() userId: Types.ObjectId, @Body() updatePostDto: UpdatePostDto): Promise<IPosts> {
     return await this.postsService.update(userId, updatePostDto);
   }
 
@@ -87,7 +92,7 @@ export class PostsController {
    */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async findAll(@UserId() userId: string, @Query() queryParams: IPostsFindQuery): Promise<IPosts[]> {
+  public async findAll(@UserId() userId: Types.ObjectId, @Query() queryParams: IPostsFindQuery): Promise<IPosts[]> {
     return await this.postsService.findAll(userId, queryParams);
   }
 
@@ -100,7 +105,7 @@ export class PostsController {
   @Get(':postId')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'postId' })
-  async getById(@UserId() userId: string, @Param() params: IPostsFindParams): Promise<IPosts> {
+  async getById(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPosts> {
     return await this.postsService.findPostById(userId, params);
   }
 
@@ -128,15 +133,12 @@ export class PostsController {
   })
   @UseInterceptors(
     FilesInterceptor('file', 4, {
-      storage: diskStorage({
-        destination: process.env.STATIC_PATH_FOLDER,
-        filename: editFileName,
-      }),
+      storage: fileStorage,
       fileFilter: imageFileFilter,
     }),
   )
   public async uploadImages(
-    @UserId() userId: string,
+    @UserId() userId: Types.ObjectId,
     @Body() uploadFilesDto: PostUploadDto,
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<IPosts> {
@@ -156,7 +158,7 @@ export class PostsController {
     type: 'string',
     description: 'Системный идентификатор поста',
   })
-  async addView(@UserId() userId: string, @Param() params: IPostsFindParams): Promise<number> {
+  async addView(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<number> {
     return await this.postsService.addView(userId, params);
   }
 
@@ -168,7 +170,7 @@ export class PostsController {
    */
   @Patch(':postId/like')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async liked(@UserId() userId: string, @Param() params: IPostsFindParams): Promise<IPosts> {
+  async liked(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPosts> {
     return await this.postsService.like(userId, params);
   }
 
@@ -184,7 +186,10 @@ export class PostsController {
     description: 'Новый комментарий',
     type: CreatePostCommentDto,
   })
-  public async createComment(@UserId() userId: string, @Body() createComments: CreatePostCommentDto): Promise<ICPosts> {
+  public async createComment(
+    @UserId() userId: Types.ObjectId,
+    @Body() createComments: CreatePostCommentDto,
+  ): Promise<ICPosts> {
     return await this.postsService.createComment(userId, createComments);
   }
 
@@ -222,7 +227,7 @@ export class PostsController {
     type: 'string',
     description: 'Системный идентификатор комментария',
   })
-  async commentLiked(@UserId() userId: string, @Param() params: IPostsCommentsFindParams): Promise<ICPosts> {
+  async commentLiked(@UserId() userId: Types.ObjectId, @Param() params: IPostsCommentsFindParams): Promise<ICPosts> {
     return await this.postsService.commentLike(userId, params);
   }
 
@@ -235,8 +240,13 @@ export class PostsController {
    */
   @Patch('comments/:commentId/update')
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiParam({
+    name: 'commentId',
+    type: 'string',
+    description: 'Системный идентификатор комментария',
+  })
   public async updateComment(
-    @UserId() userId: string,
+    @UserId() userId: Types.ObjectId,
     @Param() { commentId }: IPostsCommentsFindParams,
     @Body() updateCommentDto: UpdatePostCommentDto,
   ): Promise<ICPosts> {
@@ -251,7 +261,7 @@ export class PostsController {
    */
   @Delete('comments/delete')
   public async deleteComment(
-    @UserId() userId: string,
+    @UserId() userId: Types.ObjectId,
     @Body() deleteCommentDto: DeletePostCommentDto,
   ): Promise<IRemoveEntity<string>> {
     return await this.postsService.deleteComment(userId, deleteCommentDto);

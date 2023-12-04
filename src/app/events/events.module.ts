@@ -4,19 +4,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
+import { Events, EventsSchema } from '@app/events/entities/events.entity';
 import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
-import { EventsModel, EventsSchema } from './models/events.model';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {
-        name: EventsModel.name,
+        name: Events.name,
         schema: EventsSchema,
       },
     ]),

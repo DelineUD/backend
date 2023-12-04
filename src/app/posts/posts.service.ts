@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -30,7 +30,7 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async create(userId: string, postDto: CreatePostDto): Promise<IPosts> {
+  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPosts> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
@@ -48,7 +48,7 @@ export class PostsService {
     }
   }
 
-  async update(userId: string, postDto: UpdatePostDto): Promise<IPosts> {
+  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPosts> {
     try {
       const { postId, ...updateDto } = postDto;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
@@ -57,7 +57,7 @@ export class PostsService {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
 
-      if (userId !== postInDb.author) {
+      if (userId !== postInDb.author._id) {
         throw new BadRequestException('Нет доступа!');
       }
 
@@ -68,7 +68,7 @@ export class PostsService {
     }
   }
 
-  async delete(userId: string, postDto: DeletePostDto): Promise<IRemoveEntity<string>> {
+  async delete(userId: Types.ObjectId, postDto: DeletePostDto): Promise<IRemoveEntity<string>> {
     try {
       const { postId } = postDto;
 
@@ -77,7 +77,7 @@ export class PostsService {
         throw new EntityNotFoundError('Запись не найдена!');
       }
 
-      if (userId !== deletedPost.author) {
+      if (userId !== deletedPost.author._id) {
         throw new BadRequestException('Нет доступа!');
       }
 
@@ -93,7 +93,7 @@ export class PostsService {
     }
   }
 
-  async findAll(userId: string, queryParams: IPostsFindQuery): Promise<IPosts[]> {
+  async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPosts[]> {
     try {
       const { search, lastIndex, group } = queryParams;
 
@@ -124,7 +124,7 @@ export class PostsService {
     }
   }
 
-  async findPostById(userId: string, params: IPostsFindParams): Promise<IPosts> {
+  async findPostById(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPosts> {
     try {
       const { postId } = params;
 
@@ -148,20 +148,20 @@ export class PostsService {
     }
   }
 
-  async uploadImages(userId: string, uploadFilesDto: PostUploadDto, files: Express.Multer.File[]): Promise<IPosts> {
+  async uploadImages(
+    userId: Types.ObjectId,
+    uploadFilesDto: PostUploadDto,
+    files: Express.Multer.File[],
+  ): Promise<IPosts> {
     try {
       const { postId } = uploadFilesDto;
 
-      const post = await this.postModel.findOne({ _id: postId }).exec();
+      const post = await this.postModel.findOne({ _id: postId, author: userId }).exec();
       if (!post) {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
 
-      if (userId !== post.author) {
-        throw new BadRequestException('Нет доступа!');
-      }
-
-      const filesToNames = files.map((file) => file.filename);
+      const filesToNames = files.map((file) => `${process.env.STATIC_PATH}/${file.filename}`);
       console.log(files);
 
       if (files?.length && !post.pImg.length) {
@@ -187,7 +187,7 @@ export class PostsService {
     }
   }
 
-  async like(userId: string, params: IPostsFindParams): Promise<IPosts> {
+  async like(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPosts> {
     try {
       const { postId } = params;
 
@@ -199,14 +199,14 @@ export class PostsService {
 
       const arrLikes: string[] = postInDb.likes;
 
-      if (!arrLikes.includes(userId)) {
-        arrLikes.unshift(userId);
+      if (!arrLikes.includes(String(userId))) {
+        arrLikes.unshift(String(userId));
         await postInDb.updateOne({
           likes: arrLikes,
           countLikes: postInDb.countLikes++,
         });
       } else {
-        const filteredArray = arrLikes.filter((item) => item !== userId);
+        const filteredArray = arrLikes.filter((item) => item !== String(userId));
         await postInDb.updateOne({
           likes: filteredArray,
           countLikes: filteredArray.length,
@@ -220,7 +220,7 @@ export class PostsService {
     }
   }
 
-  async createComment(userId: string, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
+  async createComment(userId: Types.ObjectId, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
     try {
       const postInDb = await this.postModel.findOne({ _id: createCommentDto.postId }).exec();
       if (!postInDb) {
@@ -273,7 +273,7 @@ export class PostsService {
     }
   }
 
-  async commentLike(userId: string, params: PostCommentLikeDto): Promise<ICPosts> {
+  async commentLike(userId: Types.ObjectId, params: PostCommentLikeDto): Promise<ICPosts> {
     try {
       const { postId, commentId } = params;
 
@@ -327,7 +327,11 @@ export class PostsService {
     }
   }
 
-  async updateComment(userId: string, commentId: string, updateCommentDto: UpdatePostCommentDto): Promise<ICPosts> {
+  async updateComment(
+    userId: Types.ObjectId,
+    commentId: Types.ObjectId,
+    updateCommentDto: UpdatePostCommentDto,
+  ): Promise<ICPosts> {
     try {
       const { postId } = updateCommentDto;
 
@@ -350,7 +354,7 @@ export class PostsService {
     }
   }
 
-  async deleteComment(userId: string, deleteCommentDto: DeletePostCommentDto): Promise<IRemoveEntity<string>> {
+  async deleteComment(userId: Types.ObjectId, deleteCommentDto: DeletePostCommentDto): Promise<IRemoveEntity<string>> {
     try {
       const { commentId, postId } = deleteCommentDto;
 
@@ -370,7 +374,7 @@ export class PostsService {
     }
   }
 
-  async addView(userId: string, params: IPostsFindParams): Promise<number> {
+  async addView(userId: Types.ObjectId, params: IPostsFindParams): Promise<number> {
     try {
       const { postId } = params;
       const user = await this.usersService.findOne({ _id: userId });

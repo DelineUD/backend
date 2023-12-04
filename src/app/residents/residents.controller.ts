@@ -1,15 +1,17 @@
 import { Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
 
-import { editFileName, imageFileFilter, UploadService } from '../upload/upload.service';
+import { Types } from 'mongoose';
+
+import { fileStorage } from '@shared/storage';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { imageFileFilter } from '@utils/imageFileFilter';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { UserId } from '@shared/decorators/user-id.decorator';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
@@ -51,14 +53,11 @@ export class ResidentsController {
   })
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: process.env.STATIC_PATH_FOLDER,
-        filename: editFileName,
-      }),
+      storage: fileStorage,
       fileFilter: imageFileFilter,
     }),
   )
-  async avatarUpload(@UserId() userId: string, @UploadedFile() file: Express.Multer.File): Promise<string> {
+  async avatarUpload(@UserId() userId: Types.ObjectId, @UploadedFile() file: Express.Multer.File): Promise<string> {
     return await this.residentsService.uploadAvatar(userId, file);
   }
 }

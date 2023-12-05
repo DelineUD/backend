@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { VacancyService } from './vacancy.service';
@@ -23,7 +24,10 @@ export class VacancyController {
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(@UserId() userId: string, @Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async create(
+    @UserId() userId: Types.ObjectId,
+    @Query() vacancyParams: ICrudVacancyParams,
+  ): Promise<IVacancy | IVacancy[]> {
     return await this.vacancyService.update(userId, vacancyParams);
   }
 

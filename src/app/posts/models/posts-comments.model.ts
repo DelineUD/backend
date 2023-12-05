@@ -1,37 +1,30 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-import { IcPosts } from '../interfaces/posts.comments.interface';
+import { ICPosts } from '../interfaces/posts.comments.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 @Schema({
-  collection: 'postscomments',
+  collection: 'posts_comments',
   timestamps: true,
 })
-export class PostCommentsModel extends Document implements IcPosts {
+export class PostCommentsModel extends Document implements ICPosts {
   [x: string]: any;
-  @Prop({ required: true })
-  postID: string;
 
   @Prop({ required: true })
-  authorId: string;
-
-  @Prop({ required: false })
-  authorAvatar?: string;
-
+  postId: string;
   @Prop({ required: true })
   cText: string;
-
   @Prop({ required: false })
   cImg?: Array<string>;
-
   @Prop({ required: false })
   likes?: Array<string>;
-
   @Prop({ required: false })
   countLikes?: number;
-
   @Prop({ required: false })
   isLiked?: boolean;
+  @Prop({ required: true, type: Types.ObjectId, ref: 'UserModel' })
+  author: string | Types.ObjectId | IUser;
 }
 
 export const PostCommentsSchema = SchemaFactory.createForClass(PostCommentsModel);

@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
+import { UserPick } from '@app/users/interfaces/user-pick.interface';
 
 export interface IResume {
   _id?: Types.ObjectId;
@@ -12,5 +13,5 @@ export interface IResume {
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;
-  author: string | Types.ObjectId | IUser;
+  author: Types.ObjectId | Pick<IUser, UserPick>;
 }

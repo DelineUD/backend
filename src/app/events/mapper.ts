@@ -1,10 +1,9 @@
 import { IEvents } from './interfaces/events.interface';
-import { EventsModel } from './models/events.model';
 
-export const eventListMapper = (events: EventsModel[], user: any): IEvents[] => {
+export const eventListMapper = (events: IEvents[], user: any): IEvents[] => {
   return events.map((event) => ({
     _id: event._id,
-    authorId: event.authorId,
+    author: event.author,
     hText: event.hText ?? null,
     hImg: event.hImg ?? null,
     startDate: event.startDate ?? null,
@@ -22,14 +21,14 @@ export const eventListMapper = (events: EventsModel[], user: any): IEvents[] => 
   }));
 };
 
-export const eventMapper = (event: EventsModel, user: any): any => {
+export const eventMapper = (event: IEvents, user: any): any => {
   return {
     _id: event._id,
-    authorId: event.authorId,
+    author: event.author,
     hText: event.hText ?? null,
     hImg: event.hImg ?? null,
     startDate: event.startDate ?? null,
-    stopDate: event.stoptDate ?? null,
+    stopDate: event.stopDate ?? null,
     createdAt: event.createdAt ?? null,
     updatedAt: event.updatedAt ?? null,
     addr: event.addr ?? null,

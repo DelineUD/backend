@@ -1,9 +1,11 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-export class DeletePostDto {
-  @IsNotEmpty()
-  author?: string;
+import { PostDto } from '@app/posts/dto/post.dto';
 
+export class DeletePostDto extends PartialType(PostDto) {
+  @ApiProperty({ default: '' })
+  @IsMongoId()
   @IsNotEmpty()
-  _id: string;
+  postId: string;
 }

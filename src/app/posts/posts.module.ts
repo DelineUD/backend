@@ -8,7 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
-import { PostCommentsModel, PostCommentsSchema } from './models/posts.comments.model';
+import { PostCommentsModel, PostCommentsSchema } from './models/posts-comments.model';
 import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
@@ -21,14 +21,12 @@ import { PostsService } from './posts.service';
         schema: PostsSchema,
       },
     ]),
-
     MongooseModule.forFeature([
       {
         name: PostCommentsModel.name,
         schema: PostCommentsSchema,
       },
     ]),
-
     AuthModule,
     UsersModule,
     PassportModule.register({

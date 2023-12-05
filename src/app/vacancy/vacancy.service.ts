@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -21,7 +21,7 @@ export class VacancyService {
     private readonly usersService: UsersService,
   ) {}
 
-  async update(userId: string, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async update(userId: Types.ObjectId, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {

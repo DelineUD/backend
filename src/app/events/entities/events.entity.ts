@@ -1,69 +1,28 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Document, Types } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-export class EventsEntity {
-  @ApiProperty({
-    example: 'id',
-    description: 'id',
-  })
-  _id: string;
+import { IEvents } from '@app/events/interfaces/events.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
+import { UserPick } from '@app/users/interfaces/user-pick.interface';
 
-  @ApiProperty({
-    example: 'id автора',
-    description: 'id автора',
-  })
-  authorId: string;
-
-  @ApiProperty({
-    example: 'текст заголовка',
-    description: 'текст заголовка',
-  })
-  hText: string;
-
-  @ApiProperty({
-    example: 'картинка',
-    description: 'картинка',
-  })
-  hImg: string;
-
-  @ApiProperty({
-    example: 'дата начала',
-    description: 'дата начала',
-  })
-  startDate: string;
-
-  @ApiProperty({
-    example: 'дата окончания',
-    description: 'дата окончания',
-  })
-  stopDate: string;
-
-  @ApiProperty({
-    example: 'Адрес',
-    description: 'Адрес',
-  })
-  addr: string;
-
-  @ApiProperty({
-    example: 'Категория',
-    description: 'Категория',
-  })
-  category: string;
-
-  @ApiProperty({
-    example: 'доступ',
-    description: 'доступ',
-  })
-  access: string;
-
-  @ApiProperty({
-    example: 'Формат',
-    description: 'Формат',
-  })
-  format: string;
-
-  @ApiProperty({
-    example: 'Боди текст',
-    description: 'Боди текст',
-  })
-  bodyText: string;
+@Schema({
+  collection: 'events',
+  timestamps: true,
+})
+export class Events extends Document implements IEvents {
+  @Prop({ required: true }) hText: string;
+  @Prop({ required: false }) hImg?: string;
+  @Prop({ required: false }) startDate?: Date;
+  @Prop({ required: false }) stopDate?: Date;
+  @Prop({ required: false }) addr?: string;
+  @Prop({ required: false }) category?: string;
+  @Prop({ required: false }) access?: string;
+  @Prop({ required: false }) format?: string;
+  @Prop({ required: false }) bodyText?: string;
+  @Prop({ required: false }) favor?: Array<string>;
+  @Prop({ required: false }) iGo?: Array<string>;
+  @Prop({ required: false }) notGo?: Array<string>;
+  @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: Types.ObjectId;
 }
+
+export const EventsSchema = SchemaFactory.createForClass(Events);

@@ -1,23 +1,15 @@
+import { IsArray, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+
 export class PostDto {
-  _id?: string;
+  @IsOptional() @IsMongoId() @IsNotEmpty() postId?: string;
 
-  author?: string;
+  @IsOptional() @IsString() pText?: string;
+  @IsOptional() @IsString() group?: string;
 
-  createdAt?: string;
+  @IsOptional() @IsArray() @IsString({ each: true }) pImg?: Array<string>;
+  @IsOptional() @IsArray() @IsString({ each: true }) likes?: Array<string>;
+  @IsOptional() @IsArray() @IsString({ each: true }) views?: Array<string>;
 
-  updatedAt?: string;
-
-  pText?: string;
-
-  pImg?: Array<string>;
-
-  likes?: Array<string>;
-
-  views?: Array<string>;
-
-  group?: string;
-
-  countLikes?: number;
-
-  isLiked?: boolean;
+  @IsOptional() @IsNumber() countComments?: number;
+  @IsOptional() @IsNumber() countLikes?: number;
 }

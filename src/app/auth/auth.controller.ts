@@ -1,16 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  HttpException,
-  HttpStatus,
-  Post,
-  Query,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
@@ -40,13 +28,7 @@ export class AuthController {
     @Query()
     createUserDto: CreateUserDto,
   ): Promise<RegistrationStatus> {
-    const result: RegistrationStatus = await this.authService.register(createUserDto);
-
-    if (!result.success) {
-      throw new HttpException(result.message, HttpStatus.BAD_REQUEST);
-    }
-
-    return result;
+    return await this.authService.register(createUserDto);
   }
 
   @UsePipes(new ValidationPipe())

@@ -1,4 +1,4 @@
-import { IsEmail, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 import { UserDto } from './user.dto';
@@ -21,8 +21,17 @@ export class CreateUserDto extends PartialType(UserDto) {
   @IsString()
   @ApiProperty({ default: 'Баранов' })
   readonly last_name: string;
-  @ApiProperty({ default: '02.04.2023' })
+  @ApiProperty({ default: new Date('02.04.2003') })
   readonly birthday: Date;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ default: 'Россия', required: false })
+  readonly country?: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ default: 'Санкт-Петербург', required: false })
+  readonly city?: string;
 
   @ApiProperty({ default: 'Курс 1, Курс 2', required: false })
   readonly courses_new_app?: string;

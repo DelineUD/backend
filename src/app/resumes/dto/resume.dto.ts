@@ -1,6 +1,8 @@
+import { Types } from 'mongoose';
+
 export class ResumeDto {
   // Resume information
-  author: string;
+  author: Types.ObjectId;
   id: string;
   qualification: string;
   narrow_spec: string;

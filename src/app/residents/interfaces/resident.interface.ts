@@ -15,8 +15,8 @@ export interface IDescFieldsResident {
 export interface IPersonalInfoResident {
   birthday: Date;
   gender: string;
-  city_ru: string;
-  citynru: string;
+  country: string;
+  city: string;
 }
 
 export interface IResident {

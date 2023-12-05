@@ -41,20 +41,22 @@ export class AuthService {
   ) {}
 
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
-    let status: RegistrationStatus = {
-      success: true,
-      message: 'User registered or updated',
-    };
-
     try {
-      await this.usersService.createOrUpdate(userDto);
-    } catch (err) {
-      status = {
-        success: false,
-        message: err,
+      let status: RegistrationStatus = {
+        success: true,
+        message: 'Регистрация пройдена успешно!',
       };
+      const user = await this.usersService.createOrUpdate(userDto);
+      if (!user) {
+        status = {
+          success: false,
+          message: 'Ошибка при регистрации!',
+        };
+      }
+      return status;
+    } catch (err) {
+      throw err;
     }
-    return status;
   }
 
   async login(loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
@@ -115,7 +117,10 @@ export class AuthService {
     if (!loginData || loginData.length < 2) {
       throw new BadRequestException('Неверные данные для входа: пусто или неверно!');
     }
-    const payload: { phone: number; vPass: number } = {
+    const payload: {
+      phone: number;
+      vPass: number;
+    } = {
       phone: +loginData[0],
       vPass: +loginData[1],
     };

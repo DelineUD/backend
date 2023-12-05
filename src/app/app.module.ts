@@ -12,8 +12,6 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { ResidentsModule } from './residents/residents.module';
-import { UploadService } from './upload/upload.service';
-import { UploadModule } from './upload/upload.module';
 import { EventsModule } from './events/events.module';
 import { FiltersController } from './filters/filters.controller';
 import { FiltersModule } from './filters/filters.module';
@@ -24,7 +22,7 @@ import { ResumesModule } from './resumes/resumes.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['./envs/.backend.env', './envs/.development.env'],
+      envFilePath: ['./envs/.backend.env', `./envs/.${process.env.NODE_ENV}.env`],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,11 +35,10 @@ import { ResumesModule } from './resumes/resumes.module';
     AuthModule,
     ResidentsModule,
     PostsModule,
-    UploadModule,
     EventsModule,
-    FiltersModule,
     VacancyModule,
     ResumesModule,
+    FiltersModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [
@@ -50,7 +47,6 @@ import { ResumesModule } from './resumes/resumes.module';
       provide: APP_INTERCEPTOR,
       useClass: NotFoundInterceptor,
     },
-    UploadService,
   ],
 })
 export class AppModule {}

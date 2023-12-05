@@ -1,13 +1,15 @@
 import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 import { ResumesService } from './resumes.service';
 
-import { IResume } from './interfaces/resume.interface';
-import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
-import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt.guard';
+import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
+import { IResume } from './interfaces/resume.interface';
+import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
+import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -24,7 +26,10 @@ export class ResumesController {
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(@UserId() userId: string, @Query() resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
+  async create(
+    @UserId() userId: Types.ObjectId,
+    @Query() resumeParams: ICrudResumeParams,
+  ): Promise<IResume | IResume[]> {
     return await this.resumesService.update(userId, resumeParams);
   }
 
@@ -33,8 +38,8 @@ export class ResumesController {
    * @returns - Все резюме.
    */
   @Get('list')
-  async findAll(): Promise<IResume[]> {
-    return await this.resumesService.findAll();
+  async findAll(@Query() queryParams?: ResumeFindQueryDto): Promise<IResume[]> {
+    return await this.resumesService.findAll(queryParams);
   }
 
   /**

@@ -3,7 +3,6 @@ import {
   IsDate,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsNumberString,
   IsOptional,
   IsPhoneNumber,
@@ -44,16 +43,15 @@ export class UserDto {
   @IsString()
   gender?: string;
   @IsOptional()
-  @IsString()
-  cntry?: string;
 
   // Contact Information
   @IsOptional()
   @IsString()
-  city_ru?: string;
+  country?: string;
   @IsOptional()
   @IsString()
-  citynru?: string;
+  city?: string;
+  @IsOptional()
 
   // Additional Information
   @IsOptional()

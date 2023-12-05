@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -13,6 +13,8 @@ import { Vacancy } from './entities/vacancy.entity';
 import { IVacancy } from './interfaces/vacancy.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
+import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
+import { filterQueries } from '@helpers/filterQueries';
 
 @Injectable()
 export class VacancyService {
@@ -21,7 +23,7 @@ export class VacancyService {
     private readonly usersService: UsersService,
   ) {}
 
-  async update(userId: string, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async update(userId: Types.ObjectId, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
@@ -44,15 +46,19 @@ export class VacancyService {
     }
   }
 
-  async findAll(): Promise<IVacancy[]> {
+  async findAll({ desc, ...queryParams }: VacancyFindQueryDto): Promise<IVacancy[]> {
     try {
-      const vacancies = await this.vacancyModel.find().exec();
+      const query = { ...queryParams };
+      const vacancies = await this.vacancyModel
+        .find(filterQueries(query))
+        .sort(desc && { createdAt: -1 })
+        .exec();
 
       if (!vacancies.length) {
         return [];
       }
 
-      return vacancies as IVacancy[];
+      return vacancies;
     } catch (err) {
       console.error(`Ошибка при поиске вакансий: ${(err as Error).message}`);
       throw new InternalServerErrorException('Вакансии не найдены!');
@@ -77,7 +83,7 @@ export class VacancyService {
         return [];
       }
 
-      return vacancies as IVacancy[];
+      return vacancies;
     } catch (err) {
       console.error(`Ошибка при поиске вакансий пользователя: ${(err as Error).message}`);
       throw err;
@@ -102,7 +108,7 @@ export class VacancyService {
         throw new EntityNotFoundError(`Вакансия не найдена`);
       }
 
-      return vacancy as IVacancy;
+      return vacancy;
     } catch (err) {
       console.error(`Ошибка при поиске вакансии по ID: ${(err as Error).message}`);
       throw err;

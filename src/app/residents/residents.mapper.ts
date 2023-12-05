@@ -1,8 +1,8 @@
 import { UserModel } from '../users/models/user.model';
 import { IResidentList } from './interfaces/resident.interface-list';
-import { IResident, ItemLabel } from './interfaces/resident.interface';
-import { allCourses, allNarrowSpecializations, allPrograms, allSpecializations } from '../shared/consts';
-import { groupDtoFields } from '../shared/helpers/groupDto';
+import { IResident } from './interfaces/resident.interface';
+import { allCourses, allNarrowSpecializations, allPrograms, allSpecializations } from '@shared/consts';
+import { groupDtoFields } from '@helpers/groupDto';
 
 const programsFieldsOfUser: string[] = [...allPrograms]; // Programs fields of user dto
 const coursesFieldsOfUser: string[] = [...allCourses]; // Courses fields of user dto
@@ -19,6 +19,7 @@ export const residentsMapper = (user: UserModel): IResidentList => {
     avatar: user.avatar,
     first_name: user.first_name,
     last_name: user.last_name,
+    status: user.status,
   };
 };
 
@@ -35,8 +36,8 @@ export const residentMapper = (user: UserModel): IResident => {
       {
         birthday: user.birthday,
         gender: user.gender,
-        citynru: user.citynru,
-        city_ru: user.city_ru,
+        country: user.country,
+        city: user.city,
       },
     ],
     description_fields: [

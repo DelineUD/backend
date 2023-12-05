@@ -1,32 +1,75 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { FiltersService } from '@app/filters/filters.service';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { IFilters } from '@app/filters/interfaces/filters.interface';
 
-@Controller('Filters')
-@UseGuards(JwtAuthGuard)
+@ApiTags('Filters')
+@Controller('filters')
 export class FiltersController {
-  @Get('posts')
-  public async getList(@Request() data: any): Promise<unknown> {
-    console.log(data);
-    return [
-      {
-        name: 'group',
-        values: [
-          {
-            code: 'pf001',
-            name: 'Общее',
-          },
-          {
-            code: 'pf002',
-            name: 'Администрация',
-          },
-          {
-            code: 'pf003',
-            name: 'HH',
-          },
-        ],
-        multi: false,
-      },
-    ];
+  constructor(private readonly filtersService: FiltersService) {}
+
+  /**
+   * Обновление фильтров.
+   * @returns - вызов.
+   */
+  @Post('update')
+  async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
+    return await this.filtersService.update(updateFiltersDto);
+  }
+
+  /**
+   * Получение фильтров для стран.
+   * @returns - Страны.
+   */
+  @Get('countries')
+  async findCountries(): Promise<IFilters> {
+    return await this.filtersService.findCountries();
+  }
+
+  /**
+   * Получение фильтров для городов.
+   * @returns - Города.
+   */
+  @Get('cities')
+  async findCities(): Promise<IFilters> {
+    return await this.filtersService.findCities();
+  }
+
+  /**
+   * Получение фильтров для специализаций.
+   * @returns - Города.
+   */
+  @Get('specializations')
+  async findSpecializations(): Promise<IFilters> {
+    return await this.filtersService.findSpecializations();
+  }
+
+  /**
+   * Получение фильтров для узких специализаций.
+   * @returns - Города.
+   */
+  @Get('narrow-specializations')
+  async findNarrowSpecializations(): Promise<IFilters> {
+    return await this.filtersService.findNarrowSpecializations();
+  }
+
+  /**
+   * Получение фильтров для программ.
+   * @returns - Города.
+   */
+  @Get('programs')
+  async findPrograms(): Promise<IFilters> {
+    return await this.filtersService.findPrograms();
+  }
+
+  /**
+   * Получение фильтров для курсов.
+   * @returns - Города.
+   */
+  @Get('courses')
+  async findCourses(): Promise<IFilters> {
+    return await this.filtersService.findCourses();
   }
 }

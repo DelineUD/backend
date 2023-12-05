@@ -1,12 +1,14 @@
+import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '@app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
-  const port = process.env.PORT || 3000;
+  const port = process.env.SERVER_PORT || 3000;
   app.setGlobalPrefix(globalPrefix);
 
   const config = new DocumentBuilder()
@@ -47,7 +49,9 @@ async function bootstrap() {
       'http://localhost',
     ],
   });
+  app.use(`/${process.env.STATIC_PATH}`, express.static(process.env.STATIC_PATH_FOLDER));
 
   app.listen(port).then(() => `Server has been stared on ${port}`);
 }
+
 bootstrap().then(() => `Bootstrap successful`);

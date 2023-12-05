@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { VacancyService } from './vacancy.service';
@@ -7,6 +8,7 @@ import { IVacancy } from './interfaces/vacancy.interface';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt.guard';
+import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 
 @ApiTags('Vacancy')
 @Controller('vacancy')
@@ -23,7 +25,10 @@ export class VacancyController {
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(@UserId() userId: string, @Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async create(
+    @UserId() userId: Types.ObjectId,
+    @Query() vacancyParams: ICrudVacancyParams,
+  ): Promise<IVacancy | IVacancy[]> {
     return await this.vacancyService.update(userId, vacancyParams);
   }
 
@@ -32,8 +37,8 @@ export class VacancyController {
    * @returns - Все вакансии.
    */
   @Get('list')
-  async findAll(): Promise<IVacancy[]> {
-    return await this.vacancyService.findAll();
+  async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancy[]> {
+    return await this.vacancyService.findAll(queryParams);
   }
 
   /**

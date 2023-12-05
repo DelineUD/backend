@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 
 import { IPosts } from '../interfaces/posts.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
+import { UserPick } from '@app/users/interfaces/user-pick.interface';
 
 @Schema({
   collection: 'posts',
@@ -12,7 +13,7 @@ export class PostModel extends Document implements IPosts {
   [x: string]: any;
 
   @Prop({ required: true, type: Types.ObjectId, ref: 'UserModel' })
-  author: string | Types.ObjectId | IUser;
+  author: Pick<IUser, UserPick>;
   @Prop({ required: true })
   pText: string;
   @Prop({ required: false })

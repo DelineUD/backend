@@ -3,17 +3,21 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
+import { Events } from '@app/events/entities/events.entity';
+import { UpdateEventsDto } from '@app/events/dto/update-events.dto';
+import { CreateEventsDto } from '@app/events/dto/create.event.dto';
+import { DeleteEventsDto } from '@app/events/dto/delete-events.dto';
+
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { IEvents } from './interfaces/events.interface';
 import { eventListMapper, eventMapper } from './mapper';
-import { EventsModel } from './models/events.model';
 
 @Injectable()
 export class EventsService {
   constructor(
-    @InjectModel(EventsModel.name)
-    private readonly eventsModel: Model<EventsModel>,
+    @InjectModel(Events.name)
+    private readonly eventsModel: Model<Events>,
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
@@ -36,7 +40,7 @@ export class EventsService {
 
       if (
         (newStartMonth === newMonth && newStartYear === newYaer) ||
-        (queryDate < i.stopDate && queryDate > i.sartDate)
+        (queryDate < i.stopDate && queryDate > i.startDate)
       ) {
         return i;
       }
@@ -44,18 +48,18 @@ export class EventsService {
     return eventListMapper(ev_d, initUsr);
   }
 
-  async create(eventDto: IEvents): Promise<IEvents> {
-    const { _id, authorId, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
+  async create(eventDto: CreateEventsDto): Promise<IEvents> {
+    const { eventId, author, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);
-    const eventInDb = await this.eventsModel.findOne({ _id }).exec();
+    const eventInDb = await this.eventsModel.findOne({ _id: eventId }).exec();
     if (eventInDb) {
       throw new HttpException('Это событие уже существует!', HttpStatus.CONFLICT);
     }
 
-    const event: EventsModel = new this.eventsModel({
-      authorId,
+    const event: Events = new this.eventsModel({
+      author,
       hText,
       hImg,
       startDate: newStartDate.toISOString(),
@@ -72,19 +76,19 @@ export class EventsService {
     return event;
   }
 
-  async update(eventDto: IEvents): Promise<IEvents> {
-    const { _id, authorId, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
+  async update(eventDto: UpdateEventsDto): Promise<IEvents> {
+    const { eventId, author, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);
 
-    const eventInDb = await this.eventsModel.findOne({ _id }).exec();
+    const eventInDb = await this.eventsModel.findOne({ _id: eventId }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Событие с id: ${_id} не найдено!`);
+      throw new EntityNotFoundError(`Событие не найдено!`);
     }
 
-    if (authorId !== eventInDb.authorId) {
+    if (author !== eventInDb.author._id) {
       throw new HttpException('У вас нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
@@ -100,18 +104,18 @@ export class EventsService {
       bodyText,
     });
     await eventInDb.save();
-    return await this.eventsModel.findOne({ _id }).exec();
+    return await this.eventsModel.findOne({ _id: eventId }).exec();
   }
 
-  async delete(eventDto: IEvents): Promise<IEvents> {
-    const { _id, authorId } = eventDto;
+  async delete(eventDto: DeleteEventsDto): Promise<IEvents> {
+    const { eventId, author } = eventDto;
 
-    const eventInDb = await this.eventsModel.findOne({ _id }).exec();
+    const eventInDb = await this.eventsModel.findOne({ _id: eventId }).exec();
     if (!eventInDb) {
       throw new EntityNotFoundError('Событие не найдено!');
-    } else if (authorId === eventInDb.authorId) {
+    } else if (author === eventInDb.author._id) {
       await eventInDb.deleteOne({
-        _id,
+        _id: eventId,
       });
 
       if (eventInDb) {
@@ -129,7 +133,7 @@ export class EventsService {
     const user = await this.usersService.findOne(initUsr.user._id);
     const eventInDb = await this.eventsModel.findOne({ _id }).exec();
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Событие с id: ${_id} не найдено!`);
+      throw new EntityNotFoundError(`Событие найдено!`);
     }
     return eventMapper(eventInDb, user);
   }
@@ -140,7 +144,7 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Событие с id: ${event} не найдено!`);
+      throw new EntityNotFoundError(`Событие не найдено!`);
     }
     const arrGoNotGo = eventInDb.iGo;
     let checkResult: boolean;
@@ -196,7 +200,7 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Событие с id: ${event} не найдено!`);
+      throw new EntityNotFoundError(`Событие не найдено!`);
     }
     const arrGoNotGo = eventInDb.notGo;
     let checkResult: boolean;
@@ -261,7 +265,7 @@ export class EventsService {
     const eventInDb = await this.eventsModel.findOne({ _id: event }).exec();
 
     if (!eventInDb) {
-      throw new EntityNotFoundError(`Событие с id: ${event} не найдено!`);
+      throw new EntityNotFoundError(`Событие не найдено!`);
     }
     const arrGoNotGo = eventInDb.favor;
     let checkResult: boolean;

@@ -12,7 +12,7 @@ export class FiltersController {
 
   /**
    * Обновление фильтров.
-   * @returns - вызов.
+   * @returns - обновление фильтров.
    */
   @Post('update')
   async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
@@ -21,7 +21,7 @@ export class FiltersController {
 
   /**
    * Получение фильтров для стран.
-   * @returns - Страны.
+   * @returns - Фильтры страны.
    */
   @Get('countries')
   async findCountries(): Promise<IFilters> {
@@ -30,7 +30,7 @@ export class FiltersController {
 
   /**
    * Получение фильтров для городов.
-   * @returns - Города.
+   * @returns - Фильтры городов.
    */
   @Get('cities')
   async findCities(): Promise<IFilters> {
@@ -39,7 +39,7 @@ export class FiltersController {
 
   /**
    * Получение фильтров для специализаций.
-   * @returns - Города.
+   * @returns - Фильтры специализаций.
    */
   @Get('specializations')
   async findSpecializations(): Promise<IFilters> {
@@ -48,7 +48,7 @@ export class FiltersController {
 
   /**
    * Получение фильтров для узких специализаций.
-   * @returns - Города.
+   * @returns - Фильтры узких специализаций.
    */
   @Get('narrow-specializations')
   async findNarrowSpecializations(): Promise<IFilters> {
@@ -57,7 +57,7 @@ export class FiltersController {
 
   /**
    * Получение фильтров для программ.
-   * @returns - Города.
+   * @returns - Фильтры программ.
    */
   @Get('programs')
   async findPrograms(): Promise<IFilters> {
@@ -66,7 +66,7 @@ export class FiltersController {
 
   /**
    * Получение фильтров для курсов.
-   * @returns - Города.
+   * @returns - Фильтры курсов.
    */
   @Get('courses')
   async findCourses(): Promise<IFilters> {

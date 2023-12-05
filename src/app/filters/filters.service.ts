@@ -26,23 +26,23 @@ export class FiltersService {
   async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
     try {
       return await Promise.allSettled([
-        await this.updateCountries(updateFiltersDto.countryName),
-        await this.updateCities(updateFiltersDto.cityName),
-        await this.updateSpecializations(updateFiltersDto.specializationNames),
-        await this.updateNarrowSpecializations(updateFiltersDto.narrowSpecializationNames),
-        await this.updatePrograms(updateFiltersDto.programs),
-        await this.updateCourses(updateFiltersDto.courses),
+        await this.updateFilters(updateFiltersDto.countryName, this.countriesModel),
+        await this.updateFilters(updateFiltersDto.cityName, this.citiesModel),
+        await this.updateMultiFilters(updateFiltersDto.specializationNames, this.specializationsModel),
+        await this.updateMultiFilters(updateFiltersDto.narrowSpecializationNames, this.narrowSpecializationsModel),
+        await this.updateMultiFilters(updateFiltersDto.programs, this.programsModel),
+        await this.updateMultiFilters(updateFiltersDto.courses, this.coursesModel),
       ]);
     } catch (err) {
       throw err;
     }
   }
 
-  async updateCountries(countryName: string): Promise<void> {
+  async updateFilters(name: string, model: Model<IFilters>): Promise<void> {
     try {
-      const country = await this.countriesModel.findOne({ name: countryName }).exec();
-      if (!country) {
-        await this.countriesModel.create({ name: countryName });
+      const filter = await model.findOne({ name }).exec();
+      if (!filter) {
+        await model.create({ name });
       }
       return;
     } catch (err) {
@@ -50,78 +50,15 @@ export class FiltersService {
     }
   }
 
-  async updateCities(cityName: string): Promise<void> {
+  async updateMultiFilters(names: string[], model: Model<IFilters>): Promise<void> {
     try {
-      const city = await this.citiesModel.findOne({ name: cityName }).exec();
-      if (!city) {
-        await this.citiesModel.create({ name: cityName });
-      }
-      return;
-    } catch (err) {
-      throw err;
-    }
-  }
+      const existingFilters = await model.find({ name: { $in: names } }).exec();
+      const existingFilterNames = existingFilters.map((f) => f.name);
+      const newFilterNames = names.filter((n) => !existingFilterNames.includes(n));
 
-  async updateSpecializations(names: string[]): Promise<void> {
-    try {
-      const existingSpecializations = await this.specializationsModel.find({ name: { $in: names } }).exec();
-      const existingSpecNames = existingSpecializations.map((s) => s.name);
-      const newSpecNames = names.filter((n) => !existingSpecNames.includes(n));
-
-      if (newSpecNames.length > 0) {
-        const newSpecializations: IFilters[] = newSpecNames.map((name) => ({ name }));
-        await this.specializationsModel.create(newSpecializations);
-      }
-
-      return;
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async updateNarrowSpecializations(names: string[]): Promise<void> {
-    try {
-      const existingNarrowSpec = await this.narrowSpecializationsModel.find({ name: { $in: names } }).exec();
-      const existingNarrowSpecNames = existingNarrowSpec.map((s) => s.name);
-      const newNarrowSpecNames = names.filter((n) => !existingNarrowSpecNames.includes(n));
-
-      if (newNarrowSpecNames.length > 0) {
-        const newSpecializations: IFilters[] = newNarrowSpecNames.map((name) => ({ name }));
-        await this.narrowSpecializationsModel.create(newSpecializations);
-      }
-
-      return;
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async updatePrograms(names: string[]): Promise<void> {
-    try {
-      const existingPrograms = await this.programsModel.find({ name: { $in: names } }).exec();
-      const existingProgramsNames = existingPrograms.map((p) => p.name);
-      const newProgramsNames = names.filter((n) => !existingProgramsNames.includes(n));
-
-      if (newProgramsNames.length > 0) {
-        const newSpecializations: IFilters[] = newProgramsNames.map((name) => ({ name }));
-        await this.programsModel.create(newSpecializations);
-      }
-
-      return;
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async updateCourses(names: string[]): Promise<void> {
-    try {
-      const existingCourses = await this.coursesModel.find({ name: { $in: names } }).exec();
-      const existingCoursesNames = existingCourses.map((c) => c.name);
-      const newProgramsNames = names.filter((n) => !existingCoursesNames.includes(n));
-
-      if (newProgramsNames.length > 0) {
-        const newCourses: IFilters[] = newProgramsNames.map((name) => ({ name }));
-        await this.coursesModel.create(newCourses);
+      if (newFilterNames.length > 0) {
+        const newFilters: IFilters[] = newFilterNames.map((name) => ({ name }));
+        await model.create(newFilters);
       }
 
       return;

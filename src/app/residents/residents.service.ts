@@ -23,7 +23,7 @@ export class ResidentsService {
     private readonly userModel: Model<UserModel>,
   ) {}
 
-  async getResidentsList(queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+  async findList(queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
     try {
       const query = {
         country: queryParams.country ?? '',
@@ -40,9 +40,9 @@ export class ResidentsService {
     }
   }
 
-  async getResidentById(query: GetResidentParamsDto): Promise<IResident> {
+  async findOneById({ id }: GetResidentParamsDto): Promise<IResident> {
     try {
-      const resident = await this.usersService.findOne(query);
+      const resident = await this.usersService.findOne({ _id: id });
       return residentMapper(resident);
     } catch (err) {
       throw new EntityNotFoundError(`Пользователь не найден`);

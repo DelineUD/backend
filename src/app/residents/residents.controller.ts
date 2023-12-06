@@ -35,15 +35,19 @@ export class ResidentsController {
 
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getList(@Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
-    return await this.residentsService.getResidentsList(queryParams);
+  async findList(@Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+    return await this.residentsService.findList(queryParams);
   }
 
-  @Get(':_id')
+  @Get(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({ name: '_id', description: 'Идентификатор резидента', required: true })
-  async getById(@Param() params: GetResidentParamsDto): Promise<IResident> {
-    return await this.residentsService.getResidentById(params);
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Системный идентификатор резидента',
+  })
+  async findOneById(@Param() params: GetResidentParamsDto): Promise<IResident> {
+    return await this.residentsService.findOneById(params);
   }
 
   @Post('avatar')

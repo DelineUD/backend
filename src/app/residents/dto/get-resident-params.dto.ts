@@ -5,5 +5,5 @@ import { IsMongoId } from 'class-validator';
 export class GetResidentParamsDto {
   @ApiProperty({ default: '' })
   @IsMongoId()
-  _id: Types.ObjectId;
+  id: Types.ObjectId;
 }

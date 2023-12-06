@@ -49,7 +49,11 @@ export class ResumesController {
    */
   @Get('list/:userId')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: 'Системный идентификатор пользователя',
+  })
   async findAllByUserId(@Param() params: IFindAllResumeParams): Promise<IResume[]> {
     return await this.resumesService.findAllByUserId(params);
   }
@@ -62,8 +66,16 @@ export class ResumesController {
    */
   @Get(':userId/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({ name: 'id', description: 'GetCourse Resume ID' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: 'Системный идентификатор пользователя',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Системный идентификатор резюме',
+  })
   async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResume> {
     return await this.resumesService.findOneById(params);
   }

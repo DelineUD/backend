@@ -48,7 +48,11 @@ export class VacancyController {
    */
   @Get('list/:userId')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: 'Системный идентификатор пользователя',
+  })
   async findAllByUserId(@Param() params: IFindAllVacancyParams): Promise<IVacancy[]> {
     return await this.vacancyService.findAllByUserId(params);
   }
@@ -61,8 +65,16 @@ export class VacancyController {
    */
   @Get(':userId/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({ name: 'id', description: 'Vacancy ID' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiParam({
+    name: 'userId',
+    type: 'string',
+    description: 'Системный идентификатор пользователя',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Системный идентификатор вакансии',
+  })
   async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancy> {
     return await this.vacancyService.findByUserId(params);
   }

@@ -19,6 +19,7 @@ export const residentsMapper = (user: UserModel): IResidentList => {
     avatar: user.avatar,
     first_name: user.first_name,
     last_name: user.last_name,
+    status: user.status,
   };
 };
 
@@ -35,8 +36,8 @@ export const residentMapper = (user: UserModel): IResident => {
       {
         birthday: user.birthday,
         gender: user.gender,
-        citynru: user.citynru,
-        city_ru: user.city_ru,
+        country: user.country,
+        city: user.city,
       },
     ],
     description_fields: [

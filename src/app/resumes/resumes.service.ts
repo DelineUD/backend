@@ -4,15 +4,16 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { filterQueries } from '@helpers/filterQueries';
 import normalizeDto from '@utils/normalizeDto';
-
 import { resumeMapper } from '@app/resumes/resume.mapper';
+import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
+import { ResumeDto } from '@app/resumes/dto/resume.dto';
 import { Resume } from './entities/resume.entity';
 import { IResume } from './interfaces/resume.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
-import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
-import { ResumeDto } from '@app/resumes/dto/resume.dto';
+import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 
 @Injectable()
 export class ResumesService {
@@ -44,9 +45,13 @@ export class ResumesService {
     }
   }
 
-  async findAll(): Promise<IResume[]> {
+  async findAll({ desc, ...queryParams }: ResumeFindQueryDto): Promise<IResume[]> {
     try {
-      const resumes = await this.resumeModel.find().exec();
+      const query = { ...queryParams };
+      const resumes = await this.resumeModel
+        .find(filterQueries(query))
+        .sort(desc && { createdAt: -1 })
+        .exec();
 
       if (!resumes.length) {
         return [];

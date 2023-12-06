@@ -14,5 +14,7 @@ export interface IVacancy {
   need_programs: string[];
   remote_work: boolean;
   service_cost?: number;
+  country?: string;
+  city?: string;
   author: Types.ObjectId | Pick<IUser, UserPick>;
 }

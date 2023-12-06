@@ -1,4 +1,16 @@
-import { Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 
@@ -6,6 +18,7 @@ import { Types } from 'mongoose';
 
 import { fileStorage } from '@shared/storage';
 import { UserId } from '@shared/decorators/user-id.decorator';
+import { ResidentsFindQueryDto } from '@app/residents/dto/residents-find-query.dto';
 import { imageFileFilter } from '@utils/imageFileFilter';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
@@ -21,24 +34,20 @@ export class ResidentsController {
   constructor(private residentsService: ResidentsService) {}
 
   @Get('list')
-  async getList(): Promise<IResidentList[]> {
-    return await this.residentsService.getResidentsList();
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getList(@Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+    return await this.residentsService.getResidentsList(queryParams);
   }
 
   @Get(':_id')
-  @ApiParam({
-    name: '_id',
-    description: 'Идентификатор резидента',
-    required: true,
-  })
-  async getById(
-    @Param()
-    params: GetResidentParamsDto,
-  ): Promise<IResident> {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiParam({ name: '_id', description: 'Идентификатор резидента', required: true })
+  async getById(@Param() params: GetResidentParamsDto): Promise<IResident> {
     return await this.residentsService.getResidentById(params);
   }
 
   @Post('avatar')
+  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {

@@ -95,7 +95,7 @@ export class PostsService {
 
   async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPosts[]> {
     try {
-      const { search, lastIndex, group } = queryParams;
+      const { search, lastIndex, group, desc } = queryParams;
 
       const user = await this.usersService.findOne({ _id: userId });
 
@@ -114,7 +114,8 @@ export class PostsService {
 
       const posts = await this.postModel
         .find(query)
-        .sort({ createdAt: -1 })
+        .populate('author', '_id avatar first_name last_name')
+        .sort(desc && { createdAt: -1 })
         .limit(10)
         .skip(!lastIndex ? 0 : 10);
 
@@ -161,7 +162,7 @@ export class PostsService {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
 
-      const filesToNames = files.map((file) => `${process.env.STATIC_PATH}/${file.filename}`);
+      const filesToNames = files.map((file) => `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${file.filename}`);
       console.log(files);
 
       if (files?.length && !post.pImg.length) {

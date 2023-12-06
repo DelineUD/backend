@@ -14,6 +14,8 @@ export class Vacancy extends Document implements IVacancy {
   @Prop({ required: true }) narrow_spec: string[];
   @Prop({ required: true }) need_programs: string[];
   @Prop({ required: true }) remote_work: boolean;
+  @Prop() country?: string;
+  @Prop() city?: string;
   @Prop() service_cost?: number;
   @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: Types.ObjectId;
 }

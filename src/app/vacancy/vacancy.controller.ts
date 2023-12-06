@@ -8,6 +8,7 @@ import { IVacancy } from './interfaces/vacancy.interface';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt.guard';
+import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 
 @ApiTags('Vacancy')
 @Controller('vacancy')
@@ -36,8 +37,8 @@ export class VacancyController {
    * @returns - Все вакансии.
    */
   @Get('list')
-  async findAll(): Promise<IVacancy[]> {
-    return await this.vacancyService.findAll();
+  async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancy[]> {
+    return await this.vacancyService.findAll(queryParams);
   }
 
   /**

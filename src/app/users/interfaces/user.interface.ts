@@ -12,11 +12,10 @@ export interface IUser {
   avatar?: string;
   gender?: string;
   badge?: string;
-  cntry?: string;
   vPass?: number;
 
-  city_ru?: string;
-  citynru?: string;
+  country?: string;
+  city?: string;
 
   about?: string;
   education?: string;

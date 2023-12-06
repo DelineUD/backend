@@ -7,25 +7,32 @@ import { UserModel } from './models/user.model';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IUser } from '@app/users/interfaces/user.interface';
+import { userMapper } from '@app/users/users.mapper';
+import { FiltersService } from '@app/filters/filters.service';
 
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';
-import { userMapper } from '@app/users/users.mapper';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>,
+    private readonly filtersService: FiltersService,
   ) {}
 
-  async getUsers(): Promise<UserModel[]> {
-    return this.userModel.find({});
+  async findAll(filter: Partial<IUser>): Promise<UserModel[]> {
+    try {
+      return this.userModel.find({ ...filter }).exec();
+    } catch (err) {
+      throw new EntityNotFoundError(err);
+    }
   }
 
-  async findOne(where): Promise<UserModel> {
+  async findOne(where: Partial<IUser>): Promise<UserModel> {
     try {
-      return await this.userModel.findOne(where).exec();
+      return await this.userModel.findOne({ ...where }).exec();
     } catch (e) {
       throw new EntityNotFoundError(e);
     }
@@ -57,14 +64,25 @@ export class UsersService {
 
       const salt = await genSalt(10);
       const hashPassword = await hash(createUserDto.password, salt);
+      const userMapped = userMapper(createUserDto);
+      const updateFilters: UpdateFiltersDto = {
+        countryName: userMapped.country,
+        cityName: userMapped.city,
+        specializationNames: userMapped.specialization_new_app,
+        narrowSpecializationNames: userMapped.narrow_spec_new_app,
+        programs: userMapped.programs_new_app,
+        courses: userMapped.courses_new_app,
+      };
 
       const user = await this.userModel.findOne({ phone });
 
       if (!user) {
-        return await this.userModel.create({ ...userMapper(createUserDto), password: hashPassword });
+        return await this.userModel.create({ ...userMapped, password: hashPassword });
       }
 
-      return await user.updateOne({ ...userMapper(createUserDto), password: hashPassword }).exec();
+      this.filtersService.update(updateFilters).then(() => console.log('Filters updated!'));
+
+      return await user.updateOne({ ...userMapped, password: hashPassword }).exec();
     } catch (err) {
       throw err;
     }
@@ -99,7 +117,7 @@ export class UsersService {
       const result = await this.userModel.updateOne({ _id: userId }, { $unset: prop });
 
       if (!result) {
-        throw new Error(`Пользователь с id: ${userId} не найден!`);
+        throw new Error(`Пользователь не найден!`);
       }
 
       return true;

@@ -20,12 +20,11 @@ export class UserModel extends Document implements IUser {
   @Prop() avatar?: string;
   @Prop() gender?: string;
   @Prop() badge?: string;
-  @Prop() cntry?: string;
   @Prop() vPass?: number;
 
   // Contact Information
-  @Prop() city_ru?: string;
-  @Prop() citynru?: string;
+  @Prop() country?: string;
+  @Prop() city?: string;
 
   // Additional Information
   @Prop() about?: string;

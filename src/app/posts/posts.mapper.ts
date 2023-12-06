@@ -5,7 +5,12 @@ import { PostModel } from '@app/posts/models/posts.model';
 export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
   return posts.map((posts) => ({
     _id: posts._id,
-    author: posts.author,
+    author: {
+      _id: posts.author._id,
+      first_name: posts.author.first_name,
+      last_name: posts.author.last_name,
+      avatar: posts.author.avatar ?? null,
+    },
     pText: posts.pText,
     pImg: posts.pImg,
     countLikes: posts.countLikes ?? 0,
@@ -22,7 +27,12 @@ export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
 export const postMapper = (post: PostModel, user: UserModel): IPosts => {
   return {
     _id: post._id,
-    author: post.author,
+    author: {
+      _id: post.author._id,
+      first_name: post.author.first_name,
+      last_name: post.author.last_name,
+      avatar: post.author.avatar ?? null,
+    },
     pText: post.pText,
     pImg: post.pImg,
     countLikes: post.countLikes ?? 0,

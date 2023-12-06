@@ -1,7 +1,6 @@
 import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '@app/app.module';
 

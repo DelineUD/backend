@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface IFilters {
-  _id?: Types.ObjectId;
+  code?: string | Types.ObjectId;
   name: string;
 }
 

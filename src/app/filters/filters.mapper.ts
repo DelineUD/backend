@@ -3,7 +3,7 @@ import { IFilters, IFiltersResponse } from '@app/filters/interfaces/filters.inte
 export const filtersMapper = (model: IFilters[] = [], name = 'Отфильтровать по', multi = false): IFiltersResponse => {
   return {
     name,
-    values: model.map((i) => ({ _id: i._id, name: i.name })),
+    values: model.map((i) => ({ code: i.code, name: i.name })),
     multi,
   };
 };

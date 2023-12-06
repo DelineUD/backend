@@ -17,11 +17,11 @@ export class ResidentsFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  specialization?: string;
+  specializations?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  narrow_specialization?: string;
+  narrow_specializations?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()

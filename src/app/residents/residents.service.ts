@@ -29,8 +29,8 @@ export class ResidentsService {
         country: queryParams.country ?? '',
         city: queryParams.city ?? '',
         status: queryParams.status ?? '',
-        specialization_new_app: splitDtoField(queryParams.specialization),
-        narrow_spec_new_app: splitDtoField(queryParams.narrow_specialization),
+        specialization_new_app: splitDtoField(queryParams.specializations),
+        narrow_spec_new_app: splitDtoField(queryParams.narrow_specializations),
         programs_new_app: splitDtoField(queryParams.programs),
         courses_new_app: splitDtoField(queryParams.courses),
       };

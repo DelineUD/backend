@@ -72,4 +72,13 @@ export class FiltersController {
   async findCourses(): Promise<IFilters> {
     return await this.filtersService.findCourses();
   }
+
+  /**
+   * Получение фильтров для постов.
+   * @returns - Фильтры постов.
+   */
+  @Get('posts')
+  public findPosts(): IFilters {
+    return this.filtersService.findPosts();
+  }
 }

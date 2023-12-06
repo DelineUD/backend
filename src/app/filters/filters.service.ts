@@ -69,7 +69,7 @@ export class FiltersService {
 
   async findCountries(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.countriesModel.find().exec(), 'Страна', false);
+      return filtersMapper(await this.countriesModel.find().exec(), 'country', false);
     } catch (err) {
       throw err;
     }
@@ -77,7 +77,7 @@ export class FiltersService {
 
   async findCities(): Promise<IFilters> {
     try {
-      return filtersMapper(await this.citiesModel.find().exec(), 'Город', false);
+      return filtersMapper(await this.citiesModel.find().exec(), 'city', false);
     } catch (err) {
       throw err;
     }
@@ -85,7 +85,7 @@ export class FiltersService {
 
   async findSpecializations(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.specializationsModel.find().exec(), 'Специализация', true);
+      return filtersMapper(await this.specializationsModel.find().exec(), 'specializations', true);
     } catch (err) {
       throw err;
     }
@@ -93,7 +93,7 @@ export class FiltersService {
 
   async findNarrowSpecializations(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.narrowSpecializationsModel.find().exec(), 'Узкая специализация', true);
+      return filtersMapper(await this.narrowSpecializationsModel.find().exec(), 'narrow_specializations', true);
     } catch (err) {
       throw err;
     }
@@ -101,7 +101,7 @@ export class FiltersService {
 
   async findPrograms(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.programsModel.find().exec(), 'Программы', true);
+      return filtersMapper(await this.programsModel.find().exec(), 'programs', true);
     } catch (err) {
       throw err;
     }
@@ -109,7 +109,29 @@ export class FiltersService {
 
   async findCourses(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.coursesModel.find().exec(), 'Курсы', true);
+      return filtersMapper(await this.coursesModel.find().exec(), 'courses', true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  findPosts(): IFiltersResponse {
+    try {
+      const postsFilters: IFilters[] = [
+        {
+          code: 'pf001',
+          name: 'Общее',
+        },
+        {
+          code: 'pf002',
+          name: 'Администрация',
+        },
+        {
+          code: 'pf003',
+          name: 'HH',
+        },
+      ];
+      return filtersMapper(postsFilters, 'group', false);
     } catch (err) {
       throw err;
     }

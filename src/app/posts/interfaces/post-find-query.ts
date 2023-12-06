@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBooleanString, IsEmpty, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsEmpty, IsOptional, IsString } from 'class-validator';
 
 export class IPostsFindQuery {
   @ApiProperty({ default: '', required: false })

@@ -37,6 +37,7 @@ import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { IPosts } from './interfaces/posts.interface';
 import { CreatePostCommentDto } from './dto/create-post-comment.dto';
+import { ILike } from '@app/posts/interfaces/like.interface';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
@@ -170,7 +171,7 @@ export class PostsController {
    */
   @Patch(':postId/like')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async liked(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPosts> {
+  async liked(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<ILike> {
     return await this.postsService.like(userId, params);
   }
 
@@ -227,7 +228,7 @@ export class PostsController {
     type: 'string',
     description: 'Системный идентификатор комментария',
   })
-  async commentLiked(@UserId() userId: Types.ObjectId, @Param() params: IPostsCommentsFindParams): Promise<ICPosts> {
+  async commentLiked(@UserId() userId: Types.ObjectId, @Param() params: IPostsCommentsFindParams): Promise<ILike> {
     return await this.postsService.commentLike(userId, params);
   }
 

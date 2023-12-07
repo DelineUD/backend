@@ -21,6 +21,7 @@ import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
+import { ILike } from '@app/posts/interfaces/like.interface';
 
 @Injectable()
 export class PostsService {
@@ -72,16 +73,16 @@ export class PostsService {
     try {
       const { postId } = postDto;
 
-      const deletedPost = await this.postModel.findOneAndDelete({ _id: postId }).exec();
+      const deletedPost = await this.postModel
+        .findOneAndDelete({ _id: postId, author: userId })
+        .populate('author', '_id')
+        .exec();
+
       if (!deletedPost) {
         throw new EntityNotFoundError('Запись не найдена!');
       }
 
-      if (userId !== deletedPost.author._id) {
-        throw new BadRequestException('Нет доступа!');
-      }
-
-      await this.postCommentsModel.deleteMany({ author: deletedPost._id });
+      await this.postCommentsModel.deleteMany({ postId: deletedPost._id });
 
       return {
         acknowledged: true,
@@ -188,34 +189,30 @@ export class PostsService {
     }
   }
 
-  async like(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPosts> {
+  async like(userId: Types.ObjectId, params: IPostsFindParams): Promise<ILike> {
     try {
       const { postId } = params;
 
-      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
+      const postInDb = await this.postModel.findOne({ _id: postId, author: userId }).exec();
 
       if (!postInDb) {
         throw new EntityNotFoundError(`Запись не найдена`);
       }
 
-      const arrLikes: string[] = postInDb.likes;
+      const likes = postInDb.isLiked
+        ? postInDb.likes.filter((i) => i !== String(userId))
+        : postInDb.likes.unshift(String(userId));
+      const countLikes = postInDb.isLiked ? 0 : 1;
+      const isLiked = !postInDb.isLiked;
 
-      if (!arrLikes.includes(String(userId))) {
-        arrLikes.unshift(String(userId));
-        await postInDb.updateOne({
-          likes: arrLikes,
-          countLikes: postInDb.countLikes++,
-        });
-      } else {
-        const filteredArray = arrLikes.filter((item) => item !== String(userId));
-        await postInDb.updateOne({
-          likes: filteredArray,
-          countLikes: filteredArray.length,
-        });
-      }
-
+      await postInDb.updateOne({ likes, countLikes, isLiked });
       await postInDb.save();
-      return await this.postModel.findOne({ _id: postId }).exec();
+
+      return {
+        _id: postInDb._id,
+        countLikes,
+        isLiked,
+      };
     } catch (err) {
       throw err;
     }
@@ -274,7 +271,7 @@ export class PostsService {
     }
   }
 
-  async commentLike(userId: Types.ObjectId, params: PostCommentLikeDto): Promise<ICPosts> {
+  async commentLike(userId: Types.ObjectId, params: PostCommentLikeDto): Promise<ILike> {
     try {
       const { postId, commentId } = params;
 
@@ -293,36 +290,20 @@ export class PostsService {
         throw new EntityNotFoundError(`Комментарий не найден`);
       }
 
-      const arrLikes = comment.likes;
-      let checkResult = false;
+      const likes = comment.isLiked
+        ? comment.likes.filter((i) => i !== String(userId))
+        : comment.likes.unshift(String(userId));
+      const countLikes = comment.isLiked ? 0 : 1;
+      const isLiked = !comment.isLiked;
 
-      if (arrLikes.length === 0) {
-        await comment.updateOne({
-          likes: [user._id, ...arrLikes],
-          countLikes: 1,
-        });
-        await comment.save();
-      } else {
-        checkResult = arrLikes.includes(user._id.toString());
+      await comment.updateOne({ likes, countLikes, isLiked });
+      await comment.save();
 
-        if (!checkResult) {
-          await comment.updateOne({
-            likes: [user._id, ...arrLikes],
-            countLikes: comment.countLikes + 1,
-          });
-          await comment.save();
-        } else {
-          const filteredArray = arrLikes.filter((f) => f !== user._id.toString());
-          const count = filteredArray.length;
-          await comment.updateOne({
-            likes: filteredArray,
-            countLikes: count,
-          });
-          await comment.save();
-        }
-      }
-
-      return await this.postCommentsModel.findOne({ postId, _id: commentId }).exec();
+      return {
+        _id: comment._id,
+        countLikes,
+        isLiked,
+      };
     } catch (err) {
       throw err;
     }

@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -14,12 +14,17 @@ import { IResume } from './interfaces/resume.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
+import { IVacancy } from '@app/vacancy/interfaces/vacancy.interface';
+import { FilterKeys, StatusFilterKeys } from '@app/filters/consts';
+import { residentQueriesMapper } from '@app/residents/residents.mapper';
+import { FiltersService } from '@app/filters/filters.service';
 
 @Injectable()
 export class ResumesService {
   constructor(
     @InjectModel(Resume.name) private readonly resumeModel: Model<Resume>,
     private readonly usersService: UsersService,
+    private readonly filtersService: FiltersService,
   ) {}
 
   async update(userId: Types.ObjectId, resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
@@ -45,19 +50,27 @@ export class ResumesService {
     }
   }
 
-  async findAll({ desc, ...queryParams }: ResumeFindQueryDto): Promise<IResume[]> {
+  async findAll({ remote_work, desc, ...queryParams }: ResumeFindQueryDto): Promise<IResume[]> {
     try {
-      const query = { ...queryParams };
-      const resumes = await this.resumeModel
-        .find(filterQueries(query))
-        .sort(desc && { createdAt: -1 })
+      const query: FilterQuery<Partial<IResume>> = { ...queryParams };
+
+      const { specPromises, nSpecPromises, programsPromises } = this.filtersService.getFiltersPromises(query);
+
+      const [spec, narrowSpec, programs] = await Promise.allSettled([
+        Promise.all(specPromises),
+        Promise.all(nSpecPromises),
+        Promise.all(programsPromises),
+      ]);
+
+      residentQueriesMapper(spec) && (query.specializations = residentQueriesMapper(spec));
+      residentQueriesMapper(narrowSpec) && (query.narrow_specializations = residentQueriesMapper(narrowSpec));
+      residentQueriesMapper(programs) && (query.programs = residentQueriesMapper(programs));
+      remote_work && (query.remote_work = remote_work);
+
+      return await this.resumeModel
+        .find(query)
+        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
         .exec();
-
-      if (!resumes.length) {
-        return [];
-      }
-
-      return resumes;
     } catch (err) {
       console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
       throw new InternalServerErrorException(`Внутрення ошибка сервера!`);

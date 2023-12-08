@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { compare, genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { UserModel } from './models/user.model';
 
@@ -13,6 +13,8 @@ import { FiltersService } from '@app/filters/filters.service';
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { filterQueries } from '@helpers/filterQueries';
+import { FilterKeys } from '@app/filters/consts';
 
 @Injectable()
 export class UsersService {
@@ -22,7 +24,7 @@ export class UsersService {
     private readonly filtersService: FiltersService,
   ) {}
 
-  async findAll(filter: Partial<IUser>): Promise<UserModel[]> {
+  async findAll(filter: FilterQuery<Partial<IUser>>): Promise<IUser[]> {
     try {
       return this.userModel.find({ ...filter }).exec();
     } catch (err) {
@@ -66,12 +68,12 @@ export class UsersService {
       const hashPassword = await hash(createUserDto.password, salt);
       const userMapped = userMapper(createUserDto);
       const updateFilters: UpdateFiltersDto = {
-        countryName: userMapped.country,
-        cityName: userMapped.city,
-        specializationNames: userMapped.specialization_new_app,
-        narrowSpecializationNames: userMapped.narrow_spec_new_app,
-        programs: userMapped.programs_new_app,
-        courses: userMapped.courses_new_app,
+        [FilterKeys.Country]: userMapped.country,
+        [FilterKeys.City]: userMapped.city,
+        [FilterKeys.Spec]: userMapped.specializations,
+        [FilterKeys.NarrowSpec]: userMapped.narrow_specializations,
+        [FilterKeys.Programs]: userMapped.programs,
+        [FilterKeys.Courses]: userMapped.courses,
       };
 
       const user = await this.userModel.findOne({ phone });

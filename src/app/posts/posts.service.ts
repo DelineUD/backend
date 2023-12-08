@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -22,6 +22,7 @@ import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { ILike } from '@app/posts/interfaces/like.interface';
+import { GroupFilterKeys } from '@app/filters/consts';
 
 @Injectable()
 export class PostsService {
@@ -100,23 +101,16 @@ export class PostsService {
 
       const user = await this.usersService.findOne({ _id: userId });
 
-      const query: {
-        pText?: {
-          $regex: RegExp;
-        };
-        group?: string;
-        _id?: {
-          $lt: string;
-        };
-      } = {};
+      const query: FilterQuery<Partial<IPosts>> = {};
+
       search && (query.pText = { $regex: new RegExp(search, 'i') });
-      group && (query.group = group);
+      group && (query.group = GroupFilterKeys[group]);
       lastIndex && (query._id = { $lt: lastIndex });
 
       const posts = await this.postModel
         .find(query)
         .populate('author', '_id avatar first_name last_name')
-        .sort(desc && { createdAt: -1 })
+        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
         .limit(10)
         .skip(!lastIndex ? 0 : 10);
 

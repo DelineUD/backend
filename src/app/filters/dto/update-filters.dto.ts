@@ -5,19 +5,19 @@ export class UpdateFiltersDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  countryName?: string;
+  country?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  cityName?: string;
+  city?: string;
   @ApiProperty({ default: [], required: false })
   @IsOptional()
   @IsString()
-  specializationNames?: string[];
+  specializations?: string[];
   @ApiProperty({ default: [], required: false })
   @IsOptional()
   @IsString()
-  narrowSpecializationNames?: string[];
+  narrow_specializations?: string[];
   @ApiProperty({ default: [], required: false })
   @IsOptional()
   @IsString()

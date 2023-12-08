@@ -37,6 +37,7 @@ export class VacancyController {
    * @returns - Все вакансии.
    */
   @Get('list')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancy[]> {
     return await this.vacancyService.findAll(queryParams);
   }

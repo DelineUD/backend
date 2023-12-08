@@ -12,11 +12,13 @@ import { ResidentsService } from './residents.service';
 import { ResidentsController } from './residents.controller';
 
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
+import { FiltersModule } from '@app/filters/filters.module';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
+    FiltersModule,
     PassportModule.register({
       defaultStrategy: 'jwt',
       property: 'user',

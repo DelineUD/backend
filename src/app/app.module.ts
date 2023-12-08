@@ -33,12 +33,12 @@ import { ResumesModule } from './resumes/resumes.module';
       dest: './files',
     }),
     AuthModule,
+    FiltersModule,
     ResidentsModule,
     PostsModule,
     EventsModule,
     VacancyModule,
     ResumesModule,
-    FiltersModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [

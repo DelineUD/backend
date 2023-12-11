@@ -24,7 +24,7 @@ import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')

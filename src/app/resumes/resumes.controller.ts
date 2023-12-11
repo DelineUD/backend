@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 import { ResumesService } from './resumes.service';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
-import { JwtAuthGuard } from '@app/auth/guards/jwt.guard';
+import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { IResume } from './interfaces/resume.interface';

@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -17,10 +16,9 @@ import { splitDtoField } from '@helpers/splitDto';
 @Injectable()
 export class ResidentsService {
   constructor(
-    private usersService: UsersService,
-    private readonly jwtService: JwtService,
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>,
+    private usersService: UsersService,
   ) {}
 
   async findList(queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {

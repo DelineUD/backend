@@ -1,21 +1,22 @@
-import { Body, Controller, Get, Headers, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt.guard';
+import { JwtAuthGuard } from './guards/jwt-access.guard';
 
-import { ILoginSmsResponse } from './interfaces/login-sms.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { IJwtResponse } from './interfaces/login-jwt.interface';
-import { ILoginStatus } from './interfaces/login-status.interface';
 
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { GetMeDto } from './dto/get-me.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
-import { GetNewTokensDto } from './dto/get-new-tokens.dto';
+import { ILoginResponse } from '@app/auth/interfaces/login.interface';
+import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
+import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -33,7 +34,7 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post('login')
-  public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
+  public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginResponse> {
     return await this.authService.login(loginUserDto);
   }
 
@@ -42,24 +43,26 @@ export class AuthController {
     return await this.authService.sendSms(sendSmsDto);
   }
 
-  @Post('refresh')
-  async getNewTokens(@Body() data: GetNewTokensDto) {
-    return this.authService.getNewTokens(data);
-  }
-
   @Get('login-sms')
   @ApiHeader({
     name: 'User-Login-Data',
     description: 'User-Login-Data: phone code',
   })
-  public async loginSms(@Headers() headers: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
+  public async loginSms(@Headers() headers: LoginSmsDto): Promise<ILoginResponse> {
     return await this.authService.loginSms(headers);
   }
 
-  @Get('profile')
+  @UseGuards(JwtAuthRefreshGuard)
   @ApiBearerAuth('defaultBearerAuth')
+  @Get('refresh')
+  async getNewTokens(@Req() req: Request): Promise<IAuthTokens> {
+    return this.authService.refresh(req);
+  }
+
   @UseGuards(JwtAuthGuard)
-  async getMe(@Headers() data: GetMeDto) {
+  @ApiBearerAuth('defaultBearerAuth')
+  @Get('profile')
+  async getMe(@Headers() data: GetMeDto): Promise<Partial<IUser>> {
     return this.authService.getMe(data);
   }
 }

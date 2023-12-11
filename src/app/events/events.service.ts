@@ -18,7 +18,6 @@ export class EventsService {
   constructor(
     @InjectModel(Events.name)
     private readonly eventsModel: Model<Events>,
-    private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
 

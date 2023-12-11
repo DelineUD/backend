@@ -7,7 +7,7 @@ import { VacancyService } from './vacancy.service';
 import { IVacancy } from './interfaces/vacancy.interface';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
-import { JwtAuthGuard } from '@app/auth/guards/jwt.guard';
+import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 
 @ApiTags('Vacancy')

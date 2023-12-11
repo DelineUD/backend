@@ -1,8 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsMongoId, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class GetNewTokensDto {
+  @ApiProperty({ default: '' })
+  @IsMongoId()
+  readonly userId: Types.ObjectId;
+  @ApiProperty({ default: '' })
   @IsString()
-  @ApiProperty({ type: String, default: '' })
-  readonly refreshToken: string;
+  readonly headers: any;
 }

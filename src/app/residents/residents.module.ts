@@ -7,6 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { ResidentsService } from './residents.service';
 import { ResidentsController } from './residents.controller';
+import { FiltersModule } from '@app/filters/filters.module';
 
 @Module({
   imports: [
@@ -16,8 +17,9 @@ import { ResidentsController } from './residents.controller';
         schema: UserSchema,
       },
     ]),
-    UsersModule,
     AuthModule,
+    UsersModule,
+    FiltersModule,
   ],
   controllers: [ResidentsController],
   providers: [ResidentsService, AuthService],

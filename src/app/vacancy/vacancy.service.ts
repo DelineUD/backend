@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -14,13 +14,16 @@ import { IVacancy } from './interfaces/vacancy.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
-import { filterQueries } from '@helpers/filterQueries';
+import { FilterKeys } from '@app/filters/consts';
+import { residentQueriesMapper, residentQueryMapper } from '@app/residents/residents.mapper';
+import { FiltersService } from '@app/filters/filters.service';
 
 @Injectable()
 export class VacancyService {
   constructor(
     @InjectModel(Vacancy.name) private readonly vacancyModel: Model<Vacancy>,
     private readonly usersService: UsersService,
+    private readonly filtersService: FiltersService,
   ) {}
 
   async update(userId: Types.ObjectId, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
@@ -46,19 +49,27 @@ export class VacancyService {
     }
   }
 
-  async findAll({ desc, ...queryParams }: VacancyFindQueryDto): Promise<IVacancy[]> {
+  async findAll({ desc, remote_work, ...queryParams }: VacancyFindQueryDto): Promise<IVacancy[]> {
     try {
-      const query = { ...queryParams };
-      const vacancies = await this.vacancyModel
-        .find(filterQueries(query))
-        .sort(desc && { createdAt: -1 })
+      const query: FilterQuery<Partial<IVacancy>> = { ...queryParams };
+
+      const { specPromises, nSpecPromises, programsPromises } = this.filtersService.getFiltersPromises(query);
+
+      const [spec, narrowSpec, programs] = await Promise.allSettled([
+        Promise.all(specPromises),
+        Promise.all(nSpecPromises),
+        Promise.all(programsPromises),
+      ]);
+
+      residentQueriesMapper(spec) && (query.specializations = residentQueriesMapper(spec));
+      residentQueriesMapper(narrowSpec) && (query.narrow_specializations = residentQueriesMapper(narrowSpec));
+      residentQueriesMapper(programs) && (query.programs = residentQueriesMapper(programs));
+      remote_work && (query.remote_work = remote_work);
+
+      return await this.vacancyModel
+        .find(query)
+        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
         .exec();
-
-      if (!vacancies.length) {
-        return [];
-      }
-
-      return vacancies;
     } catch (err) {
       console.error(`Ошибка при поиске вакансий: ${(err as Error).message}`);
       throw new InternalServerErrorException('Вакансии не найдены!');
@@ -100,7 +111,7 @@ export class VacancyService {
       }
 
       const vacancy = await this.vacancyModel
-        .findOne({ author: userId, id })
+        .findOne({ author: userId, _id: id })
         .populate('author', '_id first_name last_name avatar')
         .exec();
 

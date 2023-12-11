@@ -1,14 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+import { validateObjectId } from '@helpers/validateObjectId';
 
 export class ResidentsFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   country?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   city?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
@@ -16,18 +19,18 @@ export class ResidentsFindQueryDto {
   status?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateObjectId)
   specializations?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateObjectId)
   narrow_specializations?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateObjectId)
   programs?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateObjectId)
   courses?: string;
 }

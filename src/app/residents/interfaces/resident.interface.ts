@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 // Description filed without label
 export type Item = string[];
 
@@ -20,7 +22,7 @@ export interface IPersonalInfoResident {
 }
 
 export interface IResident {
-  _id: string;
+  _id: Types.ObjectId;
   first_name: string;
   last_name: string;
   about: string;

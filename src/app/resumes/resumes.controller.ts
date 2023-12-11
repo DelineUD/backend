@@ -38,6 +38,7 @@ export class ResumesController {
    * @returns - Все резюме.
    */
   @Get('list')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() queryParams?: ResumeFindQueryDto): Promise<IResume[]> {
     return await this.resumesService.findAll(queryParams);
   }

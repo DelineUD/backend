@@ -6,8 +6,8 @@ export const vacancyMapper = (dto: VacancyDto): IVacancy => {
   const { qualification, narrow_spec, need_programs, ...rest } = dto;
   return {
     ...rest,
-    qualification: splitDtoField(qualification),
-    narrow_spec: splitDtoField(narrow_spec),
-    need_programs: splitDtoField(need_programs),
+    specializations: splitDtoField(qualification),
+    narrow_specializations: splitDtoField(narrow_spec),
+    programs: splitDtoField(need_programs),
   };
 };

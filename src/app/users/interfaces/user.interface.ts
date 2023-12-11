@@ -33,8 +33,8 @@ export interface IUser {
   hide_phone?: boolean;
   qualification_color?: string;
 
-  courses_new_app: string[];
-  programs_new_app: string[];
-  specialization_new_app: string[];
-  narrow_spec_new_app: string[];
+  courses: string[];
+  programs: string[];
+  specializations: string[];
+  narrow_specializations: string[];
 }

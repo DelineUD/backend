@@ -1,27 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBooleanString, IsEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsEmpty, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+import { validateObjectId } from '@helpers/validateObjectId';
 
 export class ResumeFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
-  country?: string;
+  @Transform(validateObjectId)
+  specializations?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
-  city?: string;
+  @Transform(validateObjectId)
+  narrow_specializations?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsArray()
-  qualification?: string;
+  @Transform(validateObjectId)
+  programs?: string;
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsArray()
-  narrow_specialization?: string;
-  @ApiProperty({ default: '', required: false })
-  @IsOptional()
-  @IsArray()
-  need_programs?: string;
+  @Transform(validateObjectId)
+  courses?: string;
   @ApiProperty({ default: false, required: false })
   @IsOptional()
   @IsBooleanString()
@@ -29,5 +28,5 @@ export class ResumeFindQueryDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEmpty()
-  desc?: string;
+  desc?: string | undefined;
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Countries } from '@app/filters/entities/countries.entity';
 import { Cities } from '@app/filters/entities/cities.entity';
@@ -11,6 +11,8 @@ import { NarrowSpecializations } from '@app/filters/entities/narrow-specializati
 import { Programs } from '@app/filters/entities/programs.entity';
 import { Courses } from '@app/filters/entities/courses.entity';
 import { filtersMapper } from '@app/filters/filters.mapper';
+import { FilterKeys, GroupFilterKeys, StatusFilterKeys } from '@app/filters/consts';
+import { IAllQueryFilters } from '@app/filters/interfaces/all-filters.interface';
 
 @Injectable()
 export class FiltersService {
@@ -26,31 +28,31 @@ export class FiltersService {
   async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
     try {
       return await Promise.allSettled([
-        await this.updateFilters(updateFiltersDto.countryName, this.countriesModel),
-        await this.updateFilters(updateFiltersDto.cityName, this.citiesModel),
-        await this.updateMultiFilters(updateFiltersDto.specializationNames, this.specializationsModel),
-        await this.updateMultiFilters(updateFiltersDto.narrowSpecializationNames, this.narrowSpecializationsModel),
-        await this.updateMultiFilters(updateFiltersDto.programs, this.programsModel),
-        await this.updateMultiFilters(updateFiltersDto.courses, this.coursesModel),
+        await this.updateFilters(updateFiltersDto[FilterKeys.Country], this.countriesModel),
+        await this.updateFilters(updateFiltersDto[FilterKeys.City], this.citiesModel),
+        await this.updateMultiFilters(updateFiltersDto[FilterKeys.Spec], this.specializationsModel),
+        await this.updateMultiFilters(updateFiltersDto[FilterKeys.NarrowSpec], this.narrowSpecializationsModel),
+        await this.updateMultiFilters(updateFiltersDto[FilterKeys.Programs], this.programsModel),
+        await this.updateMultiFilters(updateFiltersDto[FilterKeys.Courses], this.coursesModel),
       ]);
     } catch (err) {
       throw err;
     }
   }
 
-  async updateFilters(name: string, model: Model<IFilters>): Promise<void> {
+  async updateFilters(name: string, model: Model<IFilters>): Promise<IFilters> {
     try {
       const filter = await model.findOne({ name }).exec();
       if (!filter) {
         await model.create({ name });
       }
-      return;
+      return filter;
     } catch (err) {
       throw err;
     }
   }
 
-  async updateMultiFilters(names: string[], model: Model<IFilters>): Promise<void> {
+  async updateMultiFilters(names: string[], model: Model<IFilters>): Promise<IFilters[]> {
     try {
       const existingFilters = await model.find({ name: { $in: names } }).exec();
       const existingFilterNames = existingFilters.map((f) => f.name);
@@ -61,77 +63,131 @@ export class FiltersService {
         await model.create(newFilters);
       }
 
-      return;
+      return [];
     } catch (err) {
       throw err;
     }
   }
 
-  async findCountries(): Promise<IFiltersResponse> {
+  async findEntityByPayload<T>(model: Model<T>, payload: FilterQuery<T>) {
     try {
-      return filtersMapper(await this.countriesModel.find().exec(), 'country', false);
+      return await model.findOne({ ...payload }).exec();
     } catch (err) {
       throw err;
     }
   }
 
-  async findCities(): Promise<IFilters> {
+  getFiltersPromises(query: Partial<IAllQueryFilters>) {
+    return {
+      countryPromise: query[FilterKeys.Country] && this.findCountryByPayload({ _id: query[FilterKeys.Country] }),
+      cityPromise: query[FilterKeys.City] && this.findCityByPayload({ _id: query[FilterKeys.City] }),
+      specPromises: query[FilterKeys.Spec] && query[FilterKeys.Spec]?.map((id) => this.findSpecByPayload({ _id: id })),
+      nSpecPromises:
+        query[FilterKeys.NarrowSpec] &&
+        query[FilterKeys.NarrowSpec]?.map((id) => this.findNarrowSpecByPayload({ _id: id })),
+      programsPromises:
+        query[FilterKeys.Programs] && query[FilterKeys.Programs]?.map((id) => this.findProgramsByPayload({ _id: id })),
+      coursesPromises:
+        query[FilterKeys.Courses] && query[FilterKeys.Courses]?.map((id) => this.findCoursesByPayload({ _id: id })),
+    };
+  }
+
+  async findCountryByPayload(payload: FilterQuery<Countries>) {
+    return this.findEntityByPayload(this.countriesModel, payload);
+  }
+
+  async findCityByPayload(payload: FilterQuery<Cities>) {
+    return this.findEntityByPayload(this.citiesModel, payload);
+  }
+
+  async findSpecByPayload(payload: FilterQuery<Specializations>) {
+    return this.findEntityByPayload(this.specializationsModel, payload);
+  }
+
+  async findNarrowSpecByPayload(payload: FilterQuery<NarrowSpecializations>) {
+    return this.findEntityByPayload(this.narrowSpecializationsModel, payload);
+  }
+
+  async findProgramsByPayload(payload: FilterQuery<Programs>) {
+    return this.findEntityByPayload(this.programsModel, payload);
+  }
+
+  async findCoursesByPayload(payload: FilterQuery<Courses>) {
+    return this.findEntityByPayload(this.coursesModel, payload);
+  }
+
+  async getCountriesFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.citiesModel.find().exec(), 'city', false);
+      return filtersMapper(await this.countriesModel.find().exec(), FilterKeys.Country, false);
     } catch (err) {
       throw err;
     }
   }
 
-  async findSpecializations(): Promise<IFiltersResponse> {
+  async getCitiesFilter(): Promise<IFilters> {
     try {
-      return filtersMapper(await this.specializationsModel.find().exec(), 'specializations', true);
+      return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, false);
     } catch (err) {
       throw err;
     }
   }
 
-  async findNarrowSpecializations(): Promise<IFiltersResponse> {
+  async getSpecializationsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.narrowSpecializationsModel.find().exec(), 'narrow_specializations', true);
+      return filtersMapper(await this.specializationsModel.find().exec(), FilterKeys.Spec, true);
     } catch (err) {
       throw err;
     }
   }
 
-  async findPrograms(): Promise<IFiltersResponse> {
+  async getNarrowSpecializationsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.programsModel.find().exec(), 'programs', true);
+      return filtersMapper(
+        await this.narrowSpecializationsModel.find().exec(),
+        FilterKeys[FilterKeys.NarrowSpec],
+        true,
+      );
     } catch (err) {
       throw err;
     }
   }
 
-  async findCourses(): Promise<IFiltersResponse> {
+  async getProgramsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.coursesModel.find().exec(), 'courses', true);
+      return filtersMapper(await this.programsModel.find().exec(), FilterKeys.Programs, true);
     } catch (err) {
       throw err;
     }
   }
 
-  findPosts(): IFiltersResponse {
+  async getCoursesFilter(): Promise<IFiltersResponse> {
     try {
-      const postsFilters: IFilters[] = [
-        {
-          code: 'pf001',
-          name: 'Общее',
-        },
-        {
-          code: 'pf002',
-          name: 'Администрация',
-        },
-        {
-          code: 'pf003',
-          name: 'HH',
-        },
-      ];
-      return filtersMapper(postsFilters, 'group', false);
+      return filtersMapper(await this.coursesModel.find().exec(), FilterKeys.Courses, true);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  getPostsFilter(): IFiltersResponse {
+    try {
+      const groupFilter = Object.keys(GroupFilterKeys).map((key) => ({
+        _id: key,
+        name: GroupFilterKeys[key as keyof typeof GroupFilterKeys],
+      }));
+      console.log(groupFilter);
+      return filtersMapper(groupFilter, FilterKeys.Group, false);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  getStatusFilter(): IFiltersResponse {
+    try {
+      const statusFilter = Object.keys(StatusFilterKeys).map((key) => ({
+        _id: key,
+        name: StatusFilterKeys[key as keyof typeof StatusFilterKeys],
+      }));
+      return filtersMapper(statusFilter, FilterKeys.Status, false);
     } catch (err) {
       throw err;
     }

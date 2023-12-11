@@ -35,8 +35,8 @@ export class ResidentsController {
 
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findList(@Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
-    return await this.residentsService.findList(queryParams);
+  async findAll(@Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+    return await this.residentsService.findAll(queryParams);
   }
 
   @Get(':id')

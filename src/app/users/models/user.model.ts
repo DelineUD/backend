@@ -1,13 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-import { IUser } from '@app/users/interfaces/user.interface';
-
 @Schema({
   collection: 'users',
   timestamps: true,
 })
-export class UserModel extends Document implements IUser {
+export class UserModel extends Document {
   @Prop() id?: string;
 
   // Personal Information
@@ -46,16 +44,16 @@ export class UserModel extends Document implements IUser {
   @Prop() qualification_color?: string;
 
   // Courses
-  @Prop() courses_new_app: string[];
+  @Prop() courses: string[];
 
   // Programs
-  @Prop() programs_new_app: string[];
+  @Prop() programs: string[];
 
   // Specializations
-  @Prop() specialization_new_app: string[];
+  @Prop() specializations: string[];
 
   // Narrow Specializations
-  @Prop() narrow_spec_new_app: string[];
+  @Prop() narrow_specializations: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

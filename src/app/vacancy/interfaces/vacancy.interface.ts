@@ -9,9 +9,9 @@ export interface IVacancy {
   // Vacancy information
   id: string;
   name: string;
-  qualification: string[];
-  narrow_spec: string[];
-  need_programs: string[];
+  specializations: string[];
+  narrow_specializations: string[];
+  programs: string[];
   remote_work: boolean;
   service_cost?: number;
   country?: string;

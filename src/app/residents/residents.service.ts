@@ -1,42 +1,55 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { UserModel } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
-import { residentListMapper, residentMapper } from './residents.mapper';
+import { residentListMapper, residentMapper, residentQueriesMapper, residentQueryMapper } from './residents.mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { ResidentsFindQueryDto } from '@app/residents/dto/residents-find-query.dto';
-import { filterQueries } from '@helpers/filterQueries';
-import { splitDtoField } from '@helpers/splitDto';
+import { FiltersService } from '@app/filters/filters.service';
+import { IUser } from '@app/users/interfaces/user.interface';
+import { StatusFilterKeys } from '@app/filters/consts';
 
 @Injectable()
 export class ResidentsService {
   constructor(
-    private usersService: UsersService,
-    private readonly jwtService: JwtService,
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>,
+    private usersService: UsersService,
+    private readonly filtersService: FiltersService,
   ) {}
 
-  async findList(queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+  async findAll({ status, ...queryParams }: Partial<ResidentsFindQueryDto>): Promise<IResidentList[]> {
     try {
-      const query = {
-        country: queryParams.country ?? '',
-        city: queryParams.city ?? '',
-        status: queryParams.status ?? '',
-        specialization_new_app: splitDtoField(queryParams.specializations),
-        narrow_spec_new_app: splitDtoField(queryParams.narrow_specializations),
-        programs_new_app: splitDtoField(queryParams.programs),
-        courses_new_app: splitDtoField(queryParams.courses),
-      };
-      return await this.usersService.findAll(filterQueries(query)).then(residentListMapper);
+      const query: FilterQuery<Partial<IUser>> = { ...queryParams };
+
+      const { countryPromise, cityPromise, specPromises, nSpecPromises, programsPromises, coursesPromises } =
+        this.filtersService.getFiltersPromises(query);
+
+      const [country, city, spec, narrowSpec, programs, courses] = await Promise.allSettled([
+        countryPromise,
+        cityPromise,
+        Promise.all(specPromises),
+        Promise.all(nSpecPromises),
+        Promise.all(programsPromises),
+        Promise.all(coursesPromises),
+      ]);
+
+      residentQueryMapper(country) && (query.country = residentQueryMapper(country));
+      residentQueryMapper(city) && (query.city = residentQueryMapper(city));
+      residentQueriesMapper(spec) && (query.specializations = residentQueriesMapper(spec));
+      residentQueriesMapper(narrowSpec) && (query.narrow_specializations = residentQueriesMapper(narrowSpec));
+      residentQueriesMapper(programs) && (query.programs = residentQueriesMapper(programs));
+      residentQueriesMapper(courses) && (query.courses = residentQueriesMapper(courses));
+      status && (query.status = StatusFilterKeys[query.status]);
+
+      return await this.usersService.findAll(query).then(residentListMapper);
     } catch (err) {
-      throw new EntityNotFoundError('Пользователи не найдены');
+      throw err;
     }
   }
 

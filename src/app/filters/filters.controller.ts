@@ -24,8 +24,8 @@ export class FiltersController {
    * @returns - Фильтры страны.
    */
   @Get('countries')
-  async findCountries(): Promise<IFilters> {
-    return await this.filtersService.findCountries();
+  async getCountriesFilter(): Promise<IFilters> {
+    return await this.filtersService.getCountriesFilter();
   }
 
   /**
@@ -33,8 +33,8 @@ export class FiltersController {
    * @returns - Фильтры городов.
    */
   @Get('cities')
-  async findCities(): Promise<IFilters> {
-    return await this.filtersService.findCities();
+  async getCitiesFilter(): Promise<IFilters> {
+    return await this.filtersService.getCitiesFilter();
   }
 
   /**
@@ -42,8 +42,8 @@ export class FiltersController {
    * @returns - Фильтры специализаций.
    */
   @Get('specializations')
-  async findSpecializations(): Promise<IFilters> {
-    return await this.filtersService.findSpecializations();
+  async getSpecializationsFilter(): Promise<IFilters> {
+    return await this.filtersService.getSpecializationsFilter();
   }
 
   /**
@@ -51,8 +51,8 @@ export class FiltersController {
    * @returns - Фильтры узких специализаций.
    */
   @Get('narrow-specializations')
-  async findNarrowSpecializations(): Promise<IFilters> {
-    return await this.filtersService.findNarrowSpecializations();
+  async getNarrowSpecializationsFilter(): Promise<IFilters> {
+    return await this.filtersService.getNarrowSpecializationsFilter();
   }
 
   /**
@@ -60,8 +60,8 @@ export class FiltersController {
    * @returns - Фильтры программ.
    */
   @Get('programs')
-  async findPrograms(): Promise<IFilters> {
-    return await this.filtersService.findPrograms();
+  async getProgramsFilter(): Promise<IFilters> {
+    return await this.filtersService.getProgramsFilter();
   }
 
   /**
@@ -69,8 +69,8 @@ export class FiltersController {
    * @returns - Фильтры курсов.
    */
   @Get('courses')
-  async findCourses(): Promise<IFilters> {
-    return await this.filtersService.findCourses();
+  async getCoursesFilter(): Promise<IFilters> {
+    return await this.filtersService.getCoursesFilter();
   }
 
   /**
@@ -78,7 +78,16 @@ export class FiltersController {
    * @returns - Фильтры постов.
    */
   @Get('posts')
-  public findPosts(): IFilters {
-    return this.filtersService.findPosts();
+  public getPostsFilter(): IFilters {
+    return this.filtersService.getPostsFilter();
+  }
+
+  /**
+   * Получение фильтров для постов.
+   * @returns - Фильтры постов.
+   */
+  @Get('status')
+  public getStatusFilter(): IFilters {
+    return this.filtersService.getStatusFilter();
   }
 }

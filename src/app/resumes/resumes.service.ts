@@ -4,7 +4,6 @@ import { FilterQuery, Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import { filterQueries } from '@helpers/filterQueries';
 import normalizeDto from '@utils/normalizeDto';
 import { resumeMapper } from '@app/resumes/resume.mapper';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
@@ -14,8 +13,6 @@ import { IResume } from './interfaces/resume.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
-import { IVacancy } from '@app/vacancy/interfaces/vacancy.interface';
-import { FilterKeys, StatusFilterKeys } from '@app/filters/consts';
 import { residentQueriesMapper } from '@app/residents/residents.mapper';
 import { FiltersService } from '@app/filters/filters.service';
 

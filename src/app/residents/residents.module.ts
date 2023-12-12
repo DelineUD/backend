@@ -3,8 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModel, UserSchema } from '../users/models/user.model';
 import { UsersModule } from '../users/users.module';
-import { AuthModule } from '../auth/auth.module';
-import { AuthService } from '../auth/auth.service';
 import { ResidentsService } from './residents.service';
 import { ResidentsController } from './residents.controller';
 import { FiltersModule } from '@app/filters/filters.module';
@@ -17,11 +15,10 @@ import { FiltersModule } from '@app/filters/filters.module';
         schema: UserSchema,
       },
     ]),
-    AuthModule,
     UsersModule,
     FiltersModule,
   ],
   controllers: [ResidentsController],
-  providers: [ResidentsService, AuthService],
+  providers: [ResidentsService],
 })
 export class ResidentsModule {}

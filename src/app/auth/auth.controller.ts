@@ -10,7 +10,6 @@ import { ISensSmsResponse } from './interfaces/send-sms.interface';
 
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
-import { GetMeDto } from './dto/get-me.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { ILoginResponse } from '@app/auth/interfaces/login.interface';
@@ -23,6 +22,11 @@ import { IUser } from '@app/users/interfaces/user.interface';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Регистрация и обновление пользователя.
+   * @param createUserDto - данные пользователя.
+   * @returns - Статус регистрации
+   */
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post('register-or-update')
   public async register(
@@ -32,17 +36,32 @@ export class AuthController {
     return await this.authService.register(createUserDto);
   }
 
+  /**
+   * Вход по паролю.
+   * @param loginUserDto - данные входа.
+   * @returns - Пара токенов и тип входа
+   */
   @UsePipes(new ValidationPipe())
   @Post('login')
   public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginResponse> {
     return await this.authService.login(loginUserDto);
   }
 
+  /**
+   * Отправка sms кода.
+   * @param sendSmsDto - данные для отправки sms.
+   * @returns - ответ от стороннего api
+   */
   @Post('send-sms')
   public async sendSms(@Body() sendSmsDto: SendSmsDto): Promise<ISensSmsResponse> {
     return await this.authService.sendSms(sendSmsDto);
   }
 
+  /**
+   * Вход по sms.
+   * @param headers - данные входа по sms.
+   * @returns - Пара токенов и тип входа
+   */
   @Get('login-sms')
   @ApiHeader({
     name: 'User-Login-Data',
@@ -52,17 +71,28 @@ export class AuthController {
     return await this.authService.loginSms(headers);
   }
 
+  /**
+   * Обновление токенов.
+   * @param req - данные запрса через refresh стратегию.
+   * @returns - Пара токенов.
+   */
   @UseGuards(JwtAuthRefreshGuard)
   @ApiBearerAuth('defaultBearerAuth')
-  @Get('refresh')
+  @ApiHeader({ name: 'refreshToken' })
+  @Post('refresh')
   async getNewTokens(@Req() req: Request): Promise<IAuthTokens> {
     return this.authService.refresh(req);
   }
 
+  /**
+   * Получение пользователя.
+   * @param req - данные запрса через access стратегию.
+   * @returns - Пользователь.
+   */
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('defaultBearerAuth')
   @Get('profile')
-  async getMe(@Headers() data: GetMeDto): Promise<Partial<IUser>> {
-    return this.authService.getMe(data);
+  async getMe(@Req() req: Request): Promise<Partial<IUser>> {
+    return this.authService.getMe(req);
   }
 }

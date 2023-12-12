@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Events, EventsSchema } from '@app/events/entities/events.entity';
-import { AuthModule } from '../auth/auth.module';
-import { AuthService } from '../auth/auth.service';
 import { UsersModule } from '../users/users.module';
 import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
@@ -16,10 +14,9 @@ import { EventsService } from './events.service';
         schema: EventsSchema,
       },
     ]),
-    AuthModule,
     UsersModule,
   ],
-  providers: [EventsService, AuthService],
+  providers: [EventsService],
   controllers: [EventsController],
 })
 export class EventsModule {}

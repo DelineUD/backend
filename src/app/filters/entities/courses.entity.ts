@@ -1,8 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-import { IFilters } from '@app/filters/interfaces/filters.interface';
-
 @Schema({
   collection: 'courses',
   timestamps: true,

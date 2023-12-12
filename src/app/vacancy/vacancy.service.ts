@@ -14,8 +14,7 @@ import { IVacancy } from './interfaces/vacancy.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
-import { FilterKeys } from '@app/filters/consts';
-import { residentQueriesMapper, residentQueryMapper } from '@app/residents/residents.mapper';
+import { residentQueriesMapper } from '@app/residents/residents.mapper';
 import { FiltersService } from '@app/filters/filters.service';
 
 @Injectable()

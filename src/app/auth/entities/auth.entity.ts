@@ -7,7 +7,7 @@ import { Document, Types } from 'mongoose';
 })
 export class Auth extends Document {
   @Prop({ required: true }) userId: Types.ObjectId;
-  @Prop({ required: true }) refreshToken: string;
+  @Prop({ required: false }) refreshToken: string;
 }
 
 export const AuthSchema = SchemaFactory.createForClass(Auth);

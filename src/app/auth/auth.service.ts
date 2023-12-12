@@ -1,53 +1,45 @@
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { Request } from 'express';
 
 import { UsersService } from '../users/users.service';
 
 import { ILoginResponse } from './interfaces/login.interface';
-import { JwtPayload } from './interfaces/payload.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { IJwtPayload } from './interfaces/jwt.interface';
+import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
 import { IAuthTokens } from './interfaces/auth-tokens.interface';
 import { IUser } from '../users/interfaces/user.interface';
 
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
-import { GetMeDto } from './dto/get-me.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 
 import generateOTPCode from '../shared/utils/generateOTPCode';
 import { SmsService } from '@shared/services/sms.service';
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { TokensService } from './services/tokens.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly configService: ConfigService,
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private readonly tokensService: TokensService,
     private readonly smsService: SmsService,
   ) {}
 
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
     try {
-      let status: RegistrationStatus = {
-        success: true,
-        message: 'Регистрация пройдена успешно!',
-      };
+      const status: RegistrationStatus = { success: false, message: '' };
+
       const user = await this.usersService.createOrUpdate(userDto);
       if (!user) {
-        status = {
-          success: false,
-          message: 'Ошибка при регистрации!',
-        };
+        status.success = false;
+        status.message = 'Ошибка при регистрации!';
+      } else {
+        status.success = true;
+        status.message = 'Регистрация пройдена успешно!';
       }
+
       return status;
     } catch (err) {
       throw err;
@@ -56,40 +48,13 @@ export class AuthService {
 
   async login(loginUserDto: LoginUserDto): Promise<ILoginResponse> {
     const user = await this.usersService.findByLogin(loginUserDto);
-    const tokens = await this._createTokens({ phone: user.phone });
+
+    const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
+    await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
+
     return {
       ...tokens,
     };
-  }
-
-  async validateUser(payload: JwtPayload): Promise<IUser> {
-    const user = await this.usersService.findByPayload(payload);
-    if (!user) {
-      throw new EntityNotFoundError('Пользователь не найден');
-    }
-    return user;
-  }
-
-  private async _createTokens(payload: { phone: number }): Promise<IAuthTokens> {
-    try {
-      const [accessToken, refreshToken] = await Promise.all([
-        this.jwtService.signAsync(payload, {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: this.configService.get<string>('A_EXPIRES_IN'),
-        }),
-        this.jwtService.signAsync(payload, {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.get<string>('R_EXPIRES_IN'),
-        }),
-      ]);
-
-      return {
-        accessToken,
-        refreshToken,
-      };
-    } catch (err) {
-      throw err;
-    }
   }
 
   async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
@@ -132,7 +97,8 @@ export class AuthService {
       throw new ForbiddenException(`Неверный код!`);
     }
 
-    const tokens = await this._createTokens({ phone: user.phone });
+    const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
+    await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
     await this.usersService.deleteProperty(user._id, { vPass: payload.vPass });
 
     return {
@@ -142,10 +108,24 @@ export class AuthService {
 
   async refresh(req: Request): Promise<IAuthTokens> {
     try {
-      const user: Partial<IUser> = req.user;
-      const refreshToken = req['refreshToken'];
+      const { refreshToken, ...validUser } = req.user as IJwtRefreshValidPayload;
 
-      const tokens = await this._createTokens({ phone: user.phone });
+      const userInDb = await this.usersService.findByPayload({ ...validUser });
+      if (!userInDb) {
+        throw new UnauthorizedException('Пользователь не найден!');
+      }
+
+      const userToken = await this.tokensService.findUserRefreshToken(userInDb._id);
+      if (!userToken || userToken.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('Невалидный токен или срок его действия истек!');
+      }
+
+      const tokens = await this.tokensService.generateTokens({
+        _id: userInDb._id,
+        phone: userInDb.phone,
+        email: userInDb.email,
+      });
+      await this.tokensService.updateRefreshToken(userInDb._id, tokens.refreshToken);
 
       return {
         ...tokens,
@@ -155,29 +135,21 @@ export class AuthService {
     }
   }
 
-  async getMe({ authorization }: GetMeDto): Promise<Partial<IUser>> {
+  async getMe(req: Request): Promise<Partial<IUser>> {
     try {
-      if (!authorization) {
-        throw new UnauthorizedException('Токен не найден!');
+      const user = req.user;
+
+      const userInDb = await this.usersService.findByPayload({ ...user });
+      if (!userInDb) {
+        throw new UnauthorizedException('Пользователь не найден!');
       }
-
-      const token = authorization.split(' ')[1];
-
-      const userData: IJwtPayload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-      });
-      if (!userData) {
-        throw new UnauthorizedException('Невалидный токен или срок его действия истек!');
-      }
-
-      const user = await this.usersService.findByPhone(userData.phone);
 
       return {
-        _id: user._id,
-        first_name: user.first_name ?? null,
-        last_name: user.last_name ?? null,
-        phone: user.phone ?? null,
-        email: user.email ?? null,
+        _id: userInDb._id,
+        first_name: userInDb.first_name ?? null,
+        last_name: userInDb.last_name ?? null,
+        phone: userInDb.phone ?? null,
+        email: userInDb.email ?? null,
       };
     } catch (err) {
       throw err;

@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from '@app/app.module';
 
@@ -40,6 +41,7 @@ async function bootstrap() {
 
   SwaggerModule.setup('api/docs', app, document, options);
 
+  app.use(cookieParser());
   app.enableCors({
     origin: [
       /** IOS Capacitor Application */

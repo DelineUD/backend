@@ -1,31 +1,28 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 
-import { IJwtPayload } from '@app/auth/interfaces/jwt.interface';
+import { IJwtPayload, IJwtRefreshValidPayload } from '@app/auth/interfaces/jwt.interface';
 import { AuthService } from '@app/auth/auth.service';
-import { IUser } from '@app/users/interfaces/user.interface';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(private readonly configService: ConfigService, readonly authService: AuthService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromHeader('refreshtoken'),
       secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'),
       passReqToCallback: true,
     });
   }
 
-  async validate(req: Request, payload: IJwtPayload): Promise<Partial<IUser> & { refreshToken: string }> {
-    const refreshToken = req.headers.authorization?.replace('Bearer', '').trim();
-
-    if (!refreshToken) {
-      throw new UnauthorizedException();
+  validate(req: Request, payload: IJwtPayload): IJwtRefreshValidPayload {
+    try {
+      const refreshToken = req.get('refreshtoken').trim();
+      return { _id: payload._id, phone: payload.phone, email: payload.email, refreshToken };
+    } catch (err) {
+      throw err;
     }
-    const user = await this.authService.validateUser(payload);
-
-    return { ...user, refreshToken };
   }
 }

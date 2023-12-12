@@ -142,11 +142,7 @@ export class FiltersService {
 
   async getNarrowSpecializationsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(
-        await this.narrowSpecializationsModel.find().exec(),
-        FilterKeys[FilterKeys.NarrowSpec],
-        true,
-      );
+      return filtersMapper(await this.narrowSpecializationsModel.find().exec(), FilterKeys.NarrowSpec, true);
     } catch (err) {
       throw err;
     }
@@ -168,13 +164,12 @@ export class FiltersService {
     }
   }
 
-  getPostsFilter(): IFiltersResponse {
+  getGroupFilter(): IFiltersResponse {
     try {
       const groupFilter = Object.keys(GroupFilterKeys).map((key) => ({
         _id: key,
         name: GroupFilterKeys[key as keyof typeof GroupFilterKeys],
       }));
-      console.log(groupFilter);
       return filtersMapper(groupFilter, FilterKeys.Group, false);
     } catch (err) {
       throw err;

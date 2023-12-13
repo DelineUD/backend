@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { EventsService } from '@app/events/events.service';
 import { IEvents } from './interfaces/events.interface';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { CreateEventsDto } from '@app/events/dto/create.event.dto';
 
 @ApiTags('Events')

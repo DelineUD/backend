@@ -1,27 +1,32 @@
-import { Body, Controller, Get, Headers, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt.guard';
+import { JwtAuthGuard } from './guards/jwt-access.guard';
 
-import { ILoginSmsResponse } from './interfaces/login-sms.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { IJwtResponse } from './interfaces/login-jwt.interface';
-import { ILoginStatus } from './interfaces/login-status.interface';
 
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
-import { GetMeDto } from './dto/get-me.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
-import { GetNewTokensDto } from './dto/get-new-tokens.dto';
+import { ILoginResponse } from '@app/auth/interfaces/login.interface';
+import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
+import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
+import { IUser } from '@app/users/interfaces/user.interface';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Регистрация и обновление пользователя.
+   * @param createUserDto - данные пользователя.
+   * @returns - Статус регистрации
+   */
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post('register-or-update')
   public async register(
@@ -31,35 +36,63 @@ export class AuthController {
     return await this.authService.register(createUserDto);
   }
 
+  /**
+   * Вход по паролю.
+   * @param loginUserDto - данные входа.
+   * @returns - Пара токенов и тип входа
+   */
   @UsePipes(new ValidationPipe())
   @Post('login')
-  public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginStatus<IJwtResponse>> {
+  public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginResponse> {
     return await this.authService.login(loginUserDto);
   }
 
+  /**
+   * Отправка sms кода.
+   * @param sendSmsDto - данные для отправки sms.
+   * @returns - ответ от стороннего api
+   */
   @Post('send-sms')
   public async sendSms(@Body() sendSmsDto: SendSmsDto): Promise<ISensSmsResponse> {
     return await this.authService.sendSms(sendSmsDto);
   }
 
-  @Post('refresh')
-  async getNewTokens(@Body() data: GetNewTokensDto) {
-    return this.authService.getNewTokens(data);
-  }
-
+  /**
+   * Вход по sms.
+   * @param headers - данные входа по sms.
+   * @returns - Пара токенов и тип входа
+   */
   @Get('login-sms')
   @ApiHeader({
     name: 'User-Login-Data',
     description: 'User-Login-Data: phone code',
   })
-  public async loginSms(@Headers() headers: LoginSmsDto): Promise<ILoginStatus<ILoginSmsResponse>> {
+  public async loginSms(@Headers() headers: LoginSmsDto): Promise<ILoginResponse> {
     return await this.authService.loginSms(headers);
   }
 
-  @Get('profile')
+  /**
+   * Обновление токенов.
+   * @param req - данные запрса через refresh стратегию.
+   * @returns - Пара токенов.
+   */
+  @UseGuards(JwtAuthRefreshGuard)
   @ApiBearerAuth('defaultBearerAuth')
+  @ApiHeader({ name: 'refreshToken' })
+  @Post('refresh')
+  async getNewTokens(@Req() req: Request): Promise<IAuthTokens> {
+    return this.authService.refresh(req);
+  }
+
+  /**
+   * Получение пользователя.
+   * @param req - данные запрса через access стратегию.
+   * @returns - Пользователь.
+   */
   @UseGuards(JwtAuthGuard)
-  async getMe(@Headers() data: GetMeDto) {
-    return this.authService.getMe(data);
+  @ApiBearerAuth('defaultBearerAuth')
+  @Get('profile')
+  async getMe(@Req() req: Request): Promise<Partial<IUser>> {
+    return this.authService.getMe(req);
   }
 }

@@ -34,7 +34,7 @@ import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ICPosts } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
-import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { IPosts } from './interfaces/posts.interface';
 import { CreatePostCommentDto } from './dto/create-post-comment.dto';
 import { ILike } from '@app/posts/interfaces/like.interface';

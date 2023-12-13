@@ -2,8 +2,6 @@ import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { IEvents } from '@app/events/interfaces/events.interface';
-import { IUser } from '@app/users/interfaces/user.interface';
-import { UserPick } from '@app/users/interfaces/user-pick.interface';
 
 @Schema({
   collection: 'events',

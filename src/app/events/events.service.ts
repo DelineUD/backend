@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -18,7 +17,6 @@ export class EventsService {
   constructor(
     @InjectModel(Events.name)
     private readonly eventsModel: Model<Events>,
-    private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
 

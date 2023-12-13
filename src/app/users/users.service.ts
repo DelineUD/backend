@@ -13,7 +13,6 @@ import { FiltersService } from '@app/filters/filters.service';
 import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
-import { filterQueries } from '@helpers/filterQueries';
 import { FilterKeys } from '@app/filters/consts';
 
 @Injectable()

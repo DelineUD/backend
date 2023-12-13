@@ -20,6 +20,59 @@ export class FiltersController {
   }
 
   /**
+   * Получение фильтров для резюме.
+   * @returns - Фильтры резюме.
+   */
+  @Get('resumes')
+  public async getResumesFilter(): Promise<IFilters[]> {
+    return await Promise.all([
+      await this.filtersService.getSpecializationsFilter(),
+      await this.filtersService.getNarrowSpecializationsFilter(),
+      await this.filtersService.getProgramsFilter(),
+    ]);
+  }
+
+  /**
+   * Получение фильтров для вакансий.
+   * @returns - Фильтры вакансий.
+   */
+  @Get('vacancies')
+  public async getVacanciesFilter(): Promise<IFilters[]> {
+    return await Promise.all([
+      this.filtersService.getStatusFilter(),
+      await this.filtersService.getSpecializationsFilter(),
+      await this.filtersService.getNarrowSpecializationsFilter(),
+      await this.filtersService.getProgramsFilter(),
+    ]);
+  }
+
+  /**
+   * Получение фильтров для резидентов.
+   * @returns - Фильтры резидентов.
+   */
+  @Get('residents')
+  public async getResidentsFilter(): Promise<IFilters[]> {
+    return await Promise.all([
+      this.filtersService.getStatusFilter(),
+      await this.filtersService.getCountriesFilter(),
+      await this.filtersService.getCitiesFilter(),
+      await this.filtersService.getSpecializationsFilter(),
+      await this.filtersService.getNarrowSpecializationsFilter(),
+      await this.filtersService.getProgramsFilter(),
+      await this.filtersService.getCoursesFilter(),
+    ]);
+  }
+
+  /**
+   * Получение фильтров для постов.
+   * @returns - Фильтры постов.
+   */
+  @Get('posts')
+  public async getPostsFilter(): Promise<IFilters[]> {
+    return await Promise.all([this.filtersService.getGroupFilter()]);
+  }
+
+  /**
    * Получение фильтров для стран.
    * @returns - Фильтры страны.
    */
@@ -74,17 +127,8 @@ export class FiltersController {
   }
 
   /**
-   * Получение фильтров для постов.
-   * @returns - Фильтры постов.
-   */
-  @Get('posts')
-  public getPostsFilter(): IFilters {
-    return this.filtersService.getPostsFilter();
-  }
-
-  /**
-   * Получение фильтров для постов.
-   * @returns - Фильтры постов.
+   * Получение фильтров для статуса.
+   * @returns - Фильтры статуса.
    */
   @Get('status')
   public getStatusFilter(): IFilters {

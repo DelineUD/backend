@@ -3,25 +3,27 @@ import { IPosts } from './interfaces/posts.interface';
 import { PostModel } from '@app/posts/models/posts.model';
 
 export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
-  return posts.map((posts) => ({
-    _id: posts._id,
-    author: {
-      _id: posts.author._id,
-      first_name: posts.author.first_name,
-      last_name: posts.author.last_name,
-      avatar: posts.author.avatar ?? null,
-    },
-    pText: posts.pText,
-    pImg: posts.pImg,
-    countLikes: posts.countLikes ?? 0,
-    views_count: posts.views.length,
-    isLiked: posts.likes.includes(String(user._id)),
-    isViewed: posts.views.includes(String(user._id)),
-    createdAt: posts.createdAt,
-    updatedAt: posts.updatedAt,
-    countComments: posts.countComments,
-    group: posts.group,
-  }));
+  return posts
+    .map((posts) => ({
+      _id: posts._id,
+      author: {
+        _id: posts.author?._id,
+        first_name: posts.author?.first_name,
+        last_name: posts.author?.last_name,
+        avatar: posts.author?.avatar ?? null,
+      },
+      pText: posts.pText,
+      pImg: posts.pImg,
+      countLikes: posts.countLikes ?? 0,
+      views_count: posts.views.length,
+      isLiked: posts.likes.includes(String(user._id)),
+      isViewed: posts.views.includes(String(user._id)),
+      createdAt: posts.createdAt,
+      updatedAt: posts.updatedAt,
+      countComments: posts.countComments,
+      group: posts.group,
+    }))
+    .filter((post) => post.author);
 };
 
 export const postMapper = (post: PostModel, user: UserModel): IPosts => {

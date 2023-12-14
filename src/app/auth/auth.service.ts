@@ -95,7 +95,7 @@ export class AuthService {
         vPass: +loginData[1],
       };
 
-      const user = await this.usersService.findByPayload({ phone: payload.phone });
+      const user = await this.usersService.findByPhone(payload.phone);
       if (!user) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
@@ -120,7 +120,7 @@ export class AuthService {
     try {
       const { refreshToken, ...validUser } = req.user as IJwtRefreshValidPayload;
 
-      const userInDb = await this.usersService.findByPayload({ ...validUser });
+      const userInDb = await this.usersService.findOne({ ...validUser });
       if (!userInDb) {
         throw new UnauthorizedException('Пользователь не найден!');
       }
@@ -149,7 +149,7 @@ export class AuthService {
     try {
       const user = req.user;
 
-      const userInDb = await this.usersService.findByPayload({ ...user });
+      const userInDb = await this.usersService.findOne({ ...user });
       if (!userInDb) {
         throw new UnauthorizedException('Пользователь не найден!');
       }

@@ -97,22 +97,26 @@ export class PostsService {
 
   async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPosts[]> {
     try {
-      const { search, lastIndex, group, desc } = queryParams;
+      const query: IPostsFindQuery = { ...queryParams };
 
       const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
 
-      const query: FilterQuery<Partial<IPosts>> = {};
+      const finalQuery: FilterQuery<Partial<IPosts>> = {};
 
-      search && (query.pText = { $regex: new RegExp(search, 'i') });
-      group && (query.group = GroupFilterKeys[group]);
-      lastIndex && (query._id = { $lt: lastIndex });
+      query.search && (finalQuery.pText = { $regex: new RegExp(query.search, 'i') });
+      query.group && (finalQuery.group = GroupFilterKeys[query.group]);
+      query.lastIndex && (finalQuery._id = { $lt: query.lastIndex });
 
       const posts = await this.postModel
-        .find(query)
+        .find(finalQuery)
         .populate('author', '_id avatar first_name last_name')
-        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
+        .sort(typeof query.desc !== 'undefined' && { createdAt: -1 })
         .limit(10)
-        .skip(!lastIndex ? 0 : 10);
+        .skip(!finalQuery.lastIndex ? 0 : 10)
+        .exec();
 
       return postListMapper(posts, user);
     } catch (err) {

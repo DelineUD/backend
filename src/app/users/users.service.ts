@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { compare, genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
@@ -33,30 +33,34 @@ export class UsersService {
 
   async findOne(where: Partial<IUser>): Promise<UserModel> {
     try {
-      return await this.userModel.findOne({ ...where }).exec();
-    } catch (e) {
-      throw new EntityNotFoundError(e);
+      const user = await this.userModel.findOne({ ...where }).exec();
+      if (!user) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+      return user;
+    } catch (err) {
+      throw err;
     }
   }
 
   async findByLogin({ phone, password }: LoginUserDto): Promise<IUser> {
-    const user = await this.userModel.findOne({ phone }).exec();
+    try {
+      const user = await this.userModel.findOne({ phone }).exec();
 
-    if (!user) {
-      throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
+      }
+
+      const areEqual = await compare(password, user.password);
+
+      if (!areEqual) {
+        throw new BadRequestException('Неверные учетные данные!');
+      }
+
+      return user;
+    } catch (err) {
+      throw err;
     }
-
-    const areEqual = await compare(password, user.password);
-
-    if (!areEqual) {
-      throw new HttpException('Неверные учетные данные!', HttpStatus.BAD_REQUEST);
-    }
-
-    return user;
-  }
-
-  async findByPayload(payload: object): Promise<IUser> {
-    return await this.findOne(payload);
   }
 
   async createOrUpdate(createUserDto: CreateUserDto): Promise<IUser> {
@@ -94,7 +98,7 @@ export class UsersService {
       const user = await this.userModel.findOne({ phone }).exec();
 
       if (!user) {
-        throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
+        throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
       }
 
       return user;

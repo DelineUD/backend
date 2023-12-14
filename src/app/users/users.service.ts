@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { compare, genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
@@ -90,27 +90,31 @@ export class UsersService {
   }
 
   async findByPhone(phone: number): Promise<IUser> {
-    const user = await this.userModel.findOne({ phone }).exec();
+    try {
+      const user = await this.userModel.findOne({ phone }).exec();
 
-    if (!user) {
-      throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден!`);
+      }
+
+      return user;
+    } catch (err) {
+      throw err;
     }
-
-    return user;
   }
 
-  async update(where, newData): Promise<UserModel> {
-    let user: UserModel;
-
+  async updateByPayload(where: Partial<IUser>, payload: Partial<IUser>): Promise<IUser> {
     try {
-      user = await this.userModel.findOneAndUpdate(where, newData, {
-        new: true,
-      });
-    } catch (e) {
-      throw new EntityNotFoundError(e);
-    }
+      const updatedUser = await this.userModel.findOneAndUpdate({ ...where }, { ...payload }, { new: true });
 
-    return user;
+      if (!updatedUser) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
+      return updatedUser;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async deleteProperty(userId: Types.ObjectId | string, prop: object) {
@@ -118,12 +122,12 @@ export class UsersService {
       const result = await this.userModel.updateOne({ _id: userId }, { $unset: prop });
 
       if (!result) {
-        throw new Error(`Пользователь не найден!`);
+        throw new EntityNotFoundError(`Не найдено`);
       }
 
       return true;
     } catch (err) {
-      throw new Error(`Ошибка при удалении: ${err.message}!`);
+      throw err;
     }
   }
 }

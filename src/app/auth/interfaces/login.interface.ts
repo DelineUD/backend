@@ -3,3 +3,8 @@ export interface ILoginResponse {
   refreshToken: string;
   type?: string;
 }
+
+export interface ILoginSmsPayload {
+  phone: number;
+  vPass: number;
+}

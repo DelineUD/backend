@@ -3,7 +3,7 @@ import { Request } from 'express';
 
 import { UsersService } from '../users/users.service';
 
-import { ILoginResponse } from './interfaces/login.interface';
+import { ILoginResponse, ILoginSmsPayload } from './interfaces/login.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
 import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
@@ -18,6 +18,7 @@ import { SendSmsDto } from './dto/send-sms.dto';
 import generateOTPCode from '../shared/utils/generateOTPCode';
 import { SmsService } from '@shared/services/sms.service';
 import { TokensService } from './services/tokens.service';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
 @Injectable()
 export class AuthService {
@@ -54,56 +55,65 @@ export class AuthService {
 
     return {
       ...tokens,
+      type: 'password',
     };
   }
 
   async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
-    const user = await this.usersService.findByPhone(phone);
+    try {
+      const user = await this.usersService.findByPhone(phone);
 
-    if (!user) {
-      throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
+      if (!user) {
+        throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
+      }
+
+      const otpCode = generateOTPCode(4);
+      const msg = `Код авторизации: ${otpCode}`;
+      const { status, status_code } = await this.smsService.send(user.phone, msg);
+      if (status_code === 100) {
+        await this.usersService.updateByPayload({ _id: user._id }, { vPass: otpCode });
+      }
+
+      return {
+        status,
+        status_code,
+      };
+    } catch (err) {
+      throw err;
     }
-
-    const otpCode = generateOTPCode(4);
-    const msg = `Код авторизации: ${otpCode}`;
-    const { status, status_code } = await this.smsService.send(user.phone, msg);
-
-    if (status_code === 100) {
-      await this.usersService.update({ _id: user._id }, { vPass: otpCode });
-    }
-
-    return {
-      status,
-      status_code,
-    };
   }
 
   async loginSms(headers: LoginSmsDto): Promise<ILoginResponse> {
-    const loginData = headers['user-login-data'].split(' ');
+    try {
+      const loginData = headers['user-login-data'].split(' ');
 
-    if (!loginData || loginData.length < 2) {
-      throw new BadRequestException('Неверные данные для входа: пусто или неверно!');
+      if (!loginData || loginData.length < 2) {
+        throw new BadRequestException('Неверные данные для входа: пусто или неверно!');
+      }
+      const payload: ILoginSmsPayload = {
+        phone: +loginData[0],
+        vPass: +loginData[1],
+      };
+
+      const user = await this.usersService.findByPayload({ phone: payload.phone });
+      if (!user) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+      if (user.vPass !== payload.vPass && payload.vPass !== Number(process.env.QUICK_CODE)) {
+        throw new ForbiddenException(`Неверный код!`);
+      }
+
+      const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
+      await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
+      await this.usersService.deleteProperty(user._id, { vPass: payload.vPass });
+
+      return {
+        ...tokens,
+        type: 'sms',
+      };
+    } catch (err) {
+      throw err;
     }
-    const payload: {
-      phone: number;
-      vPass: number;
-    } = {
-      phone: +loginData[0],
-      vPass: +loginData[1],
-    };
-
-    const user = await this.usersService.findByPayload({ phone: payload.phone });
-    if ((!user && user.vPass !== payload.vPass) || payload.vPass !== Number(process.env.QUICK_CODE)) {
-      throw new ForbiddenException(`Неверный код!`);
-    }
-
-    const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
-    await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
-    await this.usersService.deleteProperty(user._id, { vPass: payload.vPass });
-
-    return {
-      ...tokens,
-    };
   }
 
   async refresh(req: Request): Promise<IAuthTokens> {

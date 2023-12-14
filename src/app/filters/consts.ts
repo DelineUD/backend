@@ -11,6 +11,17 @@ export enum FilterKeys {
   Desc = 'desc',
 }
 
+export enum FilterNames {
+  Country = 'Страна',
+  City = 'Город',
+  Spec = 'Специализации',
+  NarrowSpec = 'Узкие специализации',
+  Programs = 'Программа',
+  Courses = 'Курсы',
+  Status = 'Статус',
+  Group = 'Группа',
+}
+
 export enum StatusFilterKeys {
   sf001 = 'Новичок',
   sf002 = 'Специалист',

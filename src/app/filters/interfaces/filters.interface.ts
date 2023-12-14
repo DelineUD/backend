@@ -12,6 +12,7 @@ export interface IFiltersValue {
 
 export interface IFiltersResponse {
   name: string;
+  displayName: string;
   values: IFiltersValue[];
   multi: boolean;
 }

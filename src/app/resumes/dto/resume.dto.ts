@@ -2,8 +2,10 @@ import { Types } from 'mongoose';
 
 export class ResumeDto {
   // Resume information
-  author: Types.ObjectId;
   id: string;
+  author: Types.ObjectId;
+  country: string;
+  city: string;
   qualification: string;
   narrow_spec: string;
   remote_work: boolean;

@@ -15,19 +15,20 @@ export interface IDescFieldsResident {
 }
 
 export interface IPersonalInfoResident {
-  birthday: Date;
-  gender: string;
   country: string;
   city: string;
+  birthday?: Date | null;
+  gender?: string | null;
+  contact_link?: string | null;
 }
 
 export interface IResident {
   _id: Types.ObjectId;
   first_name: string;
   last_name: string;
-  about: string;
-  status: string;
-  avatar?: string;
+  about: string | null;
+  status: string | null;
+  avatar?: string | null;
   personal_information: IPersonalInfoResident[];
   description_fields: IDescFieldsResident[];
 }

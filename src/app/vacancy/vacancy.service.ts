@@ -14,8 +14,8 @@ import { IVacancy } from './interfaces/vacancy.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
-import { residentQueriesMapper } from '@app/residents/residents.mapper';
 import { FiltersService } from '@app/filters/filters.service';
+import { getMainFilters } from '@helpers/getMainFilters';
 
 @Injectable()
 export class VacancyService {
@@ -50,19 +50,7 @@ export class VacancyService {
 
   async findAll({ desc, remote_work, ...queryParams }: VacancyFindQueryDto): Promise<IVacancy[]> {
     try {
-      const query: FilterQuery<Partial<IVacancy>> = { ...queryParams };
-
-      const { specPromises, nSpecPromises, programsPromises } = this.filtersService.getFiltersPromises(query);
-
-      const [spec, narrowSpec, programs] = await Promise.allSettled([
-        Promise.all(specPromises),
-        Promise.all(nSpecPromises),
-        Promise.all(programsPromises),
-      ]);
-
-      residentQueriesMapper(spec) && (query.specializations = residentQueriesMapper(spec));
-      residentQueriesMapper(narrowSpec) && (query.narrow_specializations = residentQueriesMapper(narrowSpec));
-      residentQueriesMapper(programs) && (query.programs = residentQueriesMapper(programs));
+      const query: FilterQuery<Partial<IVacancy>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
 
       return await this.vacancyModel

@@ -13,3 +13,18 @@ export const filtersMapper = (
     multi,
   };
 };
+
+export const filterQueryMapper = (queryParam: PromiseSettledResult<IFilters>): string => {
+  if (queryParam.status === 'rejected') {
+    return;
+  }
+  return queryParam.value?.name;
+};
+
+export const filterQueriesMapper = (queryParam: PromiseSettledResult<IFilters[]>, allMatch = false) => {
+  if (queryParam.status === 'rejected') {
+    return;
+  }
+  const arrQueries = queryParam.value?.reduce((acc, i) => i && [...acc, i.name], []) ?? [];
+  return !allMatch && !arrQueries.length ? arrQueries : { $in: arrQueries };
+};

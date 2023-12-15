@@ -2,7 +2,6 @@ import { UserModel } from '../users/models/user.model';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { IResident } from './interfaces/resident.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
-import { IFilters } from '@app/filters/interfaces/filters.interface';
 
 export const residentListMapper = (user: UserModel[]): IResidentList[] => {
   return user.map(residentsMapper);
@@ -29,10 +28,11 @@ export const residentMapper = (user: IUser): IResident => {
 
     personal_information: [
       {
+        country: user.country,
+        city: user.city,
         birthday: user.birthday ?? null,
         gender: user.gender ?? null,
-        country: user.country ?? null,
-        city: user.city ?? null,
+        contact_link: user.telegram ?? null,
       },
     ],
     description_fields: [
@@ -54,19 +54,4 @@ export const residentMapper = (user: IUser): IResident => {
       },
     ],
   };
-};
-
-export const residentQueryMapper = (queryParam: PromiseSettledResult<IFilters>): string => {
-  if (queryParam.status === 'rejected') {
-    return;
-  }
-  return queryParam.value?.name;
-};
-
-export const residentQueriesMapper = (queryParam: PromiseSettledResult<IFilters[]>, allMatch = false) => {
-  if (queryParam.status === 'rejected') {
-    return;
-  }
-  const arrQueries = queryParam.value?.reduce((acc, i) => i && [...acc, i.name], []) ?? [];
-  return !allMatch && !arrQueries.length ? arrQueries : { $in: arrQueries };
 };

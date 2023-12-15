@@ -1,8 +1,8 @@
-import { UserModel } from '../users/models/user.model';
-import { IPosts } from './interfaces/posts.interface';
+import { IPosts } from '../interfaces/posts.interface';
 import { PostModel } from '@app/posts/models/posts.model';
+import { IUser } from '@app/users/interfaces/user.interface';
 
-export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
+export const postListMapper = (posts: IPosts[], user: IUser): IPosts[] => {
   return posts
     .map((posts) => ({
       _id: posts._id,
@@ -26,7 +26,7 @@ export const postListMapper = (posts: IPosts[], user: UserModel): IPosts[] => {
     .filter((post) => post.author);
 };
 
-export const postMapper = (post: PostModel, user: UserModel): IPosts => {
+export const postMapper = (post: PostModel, user: IUser): IPosts => {
   return {
     _id: post._id,
     author: {

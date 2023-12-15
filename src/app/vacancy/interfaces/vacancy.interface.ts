@@ -9,12 +9,12 @@ export interface IVacancy {
   // Vacancy information
   id: string;
   name: string;
+  author: Types.ObjectId | Pick<IUser, UserPick>;
+  country: string;
+  city: string;
   specializations: string[];
   narrow_specializations: string[];
   programs: string[];
-  remote_work: boolean;
+  remote_work?: boolean;
   service_cost?: number;
-  country?: string;
-  city?: string;
-  author: Types.ObjectId | Pick<IUser, UserPick>;
 }

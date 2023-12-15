@@ -17,6 +17,8 @@ export interface IDescFieldsResident {
 export interface IPersonalInfoResident {
   country: string;
   city: string;
+  email: string;
+  phone: string | null;
   birthday?: Date | null;
   gender?: string | null;
   contact_link?: string | null;
@@ -29,6 +31,6 @@ export interface IResident {
   about: string | null;
   status: string | null;
   avatar?: string | null;
-  personal_information: IPersonalInfoResident[];
+  personal_information: IPersonalInfoResident;
   description_fields: IDescFieldsResident[];
 }

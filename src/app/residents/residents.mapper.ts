@@ -1,56 +1,57 @@
-import { UserModel } from '../users/models/user.model';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { IResident } from './interfaces/resident.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
 
-export const residentListMapper = (user: UserModel[]): IResidentList[] => {
+export const residentListMapper = (user: IUser[]): IResidentList[] => {
   return user.map(residentsMapper);
 };
 
-export const residentsMapper = (user: UserModel): IResidentList => {
+export const residentsMapper = (user: IUser): IResidentList => {
+  const { ...userPayload } = JSON.parse(JSON.stringify(user)) as IUser;
   return {
-    _id: user._id,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    avatar: user.avatar ?? null,
-    status: user.status ?? null,
+    _id: userPayload._id,
+    first_name: userPayload.first_name,
+    last_name: userPayload.last_name,
+    avatar: userPayload.avatar ?? null,
+    status: userPayload.status ?? null,
   };
 };
 
 export const residentMapper = (user: IUser): IResident => {
+  const { hide_phone, ...userPayload } = JSON.parse(JSON.stringify(user)) as IUser;
   return {
-    _id: user._id,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    about: user.about ?? null,
-    status: user.status ?? null,
-    avatar: user.avatar ?? null,
+    _id: userPayload._id,
+    first_name: userPayload.first_name,
+    last_name: userPayload.last_name,
+    about: userPayload.about ?? null,
+    status: userPayload.status ?? null,
+    avatar: userPayload.avatar ?? null,
 
-    personal_information: [
-      {
-        country: user.country,
-        city: user.city,
-        birthday: user.birthday ?? null,
-        gender: user.gender ?? null,
-        contact_link: user.telegram ?? null,
-      },
-    ],
+    personal_information: {
+      country: userPayload.country,
+      city: userPayload.city,
+      email: userPayload.email,
+      phone: !hide_phone ? String(user.phone) : null,
+      birthday: userPayload.birthday ?? null,
+      gender: userPayload.gender ?? null,
+      contact_link: userPayload.telegram ?? null,
+    },
     description_fields: [
       {
         filed: 'Владение программами',
-        items: user.programs,
+        items: userPayload.programs,
       },
       {
         filed: 'Пройденные курсы',
-        items: user.courses,
+        items: userPayload.courses,
       },
       {
         filed: 'Специализация',
-        items: user.specializations,
+        items: userPayload.specializations,
       },
       {
         filed: 'Узкая специализация',
-        items: user.narrow_specializations,
+        items: userPayload.narrow_specializations,
       },
     ],
   };

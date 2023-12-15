@@ -22,7 +22,26 @@ export class ICrudVacancyParams {
   @IsString()
   readonly name_vacancy2?: string;
 
-  // Resume information
+  @ApiProperty({ default: 'Россия', required: false })
+  @IsOptional()
+  @IsString()
+  readonly country_vacancy1?: string;
+
+  @ApiProperty({ default: 'Россия', required: false })
+  @IsOptional()
+  @IsString()
+  readonly country_vacancy2?: string;
+
+  @ApiProperty({ default: 'Санкт-Петербург', required: false })
+  @IsOptional()
+  @IsString()
+  readonly city_vacancy1?: string;
+
+  @ApiProperty({ default: 'Санкт-Петербург', required: false })
+  @IsOptional()
+  @IsString()
+  readonly city_vacancy2?: string;
+
   @ApiProperty({ default: false, required: false })
   @IsOptional()
   @IsBooleanString()

@@ -7,44 +7,26 @@ import { UsersService } from '../users/users.service';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
-import { residentListMapper, residentMapper, residentQueriesMapper, residentQueryMapper } from './residents.mapper';
+import { residentListMapper, residentMapper } from './residents.mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { ResidentsFindQueryDto } from '@app/residents/dto/residents-find-query.dto';
 import { FiltersService } from '@app/filters/filters.service';
 import { IUser } from '@app/users/interfaces/user.interface';
 import { StatusFilterKeys } from '@app/filters/consts';
+import { getMainFilters } from '@helpers/getMainFilters';
 
 @Injectable()
 export class ResidentsService {
   constructor(
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>,
-    private usersService: UsersService,
+    private readonly usersService: UsersService,
     private readonly filtersService: FiltersService,
   ) {}
 
   async findAll({ status, ...queryParams }: Partial<ResidentsFindQueryDto>): Promise<IResidentList[]> {
     try {
-      const query: FilterQuery<Partial<IUser>> = { ...queryParams };
-
-      const { countryPromise, cityPromise, specPromises, nSpecPromises, programsPromises, coursesPromises } =
-        this.filtersService.getFiltersPromises(query);
-
-      const [country, city, spec, narrowSpec, programs, courses] = await Promise.allSettled([
-        countryPromise,
-        cityPromise,
-        Promise.all(specPromises),
-        Promise.all(nSpecPromises),
-        Promise.all(programsPromises),
-        Promise.all(coursesPromises),
-      ]);
-
-      residentQueryMapper(country) && (query.country = residentQueryMapper(country));
-      residentQueryMapper(city) && (query.city = residentQueryMapper(city));
-      residentQueriesMapper(spec) && (query.specializations = residentQueriesMapper(spec));
-      residentQueriesMapper(narrowSpec) && (query.narrow_specializations = residentQueriesMapper(narrowSpec));
-      residentQueriesMapper(programs) && (query.programs = residentQueriesMapper(programs));
-      residentQueriesMapper(courses) && (query.courses = residentQueriesMapper(courses));
+      const query: FilterQuery<Partial<IUser>> = await getMainFilters(this.filtersService, queryParams);
       status && (query.status = StatusFilterKeys[query.status]);
 
       return await this.usersService.findAll(query).then(residentListMapper);

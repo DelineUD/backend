@@ -13,8 +13,8 @@ import { IResume } from './interfaces/resume.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
-import { residentQueriesMapper } from '@app/residents/residents.mapper';
 import { FiltersService } from '@app/filters/filters.service';
+import { getMainFilters } from '@helpers/getMainFilters';
 
 @Injectable()
 export class ResumesService {
@@ -49,19 +49,7 @@ export class ResumesService {
 
   async findAll({ remote_work, desc, ...queryParams }: ResumeFindQueryDto): Promise<IResume[]> {
     try {
-      const query: FilterQuery<Partial<IResume>> = { ...queryParams };
-
-      const { specPromises, nSpecPromises, programsPromises } = this.filtersService.getFiltersPromises(query);
-
-      const [spec, narrowSpec, programs] = await Promise.allSettled([
-        Promise.all(specPromises),
-        Promise.all(nSpecPromises),
-        Promise.all(programsPromises),
-      ]);
-
-      residentQueriesMapper(spec) && (query.specializations = residentQueriesMapper(spec));
-      residentQueriesMapper(narrowSpec) && (query.narrow_specializations = residentQueriesMapper(narrowSpec));
-      residentQueriesMapper(programs) && (query.programs = residentQueriesMapper(programs));
+      const query: FilterQuery<Partial<IResume>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
 
       return await this.resumeModel

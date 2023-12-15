@@ -7,7 +7,7 @@ import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor'
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { postListMapper, postMapper } from './posts.mapper';
+import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
 import { IPosts } from './interfaces/posts.interface';
@@ -15,7 +15,7 @@ import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
-import { ICPosts } from '@app/posts/interfaces/posts.comments.interface';
+import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
 import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
@@ -23,6 +23,7 @@ import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
+import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 
 @Injectable()
 export class PostsService {
@@ -245,7 +246,7 @@ export class PostsService {
     }
   }
 
-  async commentList(params: IPostsFindParams): Promise<ICPosts[]> {
+  async commentList(userId: Types.ObjectId, params: IPostsFindParams): Promise<ICPostsResponse[]> {
     try {
       const { postId } = params;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
@@ -263,7 +264,7 @@ export class PostsService {
         return [];
       }
 
-      return comments as ICPosts[];
+      return commentListMapper(comments, userId);
     } catch (err) {
       throw err;
     }
@@ -341,7 +342,7 @@ export class PostsService {
       const comment = await this.postCommentsModel.findOneAndDelete({ _id: commentId, author: userId, postId }).exec();
 
       if (!comment) {
-        throw new EntityNotFoundError(`Комментарий не найден!`);
+        throw new EntityNotFoundError(`Комментарий не найден`);
       }
 
       return {

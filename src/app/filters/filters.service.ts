@@ -11,7 +11,7 @@ import { NarrowSpecializations } from '@app/filters/entities/narrow-specializati
 import { Programs } from '@app/filters/entities/programs.entity';
 import { Courses } from '@app/filters/entities/courses.entity';
 import { filtersMapper } from '@app/filters/filters.mapper';
-import { FilterKeys, GroupFilterKeys, StatusFilterKeys } from '@app/filters/consts';
+import { FilterKeys, FilterNames, GroupFilterKeys, StatusFilterKeys } from '@app/filters/consts';
 import { IAllQueryFilters } from '@app/filters/interfaces/all-filters.interface';
 
 @Injectable()
@@ -118,7 +118,7 @@ export class FiltersService {
 
   async getCountriesFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.countriesModel.find().exec(), FilterKeys.Country, false);
+      return filtersMapper(await this.countriesModel.find().exec(), FilterKeys.Country, FilterNames.Country, false);
     } catch (err) {
       throw err;
     }
@@ -126,7 +126,7 @@ export class FiltersService {
 
   async getCitiesFilter(): Promise<IFilters> {
     try {
-      return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, false);
+      return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, FilterNames.City, false);
     } catch (err) {
       throw err;
     }
@@ -134,7 +134,7 @@ export class FiltersService {
 
   async getSpecializationsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.specializationsModel.find().exec(), FilterKeys.Spec, true);
+      return filtersMapper(await this.specializationsModel.find().exec(), FilterKeys.Spec, FilterNames.Spec, true);
     } catch (err) {
       throw err;
     }
@@ -142,7 +142,12 @@ export class FiltersService {
 
   async getNarrowSpecializationsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.narrowSpecializationsModel.find().exec(), FilterKeys.NarrowSpec, true);
+      return filtersMapper(
+        await this.narrowSpecializationsModel.find().exec(),
+        FilterKeys.NarrowSpec,
+        FilterNames.NarrowSpec,
+        true,
+      );
     } catch (err) {
       throw err;
     }
@@ -150,7 +155,7 @@ export class FiltersService {
 
   async getProgramsFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.programsModel.find().exec(), FilterKeys.Programs, true);
+      return filtersMapper(await this.programsModel.find().exec(), FilterKeys.Programs, FilterNames.Programs, true);
     } catch (err) {
       throw err;
     }
@@ -158,7 +163,7 @@ export class FiltersService {
 
   async getCoursesFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.coursesModel.find().exec(), FilterKeys.Courses, true);
+      return filtersMapper(await this.coursesModel.find().exec(), FilterKeys.Courses, FilterNames.Courses, true);
     } catch (err) {
       throw err;
     }
@@ -170,7 +175,7 @@ export class FiltersService {
         _id: key,
         name: GroupFilterKeys[key as keyof typeof GroupFilterKeys],
       }));
-      return filtersMapper(groupFilter, FilterKeys.Group, false);
+      return filtersMapper(groupFilter, FilterKeys.Group, FilterNames.Group, false);
     } catch (err) {
       throw err;
     }
@@ -182,7 +187,7 @@ export class FiltersService {
         _id: key,
         name: StatusFilterKeys[key as keyof typeof StatusFilterKeys],
       }));
-      return filtersMapper(statusFilter, FilterKeys.Status, false);
+      return filtersMapper(statusFilter, FilterKeys.Status, FilterNames.Status, false);
     } catch (err) {
       throw err;
     }

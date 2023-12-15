@@ -32,7 +32,7 @@ import { IPostsCommentsFindParams } from '@app/posts/interfaces/posts-comments-f
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { ICPosts } from './interfaces/posts.comments.interface';
+import { ICPosts, ICPostsResponse } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { IPosts } from './interfaces/posts.interface';
@@ -196,6 +196,7 @@ export class PostsController {
 
   /**
    * Получение всех комментариев к посту.
+   * @param userId - id пользователя.
    * @param params - { postId: системный id поста }.
    * @returns - Комментарии к посту.
    */
@@ -206,8 +207,11 @@ export class PostsController {
     type: 'string',
     description: 'Системный идентификатор поста',
   })
-  public async commentList(@Param() params: IPostsFindParams): Promise<ICPosts[]> {
-    return await this.postsService.commentList(params);
+  public async commentList(
+    @UserId() userId: Types.ObjectId,
+    @Param() params: IPostsFindParams,
+  ): Promise<ICPostsResponse[]> {
+    return await this.postsService.commentList(userId, params);
   }
 
   /**
@@ -261,6 +265,7 @@ export class PostsController {
    * @returns - Обновленный комментарий.
    */
   @Delete('comments/delete')
+  @UsePipes(new ValidationPipe({ transform: true }))
   public async deleteComment(
     @UserId() userId: Types.ObjectId,
     @Body() deleteCommentDto: DeletePostCommentDto,

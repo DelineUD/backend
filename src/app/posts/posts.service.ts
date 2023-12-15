@@ -342,7 +342,7 @@ export class PostsService {
       const comment = await this.postCommentsModel.findOneAndDelete({ _id: commentId, author: userId, postId }).exec();
 
       if (!comment) {
-        throw new EntityNotFoundError(`Комментарий не найден!`);
+        throw new EntityNotFoundError(`Комментарий не найден`);
       }
 
       return {

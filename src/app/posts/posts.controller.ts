@@ -265,6 +265,7 @@ export class PostsController {
    * @returns - Обновленный комментарий.
    */
   @Delete('comments/delete')
+  @UsePipes(new ValidationPipe({ transform: true }))
   public async deleteComment(
     @UserId() userId: Types.ObjectId,
     @Body() deleteCommentDto: DeletePostCommentDto,

@@ -30,6 +30,7 @@ export interface IResident {
   last_name: string;
   about: string | null;
   status: string | null;
+  qualification: string | null;
   avatar?: string | null;
   personal_information: IPersonalInfoResident;
   description_fields: IDescFieldsResident[];

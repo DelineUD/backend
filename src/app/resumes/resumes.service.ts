@@ -31,7 +31,7 @@ export class ResumesService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { author: userId, ...resumeParams } as ResumeDto;
+      const dto = { author: user._id, ...resumeParams } as ResumeDto;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
       const resumesMapped = normalizedDto.map((r) => resumeMapper(r));
 
@@ -71,7 +71,10 @@ export class ResumesService {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const resumes = await this.resumeModel.find({ author: userId }).populate('author', 'first_name last_name').exec();
+      const resumes = await this.resumeModel
+        .find({ author: user._id })
+        .populate('author', '_id, first_name last_name')
+        .exec();
 
       if (!resumes.length) {
         return [];

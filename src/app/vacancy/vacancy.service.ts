@@ -32,7 +32,7 @@ export class VacancyService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { author: userId, ...vacancyParams } as VacancyDto;
+      const dto = { author: user._id, ...vacancyParams } as VacancyDto;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
       const vacancyMapped = normalizedDto.map((r) => vacancyMapper(r));
 
@@ -98,7 +98,7 @@ export class VacancyService {
       }
 
       const vacancy = await this.vacancyModel
-        .findOne({ author: userId, _id: id })
+        .findOne({ author: user._id, _id: id })
         .populate('author', '_id first_name last_name avatar')
         .exec();
 

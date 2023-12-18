@@ -34,6 +34,7 @@ export const residentMapper = (user: IUser): IResident => {
       city: userPayload.city,
       email: userPayload.email,
       phone: !hide_phone ? String(user.phone) : null,
+      site: userPayload.site ?? null,
       birthday: userPayload.birthday ?? null,
       gender: userPayload.gender ?? null,
       contact_link: userPayload.telegram ?? null,

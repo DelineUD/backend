@@ -14,6 +14,7 @@ export const residentsMapper = (user: IUser): IResidentList => {
     last_name: userPayload.last_name,
     avatar: userPayload.avatar ?? null,
     status: userPayload.status ?? null,
+    qualification: userPayload.qualification ?? null,
   };
 };
 
@@ -25,6 +26,7 @@ export const residentMapper = (user: IUser): IResident => {
     last_name: userPayload.last_name,
     about: userPayload.about ?? null,
     status: userPayload.status ?? null,
+    qualification: userPayload.qualification ?? null,
     avatar: userPayload.avatar ?? null,
 
     personal_information: {

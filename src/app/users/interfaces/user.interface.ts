@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 
+// TODO: Разобраться с обязательностью полей
 export interface IUser {
   _id?: Types.ObjectId;
 

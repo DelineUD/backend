@@ -2,12 +2,14 @@ import { Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
 
-type UserPick = '_id' | 'avatar' | 'first_name' | 'last_name';
+type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name';
+export type PostUserPick = Pick<IUser, PostUserPickList>;
 
+// TODO: Разобраться с обязательностью полей
 export interface IPosts {
   _id?: Types.ObjectId;
 
-  author?: Pick<IUser, UserPick>;
+  author?: Types.ObjectId | PostUserPick;
   pText?: string;
   pImg?: Array<string>;
   likes?: Array<string>;
@@ -20,4 +22,26 @@ export interface IPosts {
   isLiked?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IPostsResponse {
+  _id: Types.ObjectId;
+  author: IPostAuthorResponse | null;
+  pText: string;
+  pImg: Array<string>;
+  countComments?: number;
+  countLikes: number;
+  views_count: number;
+  isLiked: boolean;
+  isViewed: boolean;
+  group: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IPostAuthorResponse {
+  _id?: Types.ObjectId;
+  first_name?: string;
+  last_name?: string;
+  avatar?: string;
 }

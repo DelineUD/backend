@@ -10,7 +10,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
-import { IPosts } from './interfaces/posts.interface';
+import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
@@ -96,7 +96,7 @@ export class PostsService {
     }
   }
 
-  async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPosts[]> {
+  async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPostsResponse[]> {
     try {
       const query: IPostsFindQuery = { ...queryParams };
 
@@ -125,7 +125,7 @@ export class PostsService {
     }
   }
 
-  async findPostById(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPosts> {
+  async findPostById(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPostsResponse> {
     try {
       const { postId } = params;
 
@@ -192,16 +192,15 @@ export class PostsService {
     try {
       const { postId } = params;
 
-      const postInDb = await this.postModel.findOne({ _id: postId, author: userId }).exec();
-
+      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
       if (!postInDb) {
         throw new EntityNotFoundError(`Запись не найдена`);
       }
 
       const likes = postInDb.isLiked
         ? postInDb.likes.filter((i) => i !== String(userId))
-        : postInDb.likes.unshift(String(userId));
-      const countLikes = postInDb.isLiked ? 0 : 1;
+        : (postInDb.likes = [String(userId), ...postInDb.likes]);
+      const countLikes = likes.length;
       const isLiked = !postInDb.isLiked;
 
       await postInDb.updateOne({ likes, countLikes, isLiked });
@@ -291,8 +290,8 @@ export class PostsService {
 
       const likes = comment.isLiked
         ? comment.likes.filter((i) => i !== String(userId))
-        : comment.likes.unshift(String(userId));
-      const countLikes = comment.isLiked ? 0 : 1;
+        : (comment.likes = [String(userId), ...comment.likes]);
+      const countLikes = likes.length;
       const isLiked = !comment.isLiked;
 
       await comment.updateOne({ likes, countLikes, isLiked });

@@ -19,6 +19,7 @@ export interface IPersonalInfoResident {
   city: string;
   email: string;
   phone: string | null;
+  site: string | null;
   birthday?: Date | null;
   gender?: string | null;
   contact_link?: string | null;

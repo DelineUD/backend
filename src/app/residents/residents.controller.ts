@@ -4,6 +4,7 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -13,6 +14,7 @@ import {
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
+import e from 'express';
 
 import { Types } from 'mongoose';
 
@@ -25,6 +27,7 @@ import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
+import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
@@ -70,7 +73,11 @@ export class ResidentsController {
       fileFilter: imageFileFilter,
     }),
   )
-  async avatarUpload(@UserId() userId: Types.ObjectId, @UploadedFile() file: Express.Multer.File): Promise<string> {
-    return await this.residentsService.uploadAvatar(userId, file);
+  async avatarUpload(
+    @UserId() userId: Types.ObjectId,
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: e.Response,
+  ): Promise<e.Response<IUploadAvatar>> {
+    return await this.residentsService.uploadAvatar(userId, file, res);
   }
 }

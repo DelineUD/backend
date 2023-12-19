@@ -8,7 +8,7 @@ import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
-import { IResume } from './interfaces/resume.interface';
+import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 
 @ApiTags('Resumes')
@@ -39,7 +39,7 @@ export class ResumesController {
    */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() queryParams?: ResumeFindQueryDto): Promise<IResume[]> {
+  async findAll(@Query() queryParams?: ResumeFindQueryDto): Promise<IResumeResponse[]> {
     return await this.resumesService.findAll(queryParams);
   }
 
@@ -55,7 +55,7 @@ export class ResumesController {
     type: 'string',
     description: 'Системный идентификатор пользователя',
   })
-  async findAllByUserId(@Param() params: IFindAllResumeParams): Promise<IResume[]> {
+  async findAllByUserId(@Param() params: IFindAllResumeParams): Promise<IResumeResponse[]> {
     return await this.resumesService.findAllByUserId(params);
   }
 
@@ -77,7 +77,7 @@ export class ResumesController {
     type: 'string',
     description: 'Системный идентификатор резюме',
   })
-  async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResume> {
+  async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResumeResponse> {
     return await this.resumesService.findOneById(params);
   }
 }

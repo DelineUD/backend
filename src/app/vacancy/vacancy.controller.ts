@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { VacancyService } from './vacancy.service';
-import { IVacancy } from './interfaces/vacancy.interface';
+import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
@@ -38,7 +38,7 @@ export class VacancyController {
    */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancy[]> {
+  async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
     return await this.vacancyService.findAll(queryParams);
   }
 
@@ -54,7 +54,7 @@ export class VacancyController {
     type: 'string',
     description: 'Системный идентификатор пользователя',
   })
-  async findAllByUserId(@Param() params: IFindAllVacancyParams): Promise<IVacancy[]> {
+  async findAllByUserId(@Param() params: IFindAllVacancyParams): Promise<IVacancyResponse[]> {
     return await this.vacancyService.findAllByUserId(params);
   }
 
@@ -76,7 +76,7 @@ export class VacancyController {
     type: 'string',
     description: 'Системный идентификатор вакансии',
   })
-  async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancy> {
+  async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancyResponse> {
     return await this.vacancyService.findByUserId(params);
   }
 }

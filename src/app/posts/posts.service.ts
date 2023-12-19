@@ -24,6 +24,7 @@ import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
+import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
 
 @Injectable()
 export class PostsService {
@@ -114,7 +115,7 @@ export class PostsService {
       const posts = await this.postModel
         .find(finalQuery)
         .populate('author', '_id avatar first_name last_name')
-        .sort(typeof query.desc !== 'undefined' && { createdAt: -1 })
+        .sort(typeof query.desc === 'undefined' && { createdAt: -1 })
         .limit(10)
         .skip(!finalQuery.lastIndex ? 0 : 10)
         .exec();
@@ -245,7 +246,11 @@ export class PostsService {
     }
   }
 
-  async commentList(userId: Types.ObjectId, params: IPostsFindParams): Promise<ICPostsResponse[]> {
+  async commentList(
+    userId: Types.ObjectId,
+    params: IPostsFindParams,
+    query: IPostsCommentsFindQuery,
+  ): Promise<ICPostsResponse[]> {
     try {
       const { postId } = params;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
@@ -257,6 +262,7 @@ export class PostsService {
       const comments = await this.postCommentsModel
         .find({ postId })
         .populate('author', '_id first_name last_name avatar')
+        .sort(typeof query.desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       if (!comments) {

@@ -27,7 +27,7 @@ import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
-import { IPostsCommentsFindParams } from '@app/posts/interfaces/posts-comments-find.interface';
+import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
 
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
@@ -213,8 +213,9 @@ export class PostsController {
   public async commentList(
     @UserId() userId: Types.ObjectId,
     @Param() params: IPostsFindParams,
+    @Query() query: IPostsCommentsFindQuery,
   ): Promise<ICPostsResponse[]> {
-    return await this.postsService.commentList(userId, params);
+    return await this.postsService.commentList(userId, params, query);
   }
 
   /**

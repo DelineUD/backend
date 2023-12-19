@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsEmpty, IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class IPostsCommentsFindParams {
@@ -12,4 +12,11 @@ export class IPostsCommentsFindParams {
   @IsMongoId()
   @IsNotEmpty()
   commentId: Types.ObjectId;
+}
+
+export class IPostsCommentsFindQuery {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEmpty()
+  desc?: string | undefined;
 }

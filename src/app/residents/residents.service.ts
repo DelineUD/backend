@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
+import e, { Response } from 'express';
 
 import { UserModel } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
@@ -14,6 +15,7 @@ import { FiltersService } from '@app/filters/filters.service';
 import { IUser } from '@app/users/interfaces/user.interface';
 import { StatusFilterKeys } from '@app/filters/consts';
 import { getMainFilters } from '@helpers/getMainFilters';
+import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
 
 @Injectable()
 export class ResidentsService {
@@ -44,27 +46,26 @@ export class ResidentsService {
     }
   }
 
-  async uploadAvatar(userId: Types.ObjectId, file: Express.Multer.File): Promise<string> {
+  async uploadAvatar(
+    userId: Types.ObjectId,
+    file: Express.Multer.File,
+    res: e.Response,
+  ): Promise<e.Response<IUploadAvatar>> {
     try {
       if (!file) {
         throw new BadRequestException('Файл не найден!');
       }
 
       const pathToImage = `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${file.filename}`;
-      const resident = await this.userModel
-        .findOneAndUpdate({
-          _id: userId,
-          avatar: pathToImage,
-        })
-        .exec();
+      const resident = await this.userModel.findByIdAndUpdate(userId, { $set: { avatar: pathToImage } });
       if (!resident) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
-      console.log(file);
 
-      return pathToImage;
+      return res.status(200).json({ message: 'Аватарка успешно обновлена!' });
     } catch (err) {
-      throw err;
+      console.error(err);
+      return res.status(err.status).json({ message: 'Произошла непредвиденная ошибка!' });
     }
   }
 }

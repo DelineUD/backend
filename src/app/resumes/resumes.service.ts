@@ -5,11 +5,11 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import normalizeDto from '@utils/normalizeDto';
-import { resumeMapper } from '@app/resumes/resume.mapper';
+import { resumeDtoMapper, resumeListMapper, resumeMapper } from '@app/resumes/resume.mapper';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { ResumeDto } from '@app/resumes/dto/resume.dto';
 import { Resume } from './entities/resume.entity';
-import { IResume } from './interfaces/resume.interface';
+import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
@@ -33,7 +33,7 @@ export class ResumesService {
 
       const dto = { author: user._id, ...resumeParams } as ResumeDto;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
-      const resumesMapped = normalizedDto.map((r) => resumeMapper(r));
+      const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));
 
       await Promise.all([
         await this.resumeModel.deleteMany({ author: userId }),
@@ -47,22 +47,25 @@ export class ResumesService {
     }
   }
 
-  async findAll({ remote_work, desc, ...queryParams }: ResumeFindQueryDto): Promise<IResume[]> {
+  async findAll({ remote_work, desc, ...queryParams }: ResumeFindQueryDto): Promise<IResumeResponse[]> {
     try {
       const query: FilterQuery<Partial<IResume>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
 
-      return await this.resumeModel
+      const resumes = await this.resumeModel
         .find(query)
+        .populate('author', '_id first_name last_name avatar telegram qualification')
         .sort(typeof desc !== 'undefined' && { createdAt: -1 })
         .exec();
+
+      return resumeListMapper(resumes);
     } catch (err) {
       console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
       throw new InternalServerErrorException(`Внутрення ошибка сервера!`);
     }
   }
 
-  async findAllByUserId(params: IFindAllResumeParams) {
+  async findAllByUserId(params: IFindAllResumeParams): Promise<IResumeResponse[]> {
     try {
       const { userId } = params;
 
@@ -73,21 +76,21 @@ export class ResumesService {
 
       const resumes = await this.resumeModel
         .find({ author: user._id })
-        .populate('author', '_id, first_name last_name')
+        .populate('author', '_id first_name last_name avatar telegram qualification')
         .exec();
 
       if (!resumes.length) {
         return [];
       }
 
-      return resumes;
+      return resumeListMapper(resumes);
     } catch (err) {
       console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async findOneById(params: IFindOneResumeParams) {
+  async findOneById(params: IFindOneResumeParams): Promise<IResumeResponse> {
     try {
       const { userId, id } = params;
 
@@ -96,12 +99,15 @@ export class ResumesService {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const resume = await this.resumeModel.findOne({ author: userId, id }).populate('author').exec();
+      const resume = await this.resumeModel
+        .findOne({ author: user._id, _id: id })
+        .populate('author', '_id first_name last_name avatar telegram qualification')
+        .exec();
       if (!resume) {
         throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
-      return resume;
+      return resumeMapper(resume);
     } catch (err) {
       console.error(`Ошибка при поиске резюме по id: ${(err as Error).message}`);
       throw err;

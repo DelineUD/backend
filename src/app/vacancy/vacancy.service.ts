@@ -6,11 +6,11 @@ import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor'
 
 import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
-import { vacancyMapper } from '@app/vacancy/vacancy.mapper';
+import { vacancyDtoMapper, vacancyListMapper, vacancyMapper } from '@app/vacancy/vacancy.mapper';
 import normalizeDto from '@utils/normalizeDto';
 
 import { Vacancy } from './entities/vacancy.entity';
-import { IVacancy } from './interfaces/vacancy.interface';
+import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
 import { UsersService } from '../users/users.service';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
@@ -34,7 +34,7 @@ export class VacancyService {
 
       const dto = { author: user._id, ...vacancyParams } as VacancyDto;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
-      const vacancyMapped = normalizedDto.map((r) => vacancyMapper(r));
+      const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 
       await Promise.all([
         await this.vacancyModel.deleteMany({ author: userId }),
@@ -48,22 +48,29 @@ export class VacancyService {
     }
   }
 
-  async findAll({ desc, remote_work, ...queryParams }: VacancyFindQueryDto): Promise<IVacancy[]> {
+  async findAll({ desc, remote_work, ...queryParams }: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
     try {
       const query: FilterQuery<Partial<IVacancy>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
 
-      return await this.vacancyModel
+      const vacancies = await this.vacancyModel
         .find(query)
+        .populate('author', '_id first_name last_name avatar telegram city')
         .sort(typeof desc !== 'undefined' && { createdAt: -1 })
         .exec();
+
+      if (!vacancies.length) {
+        return [];
+      }
+
+      return vacancyListMapper(vacancies);
     } catch (err) {
       console.error(`Ошибка при поиске вакансий: ${(err as Error).message}`);
       throw new InternalServerErrorException('Вакансии не найдены!');
     }
   }
 
-  async findAllByUserId(params: IFindAllVacancyParams): Promise<IVacancy[]> {
+  async findAllByUserId(params: IFindAllVacancyParams): Promise<IVacancyResponse[]> {
     try {
       const { userId } = params;
 
@@ -73,22 +80,22 @@ export class VacancyService {
       }
 
       const vacancies = await this.vacancyModel
-        .find({ author: userId })
-        .populate('author', '_id first_name last_name avatar')
+        .find({ author: user._id })
+        .populate('author', '_id first_name last_name avatar telegram city')
         .exec();
 
       if (!vacancies.length) {
         return [];
       }
 
-      return vacancies;
+      return vacancyListMapper(vacancies);
     } catch (err) {
       console.error(`Ошибка при поиске вакансий пользователя: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async findByUserId(params: IFindOneVacancyParams): Promise<IVacancy> {
+  async findByUserId(params: IFindOneVacancyParams): Promise<IVacancyResponse> {
     try {
       const { userId, id } = params;
 
@@ -99,14 +106,14 @@ export class VacancyService {
 
       const vacancy = await this.vacancyModel
         .findOne({ author: user._id, _id: id })
-        .populate('author', '_id first_name last_name avatar')
+        .populate('author', '_id first_name last_name avatar telegram city')
         .exec();
 
       if (!vacancy) {
         throw new EntityNotFoundError(`Вакансия не найдена`);
       }
 
-      return vacancy;
+      return vacancyMapper(vacancy);
     } catch (err) {
       console.error(`Ошибка при поиске вакансии по ID: ${(err as Error).message}`);
       throw err;

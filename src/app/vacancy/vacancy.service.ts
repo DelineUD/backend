@@ -56,7 +56,7 @@ export class VacancyService {
       const vacancies = await this.vacancyModel
         .find(query)
         .populate('author', '_id first_name last_name avatar telegram city')
-        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
+        .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       if (!vacancies.length) {
@@ -70,9 +70,10 @@ export class VacancyService {
     }
   }
 
-  async findAllByUserId(params: IFindAllVacancyParams): Promise<IVacancyResponse[]> {
+  async findAllByUserId(params: IFindAllVacancyParams, query: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
     try {
       const { userId } = params;
+      const { desc } = query;
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
@@ -82,6 +83,7 @@ export class VacancyService {
       const vacancies = await this.vacancyModel
         .find({ author: user._id })
         .populate('author', '_id first_name last_name avatar telegram city')
+        .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       if (!vacancies.length) {

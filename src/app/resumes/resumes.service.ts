@@ -55,7 +55,7 @@ export class ResumesService {
       const resumes = await this.resumeModel
         .find(query)
         .populate('author', '_id first_name last_name avatar telegram qualification')
-        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
+        .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       return resumeListMapper(resumes);
@@ -65,9 +65,10 @@ export class ResumesService {
     }
   }
 
-  async findAllByUserId(params: IFindAllResumeParams): Promise<IResumeResponse[]> {
+  async findAllByUserId(params: IFindAllResumeParams, query: ResumeFindQueryDto): Promise<IResumeResponse[]> {
     try {
       const { userId } = params;
+      const { desc } = query;
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
@@ -77,6 +78,7 @@ export class ResumesService {
       const resumes = await this.resumeModel
         .find({ author: user._id })
         .populate('author', '_id first_name last_name avatar telegram qualification')
+        .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       if (!resumes.length) {

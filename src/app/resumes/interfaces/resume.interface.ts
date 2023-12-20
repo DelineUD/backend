@@ -32,10 +32,10 @@ export interface IResumeResponse {
 }
 
 export interface IResumeAuthorResponse {
-  _id?: Types.ObjectId;
-  first_name?: string;
-  last_name?: string;
-  avatar?: string;
-  qualification?: string;
-  contact_link?: string;
+  _id: Types.ObjectId | null;
+  first_name: string | null;
+  last_name: string | null;
+  avatar: string | null;
+  qualification: string | null;
+  contact_link: string | null;
 }

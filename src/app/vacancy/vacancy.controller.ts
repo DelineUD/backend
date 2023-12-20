@@ -54,8 +54,11 @@ export class VacancyController {
     type: 'string',
     description: 'Системный идентификатор пользователя',
   })
-  async findAllByUserId(@Param() params: IFindAllVacancyParams): Promise<IVacancyResponse[]> {
-    return await this.vacancyService.findAllByUserId(params);
+  async findAllByUserId(
+    @Param() params: IFindAllVacancyParams,
+    @Query() query: VacancyFindQueryDto,
+  ): Promise<IVacancyResponse[]> {
+    return await this.vacancyService.findAllByUserId(params, query);
   }
 
   /**

@@ -36,7 +36,7 @@ export class ResumesService {
       const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));
 
       await Promise.all([
-        await this.resumeModel.deleteMany({ author: userId }),
+        await this.resumeModel.deleteMany({ author: user._id }),
         await this.resumeModel.create(...resumesMapped),
       ]);
 

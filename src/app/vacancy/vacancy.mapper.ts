@@ -7,6 +7,7 @@ const toVacancyAuthor = (author: UserVacancyPick): IVacancyAuthorResponse => {
     ? {
         _id: author?._id ?? null,
         first_name: author?.first_name ?? null,
+        last_name: author?.last_name ?? null,
         avatar: author?.avatar ?? null,
         city: author?.city ?? null,
         contact_link: author?.telegram ?? null,

@@ -27,7 +27,7 @@ import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
-import { IPostsCommentsFindParams } from '@app/posts/interfaces/posts-comments-find.interface';
+import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
 
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
@@ -35,7 +35,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { ICPosts, ICPostsResponse } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
-import { IPosts } from './interfaces/posts.interface';
+import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { CreatePostCommentDto } from './dto/create-post-comment.dto';
 import { ILike } from '@app/posts/interfaces/like.interface';
 
@@ -93,7 +93,10 @@ export class PostsController {
    */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async findAll(@UserId() userId: Types.ObjectId, @Query() queryParams: IPostsFindQuery): Promise<IPosts[]> {
+  public async findAll(
+    @UserId() userId: Types.ObjectId,
+    @Query() queryParams: IPostsFindQuery,
+  ): Promise<IPostsResponse[]> {
     return await this.postsService.findAll(userId, queryParams);
   }
 
@@ -106,7 +109,7 @@ export class PostsController {
   @Get(':postId')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({ name: 'postId' })
-  async getById(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPosts> {
+  async getById(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPostsResponse> {
     return await this.postsService.findPostById(userId, params);
   }
 
@@ -210,8 +213,9 @@ export class PostsController {
   public async commentList(
     @UserId() userId: Types.ObjectId,
     @Param() params: IPostsFindParams,
+    @Query() query: IPostsCommentsFindQuery,
   ): Promise<ICPostsResponse[]> {
-    return await this.postsService.commentList(userId, params);
+    return await this.postsService.commentList(userId, params, query);
   }
 
   /**

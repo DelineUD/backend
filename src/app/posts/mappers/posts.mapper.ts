@@ -1,48 +1,53 @@
-import { IPosts } from '../interfaces/posts.interface';
-import { PostModel } from '@app/posts/models/posts.model';
+import { IPostAuthorResponse, IPosts, IPostsResponse, PostUserPick } from '../interfaces/posts.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
 
-export const postListMapper = (posts: IPosts[], user: IUser): IPosts[] => {
-  return posts
-    .map((posts) => ({
-      _id: posts._id,
-      author: {
-        _id: posts.author?._id,
-        first_name: posts.author?.first_name,
-        last_name: posts.author?.last_name,
-        avatar: posts.author?.avatar ?? null,
-      },
-      pText: posts.pText,
-      pImg: posts.pImg,
-      countLikes: posts.countLikes ?? 0,
-      views_count: posts.views.length,
-      isLiked: posts.likes.includes(String(user._id)),
-      isViewed: posts.views.includes(String(user._id)),
-      createdAt: posts.createdAt,
-      updatedAt: posts.updatedAt,
-      countComments: posts.countComments,
-      group: posts.group,
-    }))
-    .filter((post) => post.author);
+const toAuthorPost = (author: PostUserPick): IPostAuthorResponse => {
+  return author
+    ? {
+        _id: author?._id,
+        first_name: author?.first_name,
+        last_name: author?.last_name,
+        avatar: author?.avatar ?? null,
+      }
+    : null;
 };
 
-export const postMapper = (post: PostModel, user: IUser): IPosts => {
+export const postListMapper = (posts: IPosts[], user: IUser): IPostsResponse[] => {
+  const postsPayload = JSON.parse(JSON.stringify(posts)) as IPosts[];
+
+  return postsPayload
+    .map((post) => ({
+      _id: post._id,
+      pText: post.pText,
+      pImg: post.pImg,
+      countLikes: post.countLikes ?? 0,
+      countComments: post.countComments ?? 0,
+      views_count: post.views_count ?? 0,
+      isViewed: post.views.includes(String(user._id)),
+      isLiked: post.likes.includes(String(user._id)),
+      group: post.group ?? 'Общее',
+      author: toAuthorPost(post.author as PostUserPick),
+      createdAt: String(post.createdAt),
+      updatedAt: String(post.updatedAt),
+    }))
+    .filter((p) => p.author);
+};
+
+export const postMapper = (post: IPosts, user: IUser): IPostsResponse => {
+  const { author, likes, views, ...postPayload } = JSON.parse(JSON.stringify(post)) as IPosts;
+
   return {
-    _id: post._id,
-    author: {
-      _id: post.author._id,
-      first_name: post.author.first_name,
-      last_name: post.author.last_name,
-      avatar: post.author.avatar ?? null,
-    },
-    pText: post.pText,
-    pImg: post.pImg,
-    countLikes: post.countLikes ?? 0,
-    views_count: post.views.length,
-    isViewed: post.views.includes(String(user._id)),
-    isLiked: post.likes.includes(String(user._id)),
-    createdAt: post.createdAt,
-    updatedAt: post.updatedAt,
-    countComments: post.countComments,
+    _id: postPayload._id,
+    pText: postPayload.pText,
+    pImg: postPayload.pImg,
+    countLikes: postPayload.countLikes ?? 0,
+    views_count: views.length ?? 0,
+    countComments: postPayload.countComments ?? 0,
+    group: postPayload.group ?? 'Общее',
+    isViewed: views.includes(String(user._id)),
+    isLiked: likes.includes(String(user._id)),
+    createdAt: String(post.createdAt),
+    updatedAt: String(post.updatedAt),
+    author: toAuthorPost(post.author as PostUserPick),
   };
 };

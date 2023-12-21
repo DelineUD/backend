@@ -91,7 +91,7 @@ export class UsersService {
       }
 
       this.filtersService.update(updateFilters).then(() => console.log('Filters updated!'));
-      await user.updateOne({ _id: user._id }, { ...userMapped, password: hashPassword }).exec();
+      await user.updateOne({ ...userMapped, password: hashPassword }).exec();
 
       return {
         status: true,

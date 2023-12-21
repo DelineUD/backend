@@ -9,17 +9,13 @@ export type PostUserPick = Pick<IUser, PostUserPickList>;
 export interface IPosts {
   _id?: Types.ObjectId;
 
-  author?: Types.ObjectId | PostUserPick;
-  pText?: string;
+  author: Types.ObjectId | PostUserPick;
+  pText: string;
   pImg?: Array<string>;
-  likes?: Array<string>;
-  views?: Array<string>;
-  views_count?: number;
-  isViewed?: boolean;
-  group?: string;
-  countLikes?: number;
-  countComments?: number;
-  isLiked?: boolean;
+  likes: Array<string>;
+  views: Array<string>;
+  group: string;
+  countComments: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -29,14 +25,14 @@ export interface IPostsResponse {
   author: IPostAuthorResponse | null;
   pText: string;
   pImg: Array<string>;
-  countComments?: number;
+  countComments: number;
   countLikes: number;
-  views_count: number;
+  countViews: number;
   isLiked: boolean;
   isViewed: boolean;
   group: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IPostAuthorResponse {

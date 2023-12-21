@@ -11,9 +11,9 @@ export class CreatePostCommentDto extends PartialType(PostCommentDto) {
 
   @IsString()
   @ApiProperty({ default: 'Текст комментария...' })
-  cText?: string;
+  cText: string;
 
   @IsArray()
-  @ApiProperty({ default: '' })
+  @ApiProperty({ default: [] })
   cImg?: string[];
 }

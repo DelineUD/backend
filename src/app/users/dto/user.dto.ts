@@ -51,9 +51,6 @@ export class UserDto {
   @IsOptional()
   @IsString()
   city?: string;
-  @IsOptional()
-  @IsString()
-  contact_link?: string;
 
   // Additional Information
   @IsOptional()

@@ -266,7 +266,7 @@ export class PostsService {
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
 
       if (!postInDb) {
-        throw new EntityNotFoundError(`Комментарии не найдены`);
+        throw new EntityNotFoundError(`Запись не найдена`);
       }
 
       const comments = await this.postCommentsModel

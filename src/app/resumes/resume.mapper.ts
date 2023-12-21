@@ -12,7 +12,7 @@ const toResumeAuthor = (author: UserResumePick): IResumeAuthorResponse => {
     ? {
         _id: author?._id ?? null,
         first_name: author?.first_name ?? null,
-        last_name: author?.last_name ?? null,        
+        last_name: author?.last_name ?? null,
         avatar: author?.avatar ?? null,
         qualification: author?.qualification ?? null,
         contact_link: author?.telegram ?? null,

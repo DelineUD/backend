@@ -38,10 +38,10 @@ export interface IVacancyResponse {
 }
 
 export interface IVacancyAuthorResponse {
-  _id?: Types.ObjectId;
-  first_name?: string;
-  last_name?: string;
-  avatar?: string;
-  city?: string;
-  contact_link?: string;
+  _id: Types.ObjectId | null;
+  first_name: string | null;
+  last_name: string | null;
+  avatar: string | null;
+  city: string | null;
+  contact_link: string | null;
 }

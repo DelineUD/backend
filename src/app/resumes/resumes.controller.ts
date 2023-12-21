@@ -55,8 +55,11 @@ export class ResumesController {
     type: 'string',
     description: 'Системный идентификатор пользователя',
   })
-  async findAllByUserId(@Param() params: IFindAllResumeParams): Promise<IResumeResponse[]> {
-    return await this.resumesService.findAllByUserId(params);
+  async findAllByUserId(
+    @Param() params: IFindAllResumeParams,
+    @Query() query: ResumeFindQueryDto,
+  ): Promise<IResumeResponse[]> {
+    return await this.resumesService.findAllByUserId(params, query);
   }
 
   /**

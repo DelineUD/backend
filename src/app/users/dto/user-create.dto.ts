@@ -1,7 +1,8 @@
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsBooleanString, IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 import { UserDto } from './user.dto';
+import { StatusFilterKeys } from '@app/filters/consts';
 
 export class CreateUserDto extends PartialType(UserDto) {
   // Personal Information
@@ -26,12 +27,28 @@ export class CreateUserDto extends PartialType(UserDto) {
 
   @IsOptional()
   @IsString()
+  @ApiProperty({ default: 'Frontend Developer', required: false })
+  readonly qualification?: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ default: 'Обо мне...', required: false })
+  readonly about?: string;
+  @IsString()
+  @ApiProperty({ default: StatusFilterKeys.sf001, required: false })
+  readonly status?: StatusFilterKeys;
+
+  @IsOptional()
+  @IsString()
   @ApiProperty({ default: 'Россия', required: false })
   readonly country?: string;
   @IsOptional()
   @IsString()
   @ApiProperty({ default: 'Санкт-Петербург', required: false })
   readonly city?: string;
+  @IsOptional()
+  @IsBooleanString()
+  @ApiProperty({ default: false, required: false })
+  readonly hide_phone?: boolean;
 
   @ApiProperty({ default: 'Курс 1, Курс 2', required: false })
   readonly courses_new_app?: string;

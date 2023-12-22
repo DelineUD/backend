@@ -17,7 +17,6 @@ export class VacancyController {
 
   /**
    * Создание новой вакансии.
-   * @param userId - id пользователя.
    * @param vacancyParams - Данные для вакансии.
    * @returns - Вакансии.
    */

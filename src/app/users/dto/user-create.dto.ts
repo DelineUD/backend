@@ -1,10 +1,15 @@
-import { IsBooleanString, IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsBooleanString, IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 import { UserDto } from './user.dto';
 import { StatusFilterKeys } from '@app/filters/consts';
 
 export class CreateUserDto extends PartialType(UserDto) {
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ default: '' })
+  readonly id: string;
+
   // Personal Information
   @IsEmail()
   @IsString()

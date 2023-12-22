@@ -26,11 +26,8 @@ export class ResumesController {
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(
-    @UserId() userId: Types.ObjectId,
-    @Query() resumeParams: ICrudResumeParams,
-  ): Promise<IResume | IResume[]> {
-    return await this.resumesService.update(userId, resumeParams);
+  async create(@Query() resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
+    return await this.resumesService.update(resumeParams);
   }
 
   /**

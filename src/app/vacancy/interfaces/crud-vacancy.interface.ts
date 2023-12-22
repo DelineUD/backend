@@ -2,6 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBooleanString, IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class ICrudVacancyParams {
+  @ApiProperty({ default: '', required: false })
+  @IsString()
+  readonly id: string;
+
   @ApiProperty({ default: 'vacancy_1', required: false })
   @IsOptional()
   @IsString()
@@ -41,6 +45,16 @@ export class ICrudVacancyParams {
   @IsOptional()
   @IsString()
   readonly city_vacancy2?: string;
+
+  @ApiProperty({ default: 'Информация о вакансии...', required: false })
+  @IsOptional()
+  @IsString()
+  readonly about_vacancy1?: string;
+
+  @ApiProperty({ default: 'Информация о вакансии...', required: false })
+  @IsOptional()
+  @IsString()
+  readonly about_vacancy2?: string;
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()

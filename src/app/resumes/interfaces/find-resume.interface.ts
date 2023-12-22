@@ -5,11 +5,11 @@ import { Types } from 'mongoose';
 export class IFindAllResumeParams {
   @ApiProperty({ default: '' })
   @IsString({ message: 'userId должен быть строкой!' })
-  userId: Types.ObjectId; // User _id
+  userId: Types.ObjectId; // Sys mongo id
 }
 
 export class IFindOneResumeParams extends PartialType(IFindAllResumeParams) {
   @ApiProperty({ default: '' })
   @IsString({ message: 'id должен быть строкой!' })
-  id: Types.ObjectId; // Resume id
+  id: Types.ObjectId; // Sys mongo id
 }

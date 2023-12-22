@@ -22,14 +22,9 @@ export class VacancyController {
    * @returns - Вакансии.
    */
   @Post('update')
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(
-    @UserId() userId: Types.ObjectId,
-    @Query() vacancyParams: ICrudVacancyParams,
-  ): Promise<IVacancy | IVacancy[]> {
-    return await this.vacancyService.update(userId, vacancyParams);
+  async create(@Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+    return await this.vacancyService.update(vacancyParams);
   }
 
   /**

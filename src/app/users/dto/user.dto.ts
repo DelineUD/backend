@@ -11,6 +11,10 @@ import {
 import { Transform } from 'class-transformer';
 
 export class UserDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
   // Personal Information
   @IsNotEmpty()
   @IsEmail()
@@ -19,7 +23,6 @@ export class UserDto {
   @IsNotEmpty()
   @IsPhoneNumber('RU')
   phone: number;
-  @IsOptional() @IsString() id?: string;
   @IsOptional()
   @IsString()
   password?: string;

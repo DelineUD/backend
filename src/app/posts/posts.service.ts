@@ -363,7 +363,7 @@ export class PostsService {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const postInDb = await this.postModel.findOne({ _id: postId, author: String(userInDb._id) }).exec();
+      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
       if (!postInDb) {
         throw new EntityNotFoundError(`Запись не найдена`);
       }

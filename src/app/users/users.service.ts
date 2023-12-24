@@ -81,6 +81,7 @@ export class UsersService {
       };
 
       const user = await this.userModel.findOne({ phone });
+      this.filtersService.update(updateFilters).then(() => console.log('Filters updated!'));
 
       if (!user) {
         await this.userModel.create({ ...userMapped, password: hashPassword });
@@ -90,7 +91,6 @@ export class UsersService {
         };
       }
 
-      this.filtersService.update(updateFilters).then(() => console.log('Filters updated!'));
       await user.updateOne({ ...userMapped, password: hashPassword }).exec();
 
       return {

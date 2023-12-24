@@ -24,9 +24,9 @@ export class ResumesService {
     private readonly filtersService: FiltersService,
   ) {}
 
-  async update(userId: Types.ObjectId, resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
+  async update({ id, ...resumeParams }: ICrudResumeParams): Promise<IResume | IResume[]> {
     try {
-      const user = await this.usersService.findOne({ _id: userId });
+      const user = await this.usersService.findOne({ id });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }

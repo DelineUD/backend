@@ -2,6 +2,10 @@ import { IsBooleanString, IsNumberString, IsOptional, IsString } from 'class-val
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ICrudResumeParams {
+  @ApiProperty({ default: '', required: false })
+  @IsString()
+  readonly id: string;
+
   @ApiProperty({ default: 'resume_1', required: false })
   @IsOptional()
   @IsString()

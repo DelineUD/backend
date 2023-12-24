@@ -25,9 +25,9 @@ export class VacancyService {
     private readonly filtersService: FiltersService,
   ) {}
 
-  async update(userId: Types.ObjectId, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
-      const user = await this.usersService.findOne({ _id: userId });
+      const user = await this.usersService.findOne({ id });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }

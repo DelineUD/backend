@@ -12,6 +12,7 @@ export class Vacancy extends Document implements IVacancy {
   @Prop({ required: true }) name: string;
   @Prop({ required: true }) country: string;
   @Prop({ required: true }) city: string;
+  @Prop({ required: true }) about: string;
   @Prop({ required: true }) specializations: string[];
   @Prop({ required: true }) narrow_specializations: string[];
   @Prop({ required: true }) programs: string[];

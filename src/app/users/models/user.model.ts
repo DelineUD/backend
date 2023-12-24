@@ -6,7 +6,7 @@ import { Document } from 'mongoose';
   timestamps: true,
 })
 export class UserModel extends Document {
-  @Prop() id?: string;
+  @Prop({ required: true }) id: string;
 
   // Personal Information
   @Prop({ required: true }) email: string;

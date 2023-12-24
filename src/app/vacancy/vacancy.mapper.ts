@@ -30,6 +30,7 @@ export const vacancyMapper = (payload: IVacancy): IVacancyResponse => {
 
   return {
     ...vacancy,
+    service_cost: vacancy.service_cost ?? null,
     author: toVacancyAuthor(vacancy.author as UserVacancyPick),
   };
 };
@@ -41,6 +42,7 @@ export const vacancyListMapper = (payload: IVacancy[]): IVacancyResponse[] => {
     .map((vacancy) => {
       return {
         ...vacancy,
+        service_cost: vacancy.service_cost ?? null,
         author: toVacancyAuthor(vacancy.author as UserVacancyPick),
       };
     })

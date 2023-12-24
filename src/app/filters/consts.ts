@@ -16,7 +16,7 @@ export enum FilterNames {
   City = 'Город',
   Spec = 'Специализации',
   NarrowSpec = 'Узкие специализации',
-  Programs = 'Программа',
+  Programs = 'Программы',
   Courses = 'Курсы',
   Status = 'Статус',
   Group = 'Группа',

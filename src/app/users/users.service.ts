@@ -14,6 +14,7 @@ import { LoginUserDto } from './dto/user-login.dto';
 import { CreateUserDto } from './dto/user-create.dto';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { FilterKeys } from '@app/filters/consts';
+import { RegistrationStatus } from '@app/auth/interfaces/regisration-status.interface';
 
 @Injectable()
 export class UsersService {
@@ -63,7 +64,7 @@ export class UsersService {
     }
   }
 
-  async createOrUpdate(createUserDto: CreateUserDto): Promise<IUser> {
+  async createOrUpdate(createUserDto: CreateUserDto): Promise<RegistrationStatus> {
     try {
       const { phone } = createUserDto;
 
@@ -83,12 +84,19 @@ export class UsersService {
       this.filtersService.update(updateFilters).then(() => console.log('Filters updated!'));
 
       if (!user) {
-        return await this.userModel.create({ ...userMapped, password: hashPassword });
+        await this.userModel.create({ ...userMapped, password: hashPassword });
+        return {
+          status: true,
+          message: 'Пользователь успешно зарегистрирован!',
+        };
       }
 
       await user.updateOne({ ...userMapped, password: hashPassword }).exec();
 
-      return await user.updateOne({ ...userMapped, password: hashPassword }).exec();
+      return {
+        status: true,
+        message: 'Пользователь успешно обновлен!',
+      };
     } catch (err) {
       throw err;
     }

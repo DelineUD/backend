@@ -25,9 +25,9 @@ export class VacancyService {
     private readonly filtersService: FiltersService,
   ) {}
 
-  async update(userId: Types.ObjectId, vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
-      const user = await this.usersService.findOne({ _id: userId });
+      const user = await this.usersService.findOne({ id });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
@@ -37,7 +37,7 @@ export class VacancyService {
       const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 
       await Promise.all([
-        await this.vacancyModel.deleteMany({ author: userId }),
+        await this.vacancyModel.deleteMany({ author: user._id }),
         await this.vacancyModel.create(...vacancyMapped),
       ]);
 
@@ -56,7 +56,7 @@ export class VacancyService {
       const vacancies = await this.vacancyModel
         .find(query)
         .populate('author', '_id first_name last_name avatar telegram city')
-        .sort(typeof desc !== 'undefined' && { createdAt: -1 })
+        .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       if (!vacancies.length) {
@@ -70,9 +70,10 @@ export class VacancyService {
     }
   }
 
-  async findAllByUserId(params: IFindAllVacancyParams): Promise<IVacancyResponse[]> {
+  async findAllByUserId(params: IFindAllVacancyParams, query: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
     try {
       const { userId } = params;
+      const { desc } = query;
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
@@ -82,6 +83,7 @@ export class VacancyService {
       const vacancies = await this.vacancyModel
         .find({ author: user._id })
         .populate('author', '_id first_name last_name avatar telegram city')
+        .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       if (!vacancies.length) {

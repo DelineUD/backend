@@ -2,8 +2,9 @@ import { Types } from 'mongoose';
 
 // TODO: Разобраться с обязательностью полей
 export interface IUser {
-  _id?: Types.ObjectId;
+  _id?: Types.ObjectId; // Sys mongo id
 
+  id: string; // Get course id
   email: string;
   phone: number;
   password: string;

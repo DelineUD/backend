@@ -18,19 +18,13 @@ export class ResumesController {
 
   /**
    * Создание или обновление резюме.
-   * @param userId - id пользователя.
    * @param resumeParams - Данные для резюме.
    * @returns - Резюме.
    */
   @Post('update')
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(
-    @UserId() userId: Types.ObjectId,
-    @Query() resumeParams: ICrudResumeParams,
-  ): Promise<IResume | IResume[]> {
-    return await this.resumesService.update(userId, resumeParams);
+  async create(@Query() resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
+    return await this.resumesService.update(resumeParams);
   }
 
   /**
@@ -55,8 +49,11 @@ export class ResumesController {
     type: 'string',
     description: 'Системный идентификатор пользователя',
   })
-  async findAllByUserId(@Param() params: IFindAllResumeParams): Promise<IResumeResponse[]> {
-    return await this.resumesService.findAllByUserId(params);
+  async findAllByUserId(
+    @Param() params: IFindAllResumeParams,
+    @Query() query: ResumeFindQueryDto,
+  ): Promise<IResumeResponse[]> {
+    return await this.resumesService.findAllByUserId(params, query);
   }
 
   /**

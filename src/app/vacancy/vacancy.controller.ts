@@ -17,19 +17,13 @@ export class VacancyController {
 
   /**
    * Создание новой вакансии.
-   * @param userId - id пользователя.
    * @param vacancyParams - Данные для вакансии.
    * @returns - Вакансии.
    */
   @Post('update')
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
-  async create(
-    @UserId() userId: Types.ObjectId,
-    @Query() vacancyParams: ICrudVacancyParams,
-  ): Promise<IVacancy | IVacancy[]> {
-    return await this.vacancyService.update(userId, vacancyParams);
+  async create(@Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+    return await this.vacancyService.update(vacancyParams);
   }
 
   /**
@@ -54,8 +48,11 @@ export class VacancyController {
     type: 'string',
     description: 'Системный идентификатор пользователя',
   })
-  async findAllByUserId(@Param() params: IFindAllVacancyParams): Promise<IVacancyResponse[]> {
-    return await this.vacancyService.findAllByUserId(params);
+  async findAllByUserId(
+    @Param() params: IFindAllVacancyParams,
+    @Query() query: VacancyFindQueryDto,
+  ): Promise<IVacancyResponse[]> {
+    return await this.vacancyService.findAllByUserId(params, query);
   }
 
   /**

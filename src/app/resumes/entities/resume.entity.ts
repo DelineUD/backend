@@ -12,8 +12,8 @@ export class Resume extends Document implements IResume {
   @Prop({ required: true }) qualification: string[];
   @Prop({ required: true }) narrow_spec: string[];
   @Prop({ required: true }) remote_work: boolean;
-  @Prop() country?: string;
-  @Prop() city?: string;
+  @Prop({ required: true }) country: string;
+  @Prop({ required: true }) city: string;
   @Prop() service_cost?: number;
   @Prop() portfolio?: string;
   @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: Types.ObjectId;

@@ -30,18 +30,12 @@ export class AuthService {
 
   async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
     try {
-      const status: RegistrationStatus = { success: false, message: '' };
-
       const user = await this.usersService.createOrUpdate(userDto);
       if (!user) {
-        status.success = false;
-        status.message = 'Ошибка при регистрации!';
-      } else {
-        status.success = true;
-        status.message = 'Регистрация пройдена успешно!';
+        return { status: false, message: 'Ошибка при регистрации или обновлении пользователя!' };
       }
 
-      return status;
+      return user;
     } catch (err) {
       throw err;
     }

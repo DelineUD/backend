@@ -14,34 +14,34 @@ export interface IVacancy {
   author: Types.ObjectId | UserVacancyPick;
   country: string;
   city: string;
+  about: string;
   specializations: string[];
   narrow_specializations: string[];
   programs: string[];
-  remote_work?: boolean;
+  remote_work: boolean;
   service_cost?: number;
 }
 
 export interface IVacancyResponse {
-  _id?: Types.ObjectId;
-
-  // Vacancy information
+  _id?: Types.ObjectId; // Sys mongo _id
   id: string;
   name: string;
   author: IVacancyAuthorResponse | null;
   country: string;
   city: string;
+  about: string;
   specializations: string[];
   narrow_specializations: string[];
   programs: string[];
-  remote_work?: boolean;
-  service_cost?: number;
+  remote_work: boolean;
+  service_cost: number;
 }
 
 export interface IVacancyAuthorResponse {
-  _id?: Types.ObjectId;
-  first_name?: string;
-  last_name?: string;
-  avatar?: string;
-  city?: string;
-  contact_link?: string;
+  _id: Types.ObjectId | null; // Sys mongo _id
+  first_name: string | null;
+  last_name: string | null;
+  avatar: string | null;
+  city: string | null;
+  contact_link: string | null;
 }

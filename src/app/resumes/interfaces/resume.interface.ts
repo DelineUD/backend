@@ -6,10 +6,10 @@ export type UserResumePickList = '_id' | 'avatar' | 'first_name' | 'last_name' |
 export type UserResumePick = Pick<IUser, UserResumePickList>;
 
 export interface IResume {
-  _id?: Types.ObjectId;
+  _id?: Types.ObjectId; // Sys mongo id
 
   // Resume information
-  id: string;
+  id: string; // Get course id
   qualification: string[];
   narrow_spec: string[];
   remote_work: boolean;
@@ -19,10 +19,9 @@ export interface IResume {
 }
 
 export interface IResumeResponse {
-  _id?: Types.ObjectId;
+  _id?: Types.ObjectId; // Sys mongo id
 
-  // Resume information
-  id: string;
+  id: string; // Get course id
   qualification: string[];
   narrow_spec: string[];
   remote_work: boolean;
@@ -32,10 +31,10 @@ export interface IResumeResponse {
 }
 
 export interface IResumeAuthorResponse {
-  _id?: Types.ObjectId;
-  first_name?: string;
-  last_name?: string;
-  avatar?: string;
-  qualification?: string;
-  contact_link?: string;
+  _id: Types.ObjectId | null; // Sys mongo id
+  first_name: string | null;
+  last_name: string | null;
+  avatar: string | null;
+  qualification: string | null;
+  contact_link: string | null;
 }

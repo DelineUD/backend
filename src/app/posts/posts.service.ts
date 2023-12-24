@@ -24,7 +24,7 @@ import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
-import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
 
 @Injectable()
 export class PostsService {
@@ -36,16 +36,23 @@ export class PostsService {
 
   async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPosts> {
     try {
+      const createPostDto = { ...postDto };
+
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      return await this.postModel.create({
-        ...postDto,
-        author: userId,
+      const initialPostValues: Partial<IPosts> = {
+        likes: [],
+        views: [],
         countComments: 0,
-        countLikes: 0,
+      };
+
+      return await this.postModel.create({
+        ...createPostDto,
+        ...initialPostValues,
+        author: userId,
       });
     } catch (err) {
       throw err;
@@ -66,7 +73,9 @@ export class PostsService {
       }
 
       await postInDb.updateOne({ ...updateDto }).exec();
-      return await postInDb.save();
+      await postInDb.save();
+
+      return postInDb;
     } catch (err) {
       throw err;
     }
@@ -82,7 +91,7 @@ export class PostsService {
         .exec();
 
       if (!deletedPost) {
-        throw new EntityNotFoundError('Запись не найдена!');
+        throw new EntityNotFoundError('Запись не найдена');
       }
 
       await this.postCommentsModel.deleteMany({ postId: deletedPost._id });
@@ -198,13 +207,14 @@ export class PostsService {
         throw new EntityNotFoundError(`Запись не найдена`);
       }
 
-      const likes = postInDb.isLiked
+      const likes: string[] = postInDb.likes.includes(String(userId))
         ? postInDb.likes.filter((i) => i !== String(userId))
         : (postInDb.likes = [String(userId), ...postInDb.likes]);
-      const countLikes = likes.length;
-      const isLiked = !postInDb.isLiked;
 
-      await postInDb.updateOne({ likes, countLikes, isLiked });
+      const countLikes: number = likes.length;
+      const isLiked: boolean = likes.includes(String(userId));
+
+      await postInDb.updateOne({ likes }).exec();
       await postInDb.save();
 
       return {
@@ -219,7 +229,9 @@ export class PostsService {
 
   async createComment(userId: Types.ObjectId, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
     try {
-      const postInDb = await this.postModel.findOne({ _id: createCommentDto.postId }).exec();
+      const dto = createCommentDto;
+
+      const postInDb = await this.postModel.findOne({ _id: dto.postId }).exec();
       if (!postInDb) {
         throw new EntityNotFoundError(`Запись не найдена`);
       }
@@ -229,16 +241,14 @@ export class PostsService {
         countLikes: 0,
         isLiked: false,
       };
-      const comment: PostCommentsModel = new this.postCommentsModel({
-        ...createCommentDto,
+      const comment = await this.postCommentsModel.create({
+        ...dto,
         ...initialCommentValues,
         author: userId,
       });
 
-      await Promise.all([
-        await comment.save(),
-        await postInDb.updateOne({ countComments: postInDb.countComments + 1 }),
-      ]);
+      await postInDb.updateOne({ countComments: postInDb.countComments + 1 }).exec();
+      await postInDb.save();
 
       return comment;
     } catch (err) {
@@ -256,7 +266,7 @@ export class PostsService {
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
 
       if (!postInDb) {
-        throw new EntityNotFoundError(`Комментарии не найдены`);
+        throw new EntityNotFoundError(`Запись не найдена`);
       }
 
       const comments = await this.postCommentsModel
@@ -321,13 +331,17 @@ export class PostsService {
     try {
       const { postId } = updateCommentDto;
 
-      const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
       const comment = await this.postCommentsModel
-        .findOneAndUpdate({ author: userId, postId: postId, _id: commentId }, { ...updateCommentDto }, { new: true })
+        .findOneAndUpdate(
+          { author: String(userInDb._id), postId: postId, _id: commentId },
+          { ...updateCommentDto },
+          { new: true },
+        )
         .exec();
 
       if (!comment) {
@@ -344,16 +358,31 @@ export class PostsService {
     try {
       const { commentId, postId } = deleteCommentDto;
 
-      const comment = await this.postCommentsModel.findOneAndDelete({ _id: commentId, author: userId, postId }).exec();
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
 
-      if (!comment) {
+      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
+      if (!postInDb) {
+        throw new EntityNotFoundError(`Запись не найдена`);
+      }
+
+      const deletedComment = await this.postCommentsModel
+        .findOneAndDelete({ _id: commentId, author: String(userInDb._id), postId: String(postInDb._id) })
+        .exec();
+
+      if (!deletedComment) {
         throw new EntityNotFoundError(`Комментарий не найден`);
       }
+
+      await postInDb.updateOne({ countComments: postInDb.countComments - 1 }).exec();
+      await postInDb.save();
 
       return {
         acknowledged: true,
         deletedCount: 1,
-        removed: comment._id,
+        removed: deletedComment._id,
       };
     } catch (err) {
       throw err;
@@ -363,28 +392,26 @@ export class PostsService {
   async addView(userId: Types.ObjectId, params: IPostsFindParams): Promise<number> {
     try {
       const { postId } = params;
-      const user = await this.usersService.findOne({ _id: userId });
-      const post = await this.postModel.findOne({ author: userId, _id: postId }).exec();
 
-      if (!post) {
-        throw new EntityNotFoundError(`Запись не найдена!`);
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const arrViews: string[] = post.views;
-
-      const checkResult: boolean = arrViews.includes(user._id.toString());
-
-      if (!checkResult) {
-        await post.updateOne({
-          views: [user._id, ...arrViews],
-        });
-        await post.save();
+      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
+      if (!postInDb) {
+        throw new EntityNotFoundError(`Запись не найдена`);
       }
 
-      const newPost = await this.postModel.findOne({ _id: postId }).exec();
-      const res = postMapper(newPost, user);
+      const isViewed: boolean = postInDb.views.includes(String(userInDb._id));
+      const arrViews: string[] = isViewed ? postInDb.views : [String(userInDb._id), ...postInDb.views];
 
-      return res.views_count;
+      if (!isViewed) {
+        await postInDb.updateOne({ views: arrViews });
+        await postInDb.save();
+      }
+
+      return arrViews.length;
     } catch (err) {
       throw err;
     }

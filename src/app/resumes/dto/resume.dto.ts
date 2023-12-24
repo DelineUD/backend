@@ -1,8 +1,7 @@
 import { Types } from 'mongoose';
 
 export class ResumeDto {
-  // Resume information
-  id: string;
+  id: string; // Get course id
   author: Types.ObjectId;
   country: string;
   city: string;

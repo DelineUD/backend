@@ -1,12 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+import { IUser } from '@app/users/interfaces/user.interface';
+
 @Schema({
   collection: 'users',
   timestamps: true,
 })
-export class UserModel extends Document {
-  @Prop({ required: true }) id: string;
+export class UserModel extends Document implements IUser {
+  @Prop({ required: true, type: String }) id: string;
 
   // Personal Information
   @Prop({ required: true }) email: string;

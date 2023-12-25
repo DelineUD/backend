@@ -8,7 +8,7 @@ import { INormalizeDto } from '@shared/interfaces/normalize-dto.interface';
  */
 
 function normalizeDto<T extends INormalizeDto>(dto: T, prefix: string): INormalizeDto[] {
-  const { author, ...rest } = dto;
+  const { authorId, ...rest } = dto;
   const entities: INormalizeDto[] = [];
 
   // Сортировка ключей dto по префиксу и добавление в массив сущностей под своим индексом
@@ -20,7 +20,7 @@ function normalizeDto<T extends INormalizeDto>(dto: T, prefix: string): INormali
     if (key.endsWith(prefixHere)) {
       entities[count] = {
         ...entities[count],
-        author,
+        authorId,
         [key.replace(prefixHere, '')]: rest[key],
       };
     }

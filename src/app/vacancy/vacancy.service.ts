@@ -29,17 +29,12 @@ export class VacancyService {
 
   async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
-      const user = await this.usersService.findOne({ id });
-      if (!user) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
-
-      const dto = { author: user._id, ...vacancyParams } as VacancyDto;
+      const dto = { authorId: id, ...vacancyParams } as VacancyDto;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
       const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 
       await Promise.all([
-        await this.vacancyModel.deleteMany({ author: user._id }),
+        await this.vacancyModel.deleteMany({ author: id }),
         await this.vacancyModel.create(...vacancyMapped),
       ]);
 
@@ -59,7 +54,7 @@ export class VacancyService {
 
       const vacancies = await this.vacancyModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar telegram city')
+        .populate('author', '_id first_name last_name avatar telegram qualification')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
@@ -70,7 +65,7 @@ export class VacancyService {
       return vacancyListMapper(vacancies);
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
-      throw new InternalServerErrorException('Вакансии не найдены!');
+      throw new InternalServerErrorException('Ошибка при поиске вакансий!');
     }
   }
 
@@ -85,7 +80,7 @@ export class VacancyService {
       }
 
       const vacancies = await this.vacancyModel
-        .find({ author: user._id })
+        .find({ authorId: user.id })
         .populate('author', '_id first_name last_name avatar telegram city')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
@@ -111,7 +106,7 @@ export class VacancyService {
       }
 
       const vacancy = await this.vacancyModel
-        .findOne({ author: user._id, _id: id })
+        .findOne({ authorId: user.id, id: id })
         .populate('author', '_id first_name last_name avatar telegram city')
         .exec();
 

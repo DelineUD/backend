@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 
 import { UsersService } from '../users/users.service';
@@ -18,8 +18,9 @@ import generateOTPCode from '../shared/utils/generateOTPCode';
 import { SmsService } from '@shared/services/sms.service';
 import { TokensService } from './services/tokens.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import { UserDto } from '@app/users/dto/user.dto';
 import { CreateUserDto } from '@app/users/dto/user-create.dto';
+
+const logger = new Logger('Auth');
 
 @Injectable()
 export class AuthService {
@@ -38,20 +39,26 @@ export class AuthService {
 
       return user;
     } catch (err) {
+      logger.error(`Error while register: ${(err as Error).message}`);
       throw err;
     }
   }
 
   async login(loginUserDto: LoginUserDto): Promise<ILoginResponse> {
-    const user = await this.usersService.findByLogin(loginUserDto);
+    try {
+      const user = await this.usersService.findByLogin(loginUserDto);
 
-    const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
-    await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
+      const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
+      await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
 
-    return {
-      ...tokens,
-      type: 'password',
-    };
+      return {
+        ...tokens,
+        type: 'password',
+      };
+    } catch (err) {
+      logger.error(`Error while login: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
@@ -74,6 +81,7 @@ export class AuthService {
         status_code,
       };
     } catch (err) {
+      logger.error(`Error while sendSms: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -107,6 +115,7 @@ export class AuthService {
         type: 'sms',
       };
     } catch (err) {
+      logger.error(`Error while loginSms: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -136,6 +145,7 @@ export class AuthService {
         ...tokens,
       };
     } catch (err) {
+      logger.error(`Error while refresh: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -157,6 +167,7 @@ export class AuthService {
         email: userInDb.email ?? null,
       };
     } catch (err) {
+      logger.error(`Error while getMe: ${(err as Error).message}`);
       throw err;
     }
   }

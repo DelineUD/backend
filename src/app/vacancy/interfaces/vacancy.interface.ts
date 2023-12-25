@@ -8,10 +8,9 @@ export type UserVacancyPick = Pick<IUser, UserVacancyPickList>;
 export interface IVacancy {
   _id?: Types.ObjectId;
 
-  // Vacancy information
-  id: string;
+  id: string; // Get course id
+  authorId: string;
   name: string;
-  author: Types.ObjectId | UserVacancyPick;
   country: string;
   city: string;
   about: string;
@@ -20,13 +19,15 @@ export interface IVacancy {
   programs: string[];
   remote_work: boolean;
   service_cost?: number;
+  author?: IVacancyAuthorResponse;
 }
 
 export interface IVacancyResponse {
   _id?: Types.ObjectId; // Sys mongo _id
-  id: string;
+
+  id: string; // Get course id
   name: string;
-  author: IVacancyAuthorResponse | null;
+  author: IVacancyAuthorResponse;
   country: string;
   city: string;
   about: string;

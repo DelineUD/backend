@@ -28,18 +28,13 @@ export class ResumesService {
 
   async update({ id, ...resumeParams }: ICrudResumeParams): Promise<IResume | IResume[]> {
     try {
-      const user = await this.usersService.findOne({ id });
-      if (!user) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
-
-      const dto = { author: user._id, ...resumeParams } as ResumeDto;
+      const dto = { authorId: id, ...resumeParams } as ResumeDto;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
-      console.log(normalizedDto);
+
       const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));
 
       await Promise.all([
-        await this.resumeModel.deleteMany({ author: user._id }),
+        await this.resumeModel.deleteMany({ authorId: id }),
         await this.resumeModel.create(...resumesMapped),
       ]);
 
@@ -59,14 +54,14 @@ export class ResumesService {
 
       const resumes = await this.resumeModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar telegram qualification')
+        .populate('author', '_id first_name last_name avatar city contact_link')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
       return resumeListMapper(resumes);
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
-      throw new InternalServerErrorException(`Внутрення ошибка сервера!`);
+      throw new InternalServerErrorException('Ошибка при поиске резюме!');
     }
   }
 
@@ -81,7 +76,7 @@ export class ResumesService {
       }
 
       const resumes = await this.resumeModel
-        .find({ author: user._id })
+        .find({ authorId: user.id })
         .populate('author', '_id first_name last_name avatar telegram qualification')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
@@ -107,7 +102,7 @@ export class ResumesService {
       }
 
       const resume = await this.resumeModel
-        .findOne({ author: user._id, _id: id })
+        .findOne({ authorId: user.id, id })
         .populate('author', '_id first_name last_name avatar telegram qualification')
         .exec();
       if (!resume) {

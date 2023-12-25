@@ -1,8 +1,6 @@
-import { Types } from 'mongoose';
-
 export class ResumeDto {
   id: string; // Get course id
-  author: Types.ObjectId;
+  authorId: string; // Get course user id
   country: string;
   city: string;
   qualification: string;

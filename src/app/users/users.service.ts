@@ -32,7 +32,7 @@ export class UsersService {
     try {
       return this.userModel.find({ ...filter }).exec();
     } catch (err) {
-      logger.error(`Error while findAll: ${err}`);
+      logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new EntityNotFoundError(err);
     }
   }
@@ -52,10 +52,11 @@ export class UsersService {
 
   async findByLogin({ phone, password }: LoginUserDto): Promise<IUser> {
     try {
-      const user = await this.userModel.findOne({ phone: transformPhoneNumber(phone) }).exec();
+      const validPhone = transformPhoneNumber(phone);
+      const user = await this.userModel.findOne({ phone: validPhone }).exec();
 
       if (!user) {
-        throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
+        throw new EntityNotFoundError(`Пользователь с телефоном ${validPhone} не найден`);
       }
 
       const areEqual = await compare(password, user.password);
@@ -88,7 +89,7 @@ export class UsersService {
       };
 
       const user = await this.userModel.findOne({ phone: userMapped.phone });
-      this.filtersService.update(updateFilters).then(() => logger.log('Fillers updated!'));
+      this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
 
       if (!user) {
         await this.userModel.create({ ...userMapped, password: hashPassword });
@@ -114,10 +115,11 @@ export class UsersService {
 
   async findByPhone(phone: string): Promise<IUser> {
     try {
-      const user = await this.userModel.findOne({ phone }).exec();
+      const validPhone = transformPhoneNumber(phone);
+      const user = await this.userModel.findOne({ phone: validPhone }).exec();
 
       if (!user) {
-        throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
+        throw new EntityNotFoundError(`Пользователь с телефоном ${validPhone} не найден`);
       }
 
       return user;

@@ -27,6 +27,7 @@ export class AuthController {
    * @param createUserDto - данные пользователя.
    * @returns - Статус регистрации
    */
+  @UsePipes(new ValidationPipe({ transform: true }))
   @Post('register-or-update')
   public async register(@Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
     console.log('@: ', createUserDto);

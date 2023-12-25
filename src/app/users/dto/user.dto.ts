@@ -1,6 +1,5 @@
 import {
-  IsBooleanString,
-  IsDate,
+  IsDateString,
   IsEmail,
   IsNotEmpty,
   IsNumberString,
@@ -10,13 +9,14 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
+import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
+import { StatusFilterKeys } from '@app/filters/consts';
+
 export class UserDto {
-  @IsNotEmpty()
   @IsString()
   id: string;
 
   // Personal Information
-  @IsNotEmpty()
   @IsEmail()
   @IsString()
   email: string;
@@ -36,7 +36,7 @@ export class UserDto {
   @IsString()
   last_name?: string;
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   @Transform(({ value }) => new Date(value))
   birthday?: Date;
   @IsOptional()
@@ -45,7 +45,6 @@ export class UserDto {
   @IsOptional()
   @IsString()
   gender?: string;
-  @IsOptional()
 
   // Contact Information
   @IsOptional()
@@ -66,14 +65,14 @@ export class UserDto {
   @IsString()
   qualification?: string;
   @IsOptional()
-  @IsString()
+  @Transform(validateStringToBoolean)
   ready_communicate?: boolean;
   @IsOptional()
-  @IsBooleanString()
+  @Transform(validateStringToBoolean)
   remote_work?: boolean;
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: StatusFilterKeys;
 
   // Social Media
   @IsOptional()
@@ -94,7 +93,7 @@ export class UserDto {
 
   // Preferences
   @IsOptional()
-  @IsBooleanString()
+  @Transform(validateStringToBoolean)
   hide_phone?: boolean;
   @IsOptional()
   @IsString()

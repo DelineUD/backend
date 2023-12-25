@@ -1,4 +1,4 @@
 export interface INormalizeDto {
-  author: string;
+  authorId: string;
   id: string;
 }

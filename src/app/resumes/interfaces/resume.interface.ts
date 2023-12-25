@@ -9,24 +9,25 @@ export interface IResume {
   _id?: Types.ObjectId; // Sys mongo id
 
   id: string; // Get course id
+  authorId: string; // Get course user id
   qualification: string[];
   narrow_spec: string[];
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;
-  author: string | UserResumePick; // Get course user id
+  author?: IResumeAuthorResponse;
 }
 
 export interface IResumeResponse {
   _id?: Types.ObjectId; // Sys mongo id
 
   id: string; // Get course id
+  author: IResumeAuthorResponse | null;
   qualification: string[];
   narrow_spec: string[];
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;
-  author: IResumeAuthorResponse | null;
 }
 
 export interface IResumeAuthorResponse {

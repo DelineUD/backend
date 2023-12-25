@@ -1,6 +1,6 @@
 export class VacancyDto {
-  id: string;
-  author: string; // Get course id
+  id: string; // Get course id
+  authorId: string; // Get course user id
   name: string;
   country: string;
   city: string;

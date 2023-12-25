@@ -5,7 +5,7 @@ import { Transform } from 'class-transformer';
 import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
 
 export class ICrudVacancyParams {
-  @ApiProperty({ default: '', required: false })
+  @ApiProperty({ default: '', required: true })
   @IsString()
   readonly id: string;
 

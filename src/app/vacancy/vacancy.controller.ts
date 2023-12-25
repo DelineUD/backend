@@ -30,6 +30,8 @@ export class VacancyController {
    * Получение всех вакансий.
    * @returns - Все вакансии.
    */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
@@ -41,6 +43,8 @@ export class VacancyController {
    * @param params.userId - id автора.
    * @returns - Список вакансий пользователя.
    */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @Get('list/:userId')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
@@ -61,6 +65,8 @@ export class VacancyController {
    * @param params.id - id вакансии.
    * @returns - Найденная вакансия.
    */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @Get(':userId/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
@@ -71,7 +77,7 @@ export class VacancyController {
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'Системный идентификатор вакансии',
+    description: 'Идентификатор вакансии (GetCourse Id)',
   })
   async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancyResponse> {
     return await this.vacancyService.findByUserId(params);

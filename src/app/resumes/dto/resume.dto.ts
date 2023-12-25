@@ -1,6 +1,6 @@
 export class ResumeDto {
   id: string; // Get course id
-  author: string; // Get course user id
+  authorId: string; // Get course user id
   country: string;
   city: string;
   qualification: string;

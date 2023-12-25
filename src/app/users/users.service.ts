@@ -89,7 +89,7 @@ export class UsersService {
       };
 
       const user = await this.userModel.findOne({ phone: userMapped.phone });
-      this.filtersService.update(updateFilters).then(() => logger.log('Fillers updated!'));
+      this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
 
       if (!user) {
         await this.userModel.create({ ...userMapped, password: hashPassword });

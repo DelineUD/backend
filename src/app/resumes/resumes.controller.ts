@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { ResumesService } from './resumes.service';
 
@@ -7,6 +7,7 @@ import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
+import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -28,6 +29,8 @@ export class ResumesController {
    * Получение всех резюме.
    * @returns - Все резюме.
    */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() queryParams?: ResumeFindQueryDto): Promise<IResumeResponse[]> {
@@ -39,6 +42,8 @@ export class ResumesController {
    * @param params.userId - id автора.
    * @returns - Список всех резюме пользователя.
    */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @Get('list/:userId')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
@@ -59,6 +64,8 @@ export class ResumesController {
    * @param params.id - id (гет курс) резюме.
    * @returns - Найденное резюме.
    */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @Get(':userId/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
@@ -69,7 +76,7 @@ export class ResumesController {
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'Системный идентификатор резюме',
+    description: 'Идентификатор резюме (GetCourse Id)',
   })
   async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResumeResponse> {
     return await this.resumesService.findOneById(params);

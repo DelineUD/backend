@@ -4,12 +4,12 @@ import { Types } from 'mongoose';
 
 export class IFindAllVacancyParams {
   @ApiProperty({ default: '' })
-  @IsString({ message: 'userId должен быть строкой!' })
-  userId: Types.ObjectId; // User _id
+  @IsString({ message: 'userId должен быть типа ObjectId!' })
+  userId: Types.ObjectId; // Sys mongo _id
 }
 
 export class IFindOneVacancyParams extends PartialType(IFindAllVacancyParams) {
   @ApiProperty({ default: '' })
-  @IsString({ message: 'id должен быть строкой!' })
-  id: Types.ObjectId; // Vacancy id
+  @IsString({ message: 'id должен быть быть типа String!' })
+  id: string; // Get course id
 }

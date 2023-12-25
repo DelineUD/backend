@@ -21,20 +21,21 @@ const toResumeAuthor = (author: UserResumePick): IResumeAuthorResponse => {
 };
 
 export const resumeDtoMapper = (dto: ResumeDto): IResume => {
-  const { qualification, narrow_spec, ...rest } = dto;
+  const { narrow_spec, ...rest } = dto;
   return {
     ...rest,
-    qualification: splitDtoField(qualification),
     narrow_spec: splitDtoField(narrow_spec),
   };
 };
 
 export const resumeMapper = (payload: IResume): IResumeResponse => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { authorId, ...resume } = JSON.parse(JSON.stringify(payload)) as IResume;
+  const { authorId, service_cost, portfolio, ...resume } = JSON.parse(JSON.stringify(payload)) as IResume;
 
   return {
     ...resume,
+    service_cost: service_cost ?? null,
+    portfolio: portfolio ?? null,
     author: toResumeAuthor(resume.author as UserResumePick),
   };
 };
@@ -45,9 +46,11 @@ export const resumeListMapper = (payload: IResume[]): IResumeResponse[] => {
   return (
     resumes
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .map(({ authorId, ...resume }) => {
+      .map(({ authorId, service_cost, portfolio, ...resume }) => {
         return {
           ...resume,
+          service_cost: service_cost ?? null,
+          portfolio: portfolio ?? null,
           author: toResumeAuthor(resume.author as UserResumePick),
         };
       })

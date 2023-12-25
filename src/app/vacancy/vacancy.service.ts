@@ -34,7 +34,7 @@ export class VacancyService {
       const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 
       await Promise.all([
-        await this.vacancyModel.deleteMany({ author: id }),
+        await this.vacancyModel.deleteMany({ authorId: id }),
         await this.vacancyModel.create(...vacancyMapped),
       ]);
 

@@ -10,7 +10,9 @@ export interface IResume {
 
   id: string; // Get course id
   authorId: string; // Get course user id
-  qualification: string[];
+  qualification: string;
+  country: string;
+  city: string;
   narrow_spec: string[];
   remote_work: boolean;
   service_cost?: number;
@@ -23,11 +25,13 @@ export interface IResumeResponse {
 
   id: string; // Get course id
   author: IResumeAuthorResponse | null;
-  qualification: string[];
+  qualification: string;
+  country: string;
+  city: string;
   narrow_spec: string[];
   remote_work: boolean;
-  service_cost?: number;
-  portfolio?: string;
+  service_cost?: number | null;
+  portfolio?: string | null;
 }
 
 export interface IResumeAuthorResponse {

@@ -13,7 +13,8 @@ export interface IResume {
   qualification: string;
   country: string;
   city: string;
-  narrow_spec: string[];
+  specializations: string[];
+  narrow_specializations: string[];
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;
@@ -28,7 +29,8 @@ export interface IResumeResponse {
   qualification: string;
   country: string;
   city: string;
-  narrow_spec: string[];
+  specializations: string[];
+  narrow_specializations: string[];
   remote_work: boolean;
   service_cost?: number | null;
   portfolio?: string | null;

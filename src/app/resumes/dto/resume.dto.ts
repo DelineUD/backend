@@ -4,7 +4,8 @@ export class ResumeDto {
   country: string;
   city: string;
   qualification: string;
-  narrow_spec: string;
+  spec: string[];
+  narrow_spec: string[];
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;

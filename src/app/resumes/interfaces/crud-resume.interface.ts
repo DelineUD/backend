@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
+import { validateStringToArray } from '@helpers/validateStringToArray';
 
 export class ICrudResumeParams {
   @ApiProperty({ default: '', required: false })
@@ -41,23 +42,33 @@ export class ICrudResumeParams {
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @IsString()
-  readonly narrow_spec_resume1?: string;
+  @Transform(validateStringToArray)
+  readonly spec_resume1?: string;
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateStringToArray)
+  readonly spec_resume2?: string;
+
+  @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
+  @IsOptional()
+  @Transform(validateStringToArray)
+  readonly narrow_spec_resume1?: string;
+
+  @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
+  @IsOptional()
+  @Transform(validateStringToArray)
   readonly narrow_spec_resume2?: string;
 
   @ApiProperty({ default: 5000, required: false })
   @IsOptional()
   @IsNumberString()
-  readonly service_cost_resume1?: string;
+  readonly service_cost_resume1?: number;
 
   @ApiProperty({ default: 5000, required: false })
   @IsOptional()
   @IsNumberString()
-  readonly service_cost_resume2?: string;
+  readonly service_cost_resume2?: number;
 
   @ApiProperty({ default: 'https://portfolio1.ru', required: false })
   @IsOptional()

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { ResumesService } from './resumes.service';
@@ -8,6 +8,8 @@ import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
+
+const logger = new Logger('VacancyController');
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -20,9 +22,13 @@ export class ResumesController {
    * @returns - Резюме.
    */
   @Post('update')
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true, enableDebugMessages: true }))
   async create(@Query() resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
-    return await this.resumesService.update(resumeParams);
+    try {
+      return await this.resumesService.update(resumeParams);
+    } catch (err) {
+      logger.error(`Error while update controller: ${(err as Error).message}`);
+    }
   }
 
   /**

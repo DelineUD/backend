@@ -1,14 +1,14 @@
-import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Types } from 'mongoose';
 
-import { UserId } from '@shared/decorators/user-id.decorator';
 import { VacancyService } from './vacancy.service';
 import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
+
+const logger = new Logger('VacancyController');
 
 @ApiTags('Vacancy')
 @Controller('vacancy')
@@ -21,9 +21,13 @@ export class VacancyController {
    * @returns - Вакансии.
    */
   @Post('update')
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @UsePipes(new ValidationPipe({ transform: true, enableDebugMessages: true }))
   async create(@Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
-    return await this.vacancyService.update(vacancyParams);
+    try {
+      return await this.vacancyService.update(vacancyParams);
+    } catch (err) {
+      logger.error(`Error while update controller: ${(err as Error).message}`);
+    }
   }
 
   /**

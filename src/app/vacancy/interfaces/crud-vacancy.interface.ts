@@ -82,22 +82,22 @@ export class ICrudVacancyParams {
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   narrow_spec_vacancy1?: string;
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   narrow_spec_vacancy2?: string;
 
   @ApiProperty({ default: 'Программа 1, Программа 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   need_programs_vacancy1?: string;
 
   @ApiProperty({ default: 'Программа 1, Программа 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   need_programs_vacancy2?: string;
 
   @ApiProperty({ default: 5000, required: false })

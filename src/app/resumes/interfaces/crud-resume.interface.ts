@@ -42,22 +42,22 @@ export class ICrudResumeParams {
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   readonly spec_resume1?: string;
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   readonly spec_resume2?: string;
 
   @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   readonly narrow_spec_resume1?: string;
 
   @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
   @IsOptional()
-  @Transform(validateStringToArray)
+  @IsString()
   readonly narrow_spec_resume2?: string;
 
   @ApiProperty({ default: 5000, required: false })

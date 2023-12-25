@@ -5,6 +5,7 @@ import {
   UserResumePick,
 } from '@app/resumes/interfaces/resume.interface';
 import { ResumeDto } from '@app/resumes/dto/resume.dto';
+import { splitDtoField } from '@helpers/splitDto';
 
 const toResumeAuthor = (author: UserResumePick): IResumeAuthorResponse => {
   return author
@@ -23,8 +24,8 @@ export const resumeDtoMapper = (dto: ResumeDto): IResume => {
   const { spec, narrow_spec, ...rest } = dto;
   return {
     ...rest,
-    specializations: spec,
-    narrow_specializations: narrow_spec,
+    specializations: splitDtoField(spec),
+    narrow_specializations: splitDtoField(narrow_spec),
   };
 };
 

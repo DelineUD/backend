@@ -19,6 +19,7 @@ import generateOTPCode from '../shared/utils/generateOTPCode';
 import { SmsService } from '@shared/services/sms.service';
 import { TokensService } from './services/tokens.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { UserDto } from '@app/users/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,8 @@ export class AuthService {
     private readonly smsService: SmsService,
   ) {}
 
-  async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
+  async register(userDto: UserDto): Promise<RegistrationStatus> {
+    console.log(userDto);
     try {
       const user = await this.usersService.createOrUpdate(userDto);
       if (!user) {

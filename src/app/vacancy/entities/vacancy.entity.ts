@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 
 import { IVacancy } from '@app/vacancy/interfaces/vacancy.interface';
 
@@ -8,7 +8,7 @@ import { IVacancy } from '@app/vacancy/interfaces/vacancy.interface';
   timestamps: true,
 })
 export class Vacancy extends Document implements IVacancy {
-  @Prop({ required: true }) id: string;
+  @Prop({ required: true }) id: string; // Get course id
   @Prop({ required: true }) name: string;
   @Prop({ required: true }) country: string;
   @Prop({ required: true }) city: string;
@@ -18,7 +18,7 @@ export class Vacancy extends Document implements IVacancy {
   @Prop({ required: true }) programs: string[];
   @Prop({ required: true }) remote_work: boolean;
   @Prop() service_cost?: number;
-  @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: Types.ObjectId;
+  @Prop({ type: String, ref: 'UserModel' }) author: string; // Get course user id
 }
 
 export const VacancySchema = SchemaFactory.createForClass(Vacancy);

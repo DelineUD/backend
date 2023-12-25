@@ -8,14 +8,13 @@ export type UserResumePick = Pick<IUser, UserResumePickList>;
 export interface IResume {
   _id?: Types.ObjectId; // Sys mongo id
 
-  // Resume information
   id: string; // Get course id
   qualification: string[];
   narrow_spec: string[];
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;
-  author: Types.ObjectId | UserResumePick;
+  author: string | UserResumePick; // Get course user id
 }
 
 export interface IResumeResponse {

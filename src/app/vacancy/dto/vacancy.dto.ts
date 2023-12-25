@@ -1,8 +1,6 @@
-import { Types } from 'mongoose';
-
 export class VacancyDto {
   id: string;
-  author: Types.ObjectId;
+  author: string; // Get course id
   name: string;
   country: string;
   city: string;

@@ -1,6 +1,4 @@
-import { Types } from 'mongoose';
-
 export interface INormalizeDto {
-  author: Types.ObjectId;
+  author: string;
   id: string;
 }

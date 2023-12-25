@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { IResume } from '@app/resumes/interfaces/resume.interface';
@@ -8,7 +8,7 @@ import { IResume } from '@app/resumes/interfaces/resume.interface';
   timestamps: true,
 })
 export class Resume extends Document implements IResume {
-  @Prop({ required: true }) id: string;
+  @Prop({ required: true }) id: string; // Get course id
   @Prop({ required: true }) qualification: string[];
   @Prop({ required: true }) narrow_spec: string[];
   @Prop({ required: true }) remote_work: boolean;
@@ -16,7 +16,7 @@ export class Resume extends Document implements IResume {
   @Prop({ required: true }) city: string;
   @Prop() service_cost?: number;
   @Prop() portfolio?: string;
-  @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: Types.ObjectId;
+  @Prop({ type: String, ref: 'UserModel' }) author: string; // Get course user id
 }
 
 export const ResumeSchema = SchemaFactory.createForClass(Resume);

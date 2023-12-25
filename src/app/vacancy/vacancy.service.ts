@@ -29,17 +29,12 @@ export class VacancyService {
 
   async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
-      const user = await this.usersService.findOne({ id });
-      if (!user) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
-
-      const dto = { author: user._id, ...vacancyParams } as VacancyDto;
+      const dto = { author: id, ...vacancyParams } as VacancyDto;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
       const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 
       await Promise.all([
-        await this.vacancyModel.deleteMany({ author: user._id }),
+        await this.vacancyModel.deleteMany({ author: id }),
         await this.vacancyModel.create(...vacancyMapped),
       ]);
 

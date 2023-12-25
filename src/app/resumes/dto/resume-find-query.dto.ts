@@ -38,7 +38,7 @@ export class ResumeFindQueryDto {
   @ApiProperty({ default: false, required: false })
   @IsOptional()
   @IsBooleanString()
-  remote_work?: boolean;
+  remote_work?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

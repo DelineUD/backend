@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 export interface IJwtPayload {
   _id: Types.ObjectId;
-  phone: number;
+  phone: string;
   email: string;
 
   iat: number;

@@ -1,8 +1,9 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsMongoId, IsNotEmpty } from 'class-validator';
 
-import { PostCommentDto } from '@app/posts/dto/post-comment.dto';
 import { Types } from 'mongoose';
+
+import { PostCommentDto } from '@app/posts/dto/post-comment.dto';
 
 export class DeletePostCommentDto extends PartialType(PostCommentDto) {
   @ApiProperty({ default: '' })

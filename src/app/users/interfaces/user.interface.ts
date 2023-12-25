@@ -6,7 +6,7 @@ export interface IUser {
 
   id: string; // Get course id
   email: string;
-  phone: number;
+  phone: string;
   password: string;
   first_name: string;
   last_name: string;

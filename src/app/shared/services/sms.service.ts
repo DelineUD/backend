@@ -11,7 +11,7 @@ export class SmsService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async send(phone: number, text: string): Promise<SMSData> {
+  async send(phone: string, text: string): Promise<SMSData> {
     return (
       await firstValueFrom(
         this.httpService

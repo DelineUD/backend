@@ -30,8 +30,7 @@ export class AuthController {
    */
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post('register-or-update')
-  public async register(@Query() createUserDto: UserDto): Promise<RegistrationStatus> {
-    console.log('@: ', createUserDto);
+  public async register(@Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
     return await this.authService.register(createUserDto);
   }
 

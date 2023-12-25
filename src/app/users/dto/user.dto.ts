@@ -1,12 +1,4 @@
-import {
-  IsDateString,
-  IsEmail,
-  IsNotEmpty,
-  IsNumberString,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsNumberString, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
@@ -18,14 +10,12 @@ export class UserDto {
 
   // Personal Information
   @IsEmail()
-  @IsString()
   email: string;
-  @IsNotEmpty()
   @IsPhoneNumber('RU')
-  phone: number;
+  phone: string;
   @IsOptional()
   @IsString()
-  password?: string;
+  password: string;
   @IsOptional()
   @IsNumberString()
   vPass?: number;
@@ -36,9 +26,8 @@ export class UserDto {
   @IsString()
   last_name?: string;
   @IsOptional()
-  @IsDateString()
-  @Transform(({ value }) => new Date(value))
-  birthday?: Date;
+  @IsString()
+  birthday?: string;
   @IsOptional()
   @IsString()
   avatar?: string;

@@ -10,7 +10,6 @@ import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
 import { IAuthTokens } from './interfaces/auth-tokens.interface';
 import { IUser } from '../users/interfaces/user.interface';
 
-import { CreateUserDto } from '../users/dto/user-create.dto';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
@@ -20,6 +19,7 @@ import { SmsService } from '@shared/services/sms.service';
 import { TokensService } from './services/tokens.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UserDto } from '@app/users/dto/user.dto';
+import { CreateUserDto } from '@app/users/dto/user-create.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +29,7 @@ export class AuthService {
     private readonly smsService: SmsService,
   ) {}
 
-  async register(userDto: UserDto): Promise<RegistrationStatus> {
-    console.log(userDto);
+  async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
     try {
       const user = await this.usersService.createOrUpdate(userDto);
       if (!user) {
@@ -87,7 +86,7 @@ export class AuthService {
         throw new BadRequestException('Неверные данные для входа: пусто или неверно!');
       }
       const payload: ILoginSmsPayload = {
-        phone: +loginData[0],
+        phone: loginData[0],
         vPass: +loginData[1],
       };
 

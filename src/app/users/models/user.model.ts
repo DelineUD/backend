@@ -10,7 +10,7 @@ export class UserModel extends Document {
 
   // Personal Information
   @Prop({ required: true }) email: string;
-  @Prop({ required: true }) phone: number;
+  @Prop({ required: true }) phone: string;
   @Prop({ required: true }) password: string;
   @Prop({ required: true }) first_name: string;
   @Prop({ required: true }) last_name: string;

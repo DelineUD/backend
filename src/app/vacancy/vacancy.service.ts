@@ -1,6 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -16,6 +16,8 @@ import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 import { FiltersService } from '@app/filters/filters.service';
 import { getMainFilters } from '@helpers/getMainFilters';
+
+const logger = new Logger('Vacancies');
 
 @Injectable()
 export class VacancyService {
@@ -41,9 +43,11 @@ export class VacancyService {
         await this.vacancyModel.create(...vacancyMapped),
       ]);
 
+      logger.log(`Vacancies successfully created!`);
+
       return this.vacancyModel.find({ ...vacancyMapped });
     } catch (err) {
-      console.error(`Ошибка при обновлении вакансий: ${(err as Error).message}`);
+      logger.error(`Error while update: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при обновлении вакансий!');
     }
   }
@@ -65,7 +69,7 @@ export class VacancyService {
 
       return vacancyListMapper(vacancies);
     } catch (err) {
-      console.error(`Ошибка при поиске вакансий: ${(err as Error).message}`);
+      logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Вакансии не найдены!');
     }
   }
@@ -92,7 +96,7 @@ export class VacancyService {
 
       return vacancyListMapper(vacancies);
     } catch (err) {
-      console.error(`Ошибка при поиске вакансий пользователя: ${(err as Error).message}`);
+      logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -117,7 +121,7 @@ export class VacancyService {
 
       return vacancyMapper(vacancy);
     } catch (err) {
-      console.error(`Ошибка при поиске вакансии по ID: ${(err as Error).message}`);
+      logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;
     }
   }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { compare, genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
@@ -15,6 +15,10 @@ import { CreateUserDto } from './dto/user-create.dto';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { FilterKeys } from '@app/filters/consts';
 import { RegistrationStatus } from '@app/auth/interfaces/regisration-status.interface';
+import { filterQueries } from '@helpers/filterQueries';
+import { transformPhoneNumber } from '@helpers/transformPhoneNumber';
+
+const logger = new Logger('Users');
 
 @Injectable()
 export class UsersService {
@@ -28,6 +32,7 @@ export class UsersService {
     try {
       return this.userModel.find({ ...filter }).exec();
     } catch (err) {
+      logger.error(`Error while findAll: ${err}`);
       throw new EntityNotFoundError(err);
     }
   }
@@ -40,13 +45,14 @@ export class UsersService {
       }
       return user;
     } catch (err) {
+      logger.error(`Error while findOne: ${(err as Error).message}`);
       throw err;
     }
   }
 
   async findByLogin({ phone, password }: LoginUserDto): Promise<IUser> {
     try {
-      const user = await this.userModel.findOne({ phone }).exec();
+      const user = await this.userModel.findOne({ phone: transformPhoneNumber(phone) }).exec();
 
       if (!user) {
         throw new EntityNotFoundError(`Пользователь с телефоном ${phone} не найден`);
@@ -60,17 +66,18 @@ export class UsersService {
 
       return user;
     } catch (err) {
+      logger.error(`Error while findByLogin: ${(err as Error).message}`);
       throw err;
     }
   }
 
   async createOrUpdate(createUserDto: CreateUserDto): Promise<RegistrationStatus> {
     try {
-      const { phone } = createUserDto;
+      const { password, ...restUserDto } = createUserDto;
 
       const salt = await genSalt(10);
-      const hashPassword = await hash(createUserDto.password, salt);
-      const userMapped = userMapper(createUserDto);
+      const hashPassword = await hash(password, salt);
+      const userMapped = userMapper(filterQueries(restUserDto) as CreateUserDto);
       const updateFilters: UpdateFiltersDto = {
         [FilterKeys.Country]: userMapped.country,
         [FilterKeys.City]: userMapped.city,
@@ -80,11 +87,12 @@ export class UsersService {
         [FilterKeys.Courses]: userMapped.courses,
       };
 
-      const user = await this.userModel.findOne({ phone });
-      this.filtersService.update(updateFilters).then(() => console.log('Filters updated!'));
+      const user = await this.userModel.findOne({ phone: userMapped.phone });
+      this.filtersService.update(updateFilters).then(() => logger.log('Fillers updated!'));
 
       if (!user) {
         await this.userModel.create({ ...userMapped, password: hashPassword });
+        logger.log('User successfully registered!');
         return {
           status: true,
           message: 'Пользователь успешно зарегистрирован!',
@@ -92,17 +100,19 @@ export class UsersService {
       }
 
       await user.updateOne({ ...userMapped, password: hashPassword }).exec();
+      logger.log('User successfully updated!');
 
       return {
         status: true,
         message: 'Пользователь успешно обновлен!',
       };
     } catch (err) {
+      logger.error(`Error while createUser: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async findByPhone(phone: number): Promise<IUser> {
+  async findByPhone(phone: string): Promise<IUser> {
     try {
       const user = await this.userModel.findOne({ phone }).exec();
 
@@ -112,6 +122,7 @@ export class UsersService {
 
       return user;
     } catch (err) {
+      logger.error(`Error while findByPhone: ${err}`);
       throw err;
     }
   }
@@ -126,6 +137,7 @@ export class UsersService {
 
       return updatedUser;
     } catch (err) {
+      logger.error(`Error while updateByPayload: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -140,6 +152,7 @@ export class UsersService {
 
       return true;
     } catch (err) {
+      logger.error(`Error while deleteProperty: ${(err as Error).message}`);
       throw err;
     }
   }

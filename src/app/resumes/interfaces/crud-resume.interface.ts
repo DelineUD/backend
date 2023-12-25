@@ -1,5 +1,8 @@
-import { IsBooleanString, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+
+import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
 
 export class ICrudResumeParams {
   @ApiProperty({ default: '', required: false })
@@ -16,15 +19,14 @@ export class ICrudResumeParams {
   @IsString()
   readonly id_resume2?: string;
 
-  // Resume information
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @IsBooleanString()
+  @Transform(validateStringToBoolean)
   remote_work_resume1?: boolean;
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @IsBooleanString()
+  @Transform(validateStringToBoolean)
   remote_work_resume2?: boolean;
 
   @ApiProperty({ default: 'Квалификация 1, Кваливфикация 2', required: false })

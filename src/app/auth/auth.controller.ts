@@ -16,6 +16,7 @@ import { ILoginResponse } from '@app/auth/interfaces/login.interface';
 import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
 import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
+import { UserDto } from '@app/users/dto/user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -29,7 +30,7 @@ export class AuthController {
    */
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post('register-or-update')
-  public async register(@Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
+  public async register(@Query() createUserDto: UserDto): Promise<RegistrationStatus> {
     console.log('@: ', createUserDto);
     return await this.authService.register(createUserDto);
   }

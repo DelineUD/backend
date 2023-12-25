@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from '@app/app.module';
@@ -10,6 +11,7 @@ async function bootstrap() {
   const globalPrefix = 'api';
   const port = process.env.SERVER_PORT || 3000;
   app.setGlobalPrefix(globalPrefix);
+  app.useGlobalPipes(new ValidationPipe({ enableDebugMessages: true }));
 
   const config = new DocumentBuilder()
     .setTitle('UDM_API')

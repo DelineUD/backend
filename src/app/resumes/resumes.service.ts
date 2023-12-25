@@ -1,5 +1,5 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { FilterQuery, Model } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -15,6 +15,8 @@ import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-re
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { FiltersService } from '@app/filters/filters.service';
 import { getMainFilters } from '@helpers/getMainFilters';
+
+const logger = new Logger('Resumes');
 
 @Injectable()
 export class ResumesService {
@@ -33,6 +35,7 @@ export class ResumesService {
 
       const dto = { author: user._id, ...resumeParams } as ResumeDto;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
+      console.log(normalizedDto);
       const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));
 
       await Promise.all([
@@ -40,9 +43,11 @@ export class ResumesService {
         await this.resumeModel.create(...resumesMapped),
       ]);
 
+      logger.log(`Resumes successfully created!`);
+
       return await this.resumeModel.find({ ...resumesMapped });
     } catch (err) {
-      console.error(`Ошибка при обновлении резюме: ${(err as Error).message}`);
+      logger.error(`Error while update: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при обновлении резюме!');
     }
   }
@@ -60,7 +65,7 @@ export class ResumesService {
 
       return resumeListMapper(resumes);
     } catch (err) {
-      console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
+      logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException(`Внутрення ошибка сервера!`);
     }
   }
@@ -87,7 +92,7 @@ export class ResumesService {
 
       return resumeListMapper(resumes);
     } catch (err) {
-      console.error(`Ошибка при поиске резюме: ${(err as Error).message}`);
+      logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -111,7 +116,7 @@ export class ResumesService {
 
       return resumeMapper(resume);
     } catch (err) {
-      console.error(`Ошибка при поиске резюме по id: ${(err as Error).message}`);
+      logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw err;
     }
   }

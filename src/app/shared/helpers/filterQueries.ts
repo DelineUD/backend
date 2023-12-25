@@ -1,4 +1,4 @@
-export function filterQueries(query: Record<string, any>) {
+export function filterQueries(query: Record<string, any>): Record<string, any> {
   return Object.fromEntries(
     Object.entries(query).filter(([, value]) => {
       if (typeof value === 'boolean') {

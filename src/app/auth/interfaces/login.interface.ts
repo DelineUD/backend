@@ -5,6 +5,6 @@ export interface ILoginResponse {
 }
 
 export interface ILoginSmsPayload {
-  phone: number;
+  phone: string;
   vPass: number;
 }

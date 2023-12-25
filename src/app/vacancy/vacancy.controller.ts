@@ -21,7 +21,7 @@ export class VacancyController {
    * @returns - Вакансии.
    */
   @Post('update')
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new ValidationPipe({ transform: true }))
   async create(@Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     return await this.vacancyService.update(vacancyParams);
   }

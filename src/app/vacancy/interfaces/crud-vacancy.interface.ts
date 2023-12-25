@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBooleanString, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+
+import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
 
 export class ICrudVacancyParams {
   @ApiProperty({ default: '', required: false })
@@ -58,12 +61,12 @@ export class ICrudVacancyParams {
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @IsBooleanString()
+  @Transform(validateStringToBoolean)
   remote_work_vacancy1?: boolean;
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @IsBooleanString()
+  @Transform(validateStringToBoolean)
   remote_work_vacancy2?: boolean;
 
   @ApiProperty({ default: 'Квалификация 1, Кваливфикация 2', required: false })
@@ -86,7 +89,7 @@ export class ICrudVacancyParams {
   @IsString()
   narrow_spec_vacancy2?: string;
 
-  @ApiProperty({ default: ' Программа 1, Программа 2', required: false })
+  @ApiProperty({ default: 'Программа 1, Программа 2', required: false })
   @IsOptional()
   @IsString()
   need_programs_vacancy1?: string;

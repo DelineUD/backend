@@ -33,6 +33,7 @@ export class AuthController {
     @Query()
     createUserDto: CreateUserDto,
   ): Promise<RegistrationStatus> {
+    console.log('@: ', createUserDto);
     return await this.authService.register(createUserDto);
   }
 

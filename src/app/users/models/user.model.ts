@@ -35,7 +35,6 @@ export class UserModel extends Document implements IUser {
   @Prop() status?: string;
 
   // Social Media
-  @Prop() service_cost?: number;
   @Prop() site?: string;
   @Prop() instagram?: string;
   @Prop() telegram?: string;

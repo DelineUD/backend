@@ -65,9 +65,6 @@ export class UserDto {
 
   // Social Media
   @IsOptional()
-  @IsNumberString()
-  service_cost?: number;
-  @IsOptional()
   @IsString()
   site?: string;
   @IsOptional()

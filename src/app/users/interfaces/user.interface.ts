@@ -26,7 +26,6 @@ export interface IUser {
   remote_work?: boolean;
   status?: string;
 
-  service_cost?: number;
   site?: string;
   instagram?: string;
   telegram?: string;

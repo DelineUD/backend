@@ -3,7 +3,6 @@ import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
-import { validateStringToArray } from '@helpers/validateStringToArray';
 
 export class ICrudVacancyParams {
   @ApiProperty({ default: '', required: true })

@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginUserDto {
   @ApiProperty({ default: '+79819839117' })
-  @IsPhoneNumber('RU')
+  @IsPhoneNumber('RU', { message: 'Невалидный номер телефона!' })
   readonly phone: string;
 
   @IsNotEmpty()

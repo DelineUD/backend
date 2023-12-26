@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
@@ -13,6 +13,8 @@ import { Courses } from '@app/filters/entities/courses.entity';
 import { filtersMapper } from '@app/filters/filters.mapper';
 import { FilterKeys, FilterNames, GroupFilterKeys, StatusFilterKeys } from '@app/filters/consts';
 import { IAllQueryFilters } from '@app/filters/interfaces/all-filters.interface';
+
+const logger = new Logger('Filters');
 
 @Injectable()
 export class FiltersService {
@@ -36,6 +38,7 @@ export class FiltersService {
         await this.updateMultiFilters(updateFiltersDto[FilterKeys.Courses], this.coursesModel),
       ]);
     } catch (err) {
+      logger.error(`Error while update: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -48,6 +51,7 @@ export class FiltersService {
       }
       return filter;
     } catch (err) {
+      logger.error(`Error while updateFilters: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -65,6 +69,7 @@ export class FiltersService {
 
       return [];
     } catch (err) {
+      logger.error(`Error while updateMultiFilters: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -73,6 +78,7 @@ export class FiltersService {
     try {
       return await model.findOne({ ...payload }).exec();
     } catch (err) {
+      logger.error(`Error while findEntityByPayload: ${(err as Error).message}`);
       throw err;
     }
   }

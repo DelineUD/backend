@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 
@@ -25,6 +25,8 @@ import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+
+const logger = new Logger('Posts');
 
 @Injectable()
 export class PostsService {
@@ -55,6 +57,7 @@ export class PostsService {
         author: userId,
       });
     } catch (err) {
+      logger.error(`Error while create: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -75,8 +78,11 @@ export class PostsService {
       await postInDb.updateOne({ ...updateDto }).exec();
       await postInDb.save();
 
+      logger.log('Post successfully updated!');
+
       return postInDb;
     } catch (err) {
+      logger.error(`Error while update: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -96,12 +102,15 @@ export class PostsService {
 
       await this.postCommentsModel.deleteMany({ postId: deletedPost._id });
 
+      logger.log('Post successfully deleted!');
+
       return {
         acknowledged: true,
         deletedCount: 1,
         removed: deletedPost._id,
       };
     } catch (err) {
+      logger.error(`Error while delete: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -131,6 +140,7 @@ export class PostsService {
 
       return postListMapper(posts, user);
     } catch (err) {
+      logger.error(`Error while findAll: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -155,6 +165,7 @@ export class PostsService {
 
       return postMapper(post, user);
     } catch (err) {
+      logger.error(`Error while findPostById: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -189,11 +200,15 @@ export class PostsService {
         });
 
         await post.save();
+
+        logger.log('Images successfully uploaded!');
+
         return await this.postModel.findOne({ _id: postId }).exec();
       }
 
       return;
     } catch (err) {
+      logger.error(`Error while uploadImages: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -217,12 +232,15 @@ export class PostsService {
       await postInDb.updateOne({ likes }).exec();
       await postInDb.save();
 
+      logger.log('Post successfully liked!');
+
       return {
         _id: postInDb._id,
         countLikes,
         isLiked,
       };
     } catch (err) {
+      logger.error(`Error while like: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -250,8 +268,11 @@ export class PostsService {
       await postInDb.updateOne({ countComments: postInDb.countComments + 1 }).exec();
       await postInDb.save();
 
+      logger.log('Comment successfully created!');
+
       return comment;
     } catch (err) {
+      logger.error(`Error while createComment: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -281,6 +302,7 @@ export class PostsService {
 
       return commentListMapper(comments, userId);
     } catch (err) {
+      logger.error(`Error while commentList: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -313,12 +335,15 @@ export class PostsService {
       await comment.updateOne({ likes, countLikes, isLiked });
       await comment.save();
 
+      logger.log('Comment successfully liked!');
+
       return {
         _id: comment._id,
         countLikes,
         isLiked,
       };
     } catch (err) {
+      logger.error(`Error while commentLike: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -348,8 +373,11 @@ export class PostsService {
         throw new EntityNotFoundError(`Комментарий не найден`);
       }
 
+      logger.log('Comment successfully updated!');
+
       return comment;
     } catch (err) {
+      logger.error(`Error while updateComment: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -376,6 +404,8 @@ export class PostsService {
         throw new EntityNotFoundError(`Комментарий не найден`);
       }
 
+      logger.log('Comment successfully deleted!');
+
       await postInDb.updateOne({ countComments: postInDb.countComments - 1 }).exec();
       await postInDb.save();
 
@@ -385,6 +415,7 @@ export class PostsService {
         removed: deletedComment._id,
       };
     } catch (err) {
+      logger.error(`Error while deleteComment: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -411,8 +442,11 @@ export class PostsService {
         await postInDb.save();
       }
 
+      logger.log('Post successfully viewed!');
+
       return arrViews.length;
     } catch (err) {
+      logger.error(`Error while addView: ${(err as Error).message}`);
       throw err;
     }
   }

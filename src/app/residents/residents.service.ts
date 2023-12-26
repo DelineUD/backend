@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
-import e, { Response } from 'express';
+import e from 'express';
 
 import { UserModel } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
@@ -16,6 +16,8 @@ import { IUser } from '@app/users/interfaces/user.interface';
 import { StatusFilterKeys } from '@app/filters/consts';
 import { getMainFilters } from '@helpers/getMainFilters';
 import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
+
+const logger = new Logger('Residents');
 
 @Injectable()
 export class ResidentsService {
@@ -33,6 +35,7 @@ export class ResidentsService {
 
       return await this.usersService.findAll(query).then(residentListMapper);
     } catch (err) {
+      logger.error(`Error while findAll: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -42,6 +45,7 @@ export class ResidentsService {
       const resident = await this.usersService.findOne({ _id: id });
       return residentMapper(resident);
     } catch (err) {
+      logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw new EntityNotFoundError(`Пользователь не найден`);
     }
   }
@@ -62,9 +66,11 @@ export class ResidentsService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
+      logger.log('Avatar successfully loaded!');
+
       return res.status(200).json({ message: 'Аватарка успешно обновлена!' });
     } catch (err) {
-      console.error(err);
+      logger.error(`Error while uploadAvatar: ${(err as Error).message}`);
       return res.status(err.status).json({ message: 'Произошла непредвиденная ошибка!' });
     }
   }

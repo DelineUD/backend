@@ -1,10 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ObjectId, Types } from 'mongoose';
 
-import { EventsService } from '@app/events/events.service';
 import { IEvents } from './interfaces/events.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { CreateEventsDto } from '@app/events/dto/create.event.dto';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { EventsService } from '@app/events/events.service';
 
 @ApiTags('Events')
 @ApiBearerAuth('defaultBearerAuth')
@@ -19,17 +21,17 @@ export class EventsController {
   }
 
   @Get('list')
-  public async getList(@Request() data: any): Promise<any> {
-    return await this.eventsService.getEventsList(data);
+  public async getList(@UserId() userId: Types.ObjectId): Promise<any> {
+    return await this.eventsService.getEventsList(userId);
   }
 
   @Get('by-month')
   public async getEventListByMonth(
+    @UserId() userId: Types.ObjectId,
     @Query('month') month: string,
     @Query('year') year: string,
-    @Request() data: any,
   ): Promise<any> {
-    return await this.eventsService.getEventsListByMonth(month, year, data.user._id);
+    return await this.eventsService.getEventsListByMonth(month, year, userId);
   }
 
   @Get(':_id')

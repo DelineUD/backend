@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { Events } from '@app/events/entities/events.entity';
 import { UpdateEventsDto } from '@app/events/dto/update-events.dto';
@@ -20,30 +21,44 @@ export class EventsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async getEventsList(initUsr: any): Promise<any> {
-    const user = await this.usersService.findOne(initUsr.user._id);
-    const events = await this.eventsModel.find({}).sort({ startDate: -1 });
-    return eventListMapper(events, user);
+  async getEventsList(userId: Types.ObjectId): Promise<any> {
+    try {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+      const events = await this.eventsModel.find({}).sort({ startDate: -1 });
+
+      return eventListMapper(events, userInDb._id);
+    } catch (err) {
+      throw err;
+    }
   }
 
-  async getEventsListByMonth(month: any, year: any, initUsr: any): Promise<unknown> {
-    const events = await this.eventsModel.find({}).sort({ startDate: -1 });
+  async getEventsListByMonth(month: any, year: any, userId: Types.ObjectId): Promise<unknown> {
+    try {
+      const userInDb = await this.usersService.findOne({ _id: userId });
 
-    const queryDate = new Date(`${year}-${month}-01`);
-    const newMonth = parseInt(month, 10);
-    const newYaer = parseInt(year, 10);
-    const ev_d = events?.filter((i) => {
-      const newStartMonth = i.startDate === undefined ? 1 : i.startDate.getMonth() + 1;
-      const newStartYear = i.startDate === undefined ? 1 : i.startDate.getFullYear();
+      const events = await this.eventsModel.find({}).sort({ startDate: -1 });
 
-      if (
-        (newStartMonth === newMonth && newStartYear === newYaer) ||
-        (queryDate < i.stopDate && queryDate > i.startDate)
-      ) {
-        return i;
-      }
-    });
-    return eventListMapper(ev_d, initUsr);
+      const queryDate = new Date(`${year}-${month}-01`);
+      const newMonth = parseInt(month, 10);
+      const newYaer = parseInt(year, 10);
+      const ev_d = events?.filter((i) => {
+        const newStartMonth = i.startDate === undefined ? 1 : i.startDate.getMonth() + 1;
+        const newStartYear = i.startDate === undefined ? 1 : i.startDate.getFullYear();
+
+        if (
+          (newStartMonth === newMonth && newStartYear === newYaer) ||
+          (queryDate < i.stopDate && queryDate > i.startDate)
+        ) {
+          return i;
+        }
+      });
+      return eventListMapper(ev_d, userInDb._id);
+    } catch (err) {
+      throw err;
+    }
   }
 
   async create(eventDto: CreateEventsDto): Promise<IEvents> {

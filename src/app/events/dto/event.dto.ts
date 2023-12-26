@@ -1,10 +1,10 @@
 import { Types } from 'mongoose';
-import { IsArray, IsDate, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDate, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class EventDto {
-  @IsMongoId() @IsNotEmpty() eventId: Types.ObjectId;
-  @IsMongoId() @IsNotEmpty() author: Types.ObjectId;
-  @IsString() @IsNotEmpty() hText: string;
+  @IsMongoId() eventId: Types.ObjectId;
+  @IsMongoId() author: Types.ObjectId;
+  @IsString() hText: string;
   @IsOptional() @IsDate() startDate?: Date;
   @IsOptional() @IsString() hImg?: string;
   @IsOptional() @IsString() addr?: string;

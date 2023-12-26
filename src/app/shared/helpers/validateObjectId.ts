@@ -11,6 +11,6 @@ export const validateObjectId = ({ value }: { value: string }): undefined | stri
       throw new BadRequestException('Invalid ObjectId format!');
     }
   });
-  console.log(arrayOfValue);
+
   return arrayOfValue;
 };

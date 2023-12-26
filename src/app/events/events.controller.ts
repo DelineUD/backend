@@ -15,12 +15,11 @@ export class EventsController {
 
   @Post('create')
   public async create(@Body() createEvent: CreateEventsDto): Promise<IEvents> {
-    console.log(createEvent.stopDate);
     return await this.eventsService.create(createEvent);
   }
 
   @Get('list')
-  public async gettList(@Request() data: any): Promise<any> {
+  public async getList(@Request() data: any): Promise<any> {
     return await this.eventsService.getEventsList(data);
   }
 

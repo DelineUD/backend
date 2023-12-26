@@ -184,7 +184,6 @@ export class PostsService {
       }
 
       const filesToNames = files.map((file) => `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${file.filename}`);
-      console.log(files);
 
       if (files?.length && !post.pImg.length) {
         await post.updateOne({

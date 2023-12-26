@@ -54,7 +54,7 @@ export class ResumesService {
 
       const resumes = await this.resumeModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar city contact_link')
+        .populate('author', '_id first_name last_name avatar city telegram')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 

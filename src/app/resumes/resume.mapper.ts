@@ -31,13 +31,17 @@ export const resumeDtoMapper = (dto: ResumeDto): IResume => {
 
 export const resumeMapper = (payload: IResume): IResumeResponse => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { authorId, service_cost, portfolio, ...resume } = JSON.parse(JSON.stringify(payload)) as IResume;
+  const { authorId, service_cost, portfolio, updatedAt, createdAt, ...resume } = JSON.parse(
+    JSON.stringify(payload),
+  ) as IResume;
 
   return {
     ...resume,
     service_cost: service_cost ?? null,
     portfolio: portfolio ?? null,
     author: toResumeAuthor(resume.author as UserResumePick),
+    createdAt: String(createdAt),
+    updatedAt: String(updatedAt),
   };
 };
 
@@ -47,12 +51,14 @@ export const resumeListMapper = (payload: IResume[]): IResumeResponse[] => {
   return (
     resumes
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .map(({ authorId, service_cost, portfolio, ...resume }) => {
+      .map(({ authorId, service_cost, portfolio, updatedAt, createdAt, ...resume }) => {
         return {
           ...resume,
           service_cost: service_cost ?? null,
           portfolio: portfolio ?? null,
           author: toResumeAuthor(resume.author as UserResumePick),
+          createdAt: String(createdAt),
+          updatedAt: String(updatedAt),
         };
       })
       .filter((r) => r.author)

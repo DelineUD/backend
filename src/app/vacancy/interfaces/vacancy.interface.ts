@@ -20,6 +20,8 @@ export interface IVacancy {
   remote_work: boolean;
   service_cost?: number;
   author?: IVacancyAuthorResponse;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IVacancyResponse {
@@ -36,6 +38,8 @@ export interface IVacancyResponse {
   programs: string[];
   remote_work: boolean;
   service_cost: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IVacancyAuthorResponse {

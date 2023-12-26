@@ -27,12 +27,14 @@ export const vacancyDtoMapper = (dto: VacancyDto): IVacancy => {
 
 export const vacancyMapper = (payload: IVacancy): IVacancyResponse => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { authorId, ...vacancy } = JSON.parse(JSON.stringify(payload)) as IVacancy;
+  const { authorId, createdAt, updatedAt, ...vacancy } = JSON.parse(JSON.stringify(payload)) as IVacancy;
 
   return {
     ...vacancy,
     service_cost: vacancy.service_cost ?? null,
     author: toVacancyAuthor(vacancy.author as UserVacancyPick),
+    createdAt: String(createdAt),
+    updatedAt: String(updatedAt),
   };
 };
 
@@ -42,11 +44,13 @@ export const vacancyListMapper = (payload: IVacancy[]): IVacancyResponse[] => {
   return (
     vacancies
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .map(({ authorId, ...vacancy }) => {
+      .map(({ authorId, createdAt, updatedAt, ...vacancy }) => {
         return {
           ...vacancy,
           service_cost: vacancy.service_cost ?? null,
           author: toVacancyAuthor(vacancy.author as UserVacancyPick),
+          createdAt: String(createdAt),
+          updatedAt: String(updatedAt),
         };
       })
       .filter((v) => v.author)

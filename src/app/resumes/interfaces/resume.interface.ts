@@ -19,6 +19,8 @@ export interface IResume {
   service_cost?: number;
   portfolio?: string;
   author?: IResumeAuthorResponse;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IResumeResponse {
@@ -34,6 +36,8 @@ export interface IResumeResponse {
   remote_work: boolean;
   service_cost?: number | null;
   portfolio?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IResumeAuthorResponse {

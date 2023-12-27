@@ -65,15 +65,20 @@ export class PostsService {
   async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPosts> {
     try {
       const { postId, ...updateDto } = postDto;
-      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
 
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
+      const postInDb = await this.postModel.findOne({ _id: postId }).exec();
       if (!postInDb) {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
-
-      if (userId !== postInDb.author._id) {
-        throw new BadRequestException('Нет доступа!');
-      }
+      // TODO Добаить валидацию после разделения анкет
+      // if (userInDb._id !== postInDb.author._id) {
+      //   throw new BadRequestException('Нет доступа!');
+      // }
 
       await postInDb.updateOne({ ...updateDto }).exec();
       await postInDb.save();

@@ -2,7 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
+import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
+import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class ICrudVacancyParams {
   @ApiProperty({ default: '', required: true })
@@ -61,12 +62,12 @@ export class ICrudVacancyParams {
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   remote_work_vacancy1?: boolean;
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   remote_work_vacancy2?: boolean;
 
   @ApiProperty({ default: 'Квалификация', required: false })
@@ -81,23 +82,23 @@ export class ICrudVacancyParams {
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @IsString()
-  narrow_spec_vacancy1?: string;
+  @Transform(validateArrayOfString)
+  narrow_spec_vacancy1?: string[];
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @IsString()
-  narrow_spec_vacancy2?: string;
+  @Transform(validateArrayOfString)
+  narrow_spec_vacancy2?: string[];
 
   @ApiProperty({ default: 'Программа 1, Программа 2', required: false })
   @IsOptional()
-  @IsString()
-  need_programs_vacancy1?: string;
+  @Transform(validateArrayOfString)
+  need_programs_vacancy1?: string[];
 
   @ApiProperty({ default: 'Программа 1, Программа 2', required: false })
   @IsOptional()
-  @IsString()
-  need_programs_vacancy2?: string;
+  @Transform(validateArrayOfString)
+  need_programs_vacancy2?: string[];
 
   @ApiProperty({ default: 5000, required: false })
   @IsOptional()

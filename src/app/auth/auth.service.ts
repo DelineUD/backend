@@ -15,7 +15,7 @@ import { LoginSmsDto } from './dto/login-sms.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 
 import generateOTPCode from '../shared/utils/generateOTPCode';
-import { SmsService } from '@shared/services/sms.service';
+import { SmsService } from '@app/auth/services/sms.service';
 import { TokensService } from './services/tokens.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { CreateUserDto } from '@app/users/dto/user-create.dto';

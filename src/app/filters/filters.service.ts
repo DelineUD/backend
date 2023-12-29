@@ -99,33 +99,64 @@ export class FiltersService {
   }
 
   async findCountryByPayload(payload: FilterQuery<Countries>) {
-    return this.findEntityByPayload(this.countriesModel, payload);
+    try {
+      return this.findEntityByPayload(this.countriesModel, payload);
+    } catch (err) {
+      logger.error(`Error while findCountryByPayload: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async findCityByPayload(payload: FilterQuery<Cities>) {
-    return this.findEntityByPayload(this.citiesModel, payload);
+    try {
+      return this.findEntityByPayload(this.citiesModel, payload);
+    } catch (err) {
+      logger.error(`Error while findCityByPayload: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async findSpecByPayload(payload: FilterQuery<Specializations>) {
-    return this.findEntityByPayload(this.specializationsModel, payload);
+    try {
+      return this.findEntityByPayload(this.specializationsModel, payload);
+    } catch (err) {
+      logger.error(`Error while findSpecByPayload: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async findNarrowSpecByPayload(payload: FilterQuery<NarrowSpecializations>) {
-    return this.findEntityByPayload(this.narrowSpecializationsModel, payload);
+    try {
+      return this.findEntityByPayload(this.narrowSpecializationsModel, payload);
+    } catch (err) {
+      logger.error(`Error while findNarrowSpecByPayload: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async findProgramsByPayload(payload: FilterQuery<Programs>) {
-    return this.findEntityByPayload(this.programsModel, payload);
+    try {
+      return this.findEntityByPayload(this.programsModel, payload);
+    } catch (err) {
+      logger.error(`Error while findProgramsByPayload: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async findCoursesByPayload(payload: FilterQuery<Courses>) {
-    return this.findEntityByPayload(this.coursesModel, payload);
+    try {
+      return this.findEntityByPayload(this.coursesModel, payload);
+    } catch (err) {
+      logger.error(`Error while findCoursesByPayload: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async getCountriesFilter(): Promise<IFiltersResponse> {
     try {
       return filtersMapper(await this.countriesModel.find().exec(), FilterKeys.Country, FilterNames.Country, false);
     } catch (err) {
+      logger.error(`Error while getCountriesFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -134,6 +165,7 @@ export class FiltersService {
     try {
       return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, FilterNames.City, false);
     } catch (err) {
+      logger.error(`Error while getCitiesFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -142,6 +174,7 @@ export class FiltersService {
     try {
       return filtersMapper(await this.specializationsModel.find().exec(), FilterKeys.Spec, FilterNames.Spec, true);
     } catch (err) {
+      logger.error(`Error while getSpecializationsFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -155,6 +188,7 @@ export class FiltersService {
         true,
       );
     } catch (err) {
+      logger.error(`Error while getNarrowSpecializationsFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -163,6 +197,7 @@ export class FiltersService {
     try {
       return filtersMapper(await this.programsModel.find().exec(), FilterKeys.Programs, FilterNames.Programs, true);
     } catch (err) {
+      logger.error(`Error while getProgramsFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -171,6 +206,7 @@ export class FiltersService {
     try {
       return filtersMapper(await this.coursesModel.find().exec(), FilterKeys.Courses, FilterNames.Courses, true);
     } catch (err) {
+      logger.error(`Error while getCoursesFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -183,6 +219,7 @@ export class FiltersService {
       }));
       return filtersMapper(groupFilter, FilterKeys.Group, FilterNames.Group, false);
     } catch (err) {
+      logger.error(`Error while getGroupFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -195,6 +232,7 @@ export class FiltersService {
       }));
       return filtersMapper(statusFilter, FilterKeys.Status, FilterNames.Status, false);
     } catch (err) {
+      logger.error(`Error while getStatusFilter: ${(err as Error).message}`);
       throw err;
     }
   }

@@ -40,6 +40,16 @@ export class ICrudResumeParams {
   @IsString()
   readonly qualification_resume2?: string;
 
+  @ApiProperty({ default: 'Обо мне...', required: false })
+  @IsOptional()
+  @IsString()
+  readonly about_resume1?: string;
+
+  @ApiProperty({ default: 'Обо мне...', required: false })
+  @IsOptional()
+  @IsString()
+  readonly about_resume2?: string;
+
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
   @Transform(validateArrayOfString)

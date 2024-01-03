@@ -1,11 +1,10 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Error, Model, Types } from 'mongoose';
 
 import { Codes } from '@app/auth/entities/codes.entity';
 import generateOTPCode from '@utils/generateOTPCode';
 import { ICodes } from '@app/auth/interfaces/codes.interface';
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
 const logger = new Logger('Codes');
 
@@ -33,7 +32,7 @@ export class CodesService {
 
       return code;
     } catch (err) {
-      logger.error(`Error while create: ${err.message}`);
+      logger.error(`Error while create: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -49,13 +48,9 @@ export class CodesService {
 
   async findCodeByPayload(payload: Partial<ICodes>): Promise<ICodes> {
     try {
-      const codeInDb = await this.codesModel.findOne({ ...payload });
-      if (!codeInDb) {
-        throw new EntityNotFoundError('Не найдено');
-      }
-      return codeInDb;
+      return await this.codesModel.findOne({ ...payload });
     } catch (err) {
-      logger.error(`Error while findOneByPayload: ${err.message}`);
+      logger.error(`Error while findOneByPayload: ${(err as Error).message}`);
       throw err;
     }
   }

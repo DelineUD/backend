@@ -110,7 +110,7 @@ export class AuthService {
         userId: user._id,
         userPhone: user.phone,
       });
-      if (!authCode.otp) {
+      if (!authCode) {
         throw new ForbiddenException(`Срок действия кода истек!`);
       }
 

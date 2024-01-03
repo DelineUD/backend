@@ -1,4 +1,4 @@
-import { IsEmail, IsNumberString, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
@@ -17,9 +17,6 @@ export class UserDto {
   @IsOptional()
   @IsString()
   password: string;
-  @IsOptional()
-  @IsNumberString()
-  vPass?: number;
   @IsOptional()
   @IsString()
   first_name?: string;

@@ -13,4 +13,4 @@ export class Codes extends Document implements ICodes {
   @Prop({ required: true }) otp: number;
 }
 
-export const CodesSchema = SchemaFactory.createForClass(Codes).index({ createdAt: 1 }, { expireAfterSeconds: 10 });
+export const CodesSchema = SchemaFactory.createForClass(Codes);

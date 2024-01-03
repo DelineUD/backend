@@ -1,5 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { UsersService } from '../users/users.service';
 
@@ -14,11 +16,11 @@ import { LoginUserDto } from '../users/dto/user-login.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 
-import generateOTPCode from '../shared/utils/generateOTPCode';
 import { SmsService } from '@app/auth/services/sms.service';
 import { TokensService } from './services/tokens.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { CreateUserDto } from '@app/users/dto/user-create.dto';
+import { CodesService } from '@app/auth/services/codes.service';
 
 const logger = new Logger('Auth');
 
@@ -27,6 +29,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
+    private readonly codesService: CodesService,
     private readonly smsService: SmsService,
   ) {}
 
@@ -64,16 +67,16 @@ export class AuthService {
   async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
     try {
       const user = await this.usersService.findByPhone(phone);
-
       if (!user) {
         throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
       }
 
-      const otpCode = generateOTPCode(4);
-      const msg = `Код авторизации: ${otpCode}`;
+      const authCode = await this.codesService.generateCode(user._id, user.phone);
+      const msg = `${authCode.otp} — ваш код для входа в приложение Умный Дизайн. Никому не сообщайте его!`;
+
       const { status, status_code } = await this.smsService.send(user.phone, msg);
-      if (status_code === 100) {
-        await this.usersService.updateByPayload({ _id: user._id }, { vPass: otpCode });
+      if (status_code !== 100) {
+        await this.codesService.deleteCodeById(authCode._id);
       }
 
       return {
@@ -102,13 +105,22 @@ export class AuthService {
       if (!user) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
-      if (user.vPass !== payload.vPass && payload.vPass !== Number(process.env.QUICK_CODE)) {
+
+      const authCode = await this.codesService.findCodeByPayload({
+        userId: user._id,
+        userPhone: user.phone,
+      });
+      if (!authCode.otp) {
+        throw new ForbiddenException(`Срок действия кода истек!`);
+      }
+
+      if (authCode.otp !== payload.vPass && payload.vPass !== Number(process.env.QUICK_CODE)) {
         throw new ForbiddenException(`Неверный код!`);
       }
 
       const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
       await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
-      await this.usersService.deleteProperty(user._id, { vPass: payload.vPass });
+      await this.codesService.deleteCodeById(authCode._id);
 
       return {
         ...tokens,

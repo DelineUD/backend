@@ -9,18 +9,26 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
-import { Auth, AuthSchema } from '@app/auth/entities/auth.entity';
+import { Tokens, TokensSchema } from '@app/auth/entities/tokens.entity';
+import { Codes, CodesSchema } from '@app/auth/entities/codes.entity';
 
 import { STRATEGIES } from './strategies';
 import { GUARDS } from './guards';
 import { TokensService } from '@app/auth/services/tokens.service';
+import { CodesService } from '@app/auth/services/codes.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {
-        name: Auth.name,
-        schema: AuthSchema,
+        name: Tokens.name,
+        schema: TokensSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: Codes.name,
+        schema: CodesSchema,
       },
     ]),
     JwtModule.register({}),
@@ -29,7 +37,7 @@ import { TokensService } from '@app/auth/services/tokens.service';
     HttpModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, TokensService, SmsService, ...STRATEGIES, ...GUARDS],
+  providers: [AuthService, TokensService, SmsService, CodesService, ...STRATEGIES, ...GUARDS],
   exports: [AuthService, SmsService],
 })
 export class AuthModule {}

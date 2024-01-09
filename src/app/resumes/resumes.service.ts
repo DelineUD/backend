@@ -40,7 +40,7 @@ export class ResumesService {
 
       logger.log(`Resumes successfully created!`);
 
-      return await this.resumeModel.find({ ...resumesMapped });
+      return await this.resumeModel.find({ authorId: id });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при обновлении резюме!');

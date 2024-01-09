@@ -6,9 +6,9 @@ export class VacancyDto {
   city: string;
   about: string;
   qualification: string;
-  spec: string;
-  narrow_spec: string;
-  need_programs: string;
+  spec: string[];
+  narrow_spec: string[];
+  need_programs: string[];
   remote_work: boolean;
   service_cost?: number;
 }

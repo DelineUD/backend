@@ -31,5 +31,5 @@ export enum StatusFilterKeys {
 export enum GroupFilterKeys {
   pf001 = 'Общее',
   pf002 = 'Администрация',
-  pf003 = 'HH',
+  pf003 = 'Афонская',
 }

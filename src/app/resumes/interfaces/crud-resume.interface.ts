@@ -2,8 +2,8 @@ import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
-import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
-import { validateStringToArray } from '@helpers/validateStringToArray';
+import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
+import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class ICrudResumeParams {
   @ApiProperty({ default: '', required: false })
@@ -22,12 +22,12 @@ export class ICrudResumeParams {
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   readonly remote_work_resume1?: boolean;
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   readonly remote_work_resume2?: boolean;
 
   @ApiProperty({ default: 'Квалификация', required: false })
@@ -40,24 +40,34 @@ export class ICrudResumeParams {
   @IsString()
   readonly qualification_resume2?: string;
 
-  @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
+  @ApiProperty({ default: 'Обо мне...', required: false })
   @IsOptional()
   @IsString()
+  readonly about_resume1?: string;
+
+  @ApiProperty({ default: 'Обо мне...', required: false })
+  @IsOptional()
+  @IsString()
+  readonly about_resume2?: string;
+
+  @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
+  @IsOptional()
+  @Transform(validateArrayOfString)
   readonly spec_resume1?: string;
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateArrayOfString)
   readonly spec_resume2?: string;
 
   @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateArrayOfString)
   readonly narrow_spec_resume1?: string;
 
   @ApiProperty({ default: 'Узкая специализация 1, Узкая специализация 2', required: false })
   @IsOptional()
-  @IsString()
+  @Transform(validateArrayOfString)
   readonly narrow_spec_resume2?: string;
 
   @ApiProperty({ default: 5000, required: false })

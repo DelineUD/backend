@@ -1,8 +1,9 @@
-import { IsEmail, IsNumberString, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-import { validateStringToBoolean } from '@helpers/validateStringToBoolean';
+import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
 import { StatusFilterKeys } from '@app/filters/consts';
+import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class UserDto {
   @IsString()
@@ -16,9 +17,6 @@ export class UserDto {
   @IsOptional()
   @IsString()
   password: string;
-  @IsOptional()
-  @IsNumberString()
-  vPass?: number;
   @IsOptional()
   @IsString()
   first_name?: string;
@@ -54,10 +52,10 @@ export class UserDto {
   @IsString()
   qualification?: string;
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   ready_communicate?: boolean;
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   remote_work?: boolean;
   @IsOptional()
   @IsString()
@@ -79,7 +77,7 @@ export class UserDto {
 
   // Preferences
   @IsOptional()
-  @Transform(validateStringToBoolean)
+  @Transform(validateBooleanOfString)
   hide_phone?: boolean;
   @IsOptional()
   @IsString()
@@ -87,21 +85,21 @@ export class UserDto {
 
   // Courses
   @IsOptional()
-  @IsString()
-  courses_new_app?: string;
+  @Transform(validateArrayOfString)
+  courses_new_app?: string[];
 
   // Programs
   @IsOptional()
-  @IsString()
-  programs_new_app?: string;
+  @Transform(validateArrayOfString)
+  programs_new_app?: string[];
 
   // Specializations
   @IsOptional()
-  @IsString()
-  specialization_new_app?: string;
+  @Transform(validateArrayOfString)
+  specialization_new_app?: string[];
 
   // Narrow Specializations
   @IsOptional()
-  @IsString()
-  narrow_spec_new_app?: string;
+  @Transform(validateArrayOfString)
+  narrow_spec_new_app?: string[];
 }

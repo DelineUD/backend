@@ -24,8 +24,8 @@ export const resumeDtoMapper = (dto: ResumeDto): IResume => {
   const { spec, narrow_spec, ...rest } = dto;
   return {
     ...rest,
-    specializations: splitDtoField(spec),
-    narrow_specializations: splitDtoField(narrow_spec),
+    specializations: spec,
+    narrow_specializations: narrow_spec,
   };
 };
 

@@ -40,7 +40,7 @@ export class VacancyService {
 
       logger.log(`Vacancies successfully created!`);
 
-      return this.vacancyModel.find({ ...vacancyMapped });
+      return await this.vacancyModel.find({ authorId: id });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при обновлении вакансий!');

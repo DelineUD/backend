@@ -14,7 +14,6 @@ export interface IUser {
   avatar?: string;
   gender?: string;
   badge?: string;
-  vPass?: number;
 
   country?: string;
   city?: string;

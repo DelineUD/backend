@@ -16,7 +16,7 @@ import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { FilterKeys } from '@app/filters/consts';
 import { RegistrationStatus } from '@app/auth/interfaces/regisration-status.interface';
 import { filterQueries } from '@helpers/filterQueries';
-import { transformPhoneNumber } from '@helpers/transformPhoneNumber';
+import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 
 const logger = new Logger('Users');
 
@@ -62,7 +62,7 @@ export class UsersService {
       const areEqual = await compare(password, user.password);
 
       if (!areEqual) {
-        throw new BadRequestException('Неверные учетные данные!');
+        throw new BadRequestException('Неверный пароль!');
       }
 
       return user;

@@ -11,7 +11,6 @@ async function bootstrap() {
   const globalPrefix = 'api';
   const port = process.env.SERVER_PORT || 3000;
   app.setGlobalPrefix(globalPrefix);
-  app.useGlobalPipes(new ValidationPipe({ enableDebugMessages: true }));
 
   const config = new DocumentBuilder()
     .setTitle('UDM_API')

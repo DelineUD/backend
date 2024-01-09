@@ -16,7 +16,6 @@ import { ILoginResponse } from '@app/auth/interfaces/login.interface';
 import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
 import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
-import { UserDto } from '@app/users/dto/user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')

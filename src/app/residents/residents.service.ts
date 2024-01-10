@@ -28,10 +28,18 @@ export class ResidentsService {
     private readonly filtersService: FiltersService,
   ) {}
 
-  async findAll({ status, ...queryParams }: Partial<ResidentsFindQueryDto>): Promise<IResidentList[]> {
+  async findAll({ search, status, ...queryParams }: Partial<ResidentsFindQueryDto>): Promise<IResidentList[]> {
     try {
       const query: FilterQuery<Partial<IUser>> = await getMainFilters(this.filtersService, queryParams);
       status && (query.status = StatusFilterKeys[query.status]);
+
+      if (search) {
+        const [first, last] = [new RegExp(search.split(' ')[0], 'i'), new RegExp(search.split(' ')[1], 'i')];
+        query.$or = [
+          { first_name: first, last_name: last },
+          { first_name: last, last_name: first },
+        ];
+      }
 
       return await this.usersService.findAll(query).then(residentListMapper);
     } catch (err) {

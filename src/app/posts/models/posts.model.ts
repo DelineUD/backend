@@ -3,14 +3,15 @@ import { Document, Types } from 'mongoose';
 
 import { IPosts } from '../interfaces/posts.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
+import { VacancySchema } from '@app/vacancy/entities/vacancy.entity';
 
 @Schema({
   collection: 'posts',
   timestamps: true,
 })
 export class PostModel extends Document implements IPosts {
-  @Prop({ required: true, type: Types.ObjectId, ref: 'UserModel' })
-  author: Types.ObjectId;
+  @Prop({ required: true })
+  authorId: Types.ObjectId;
   @Prop({ required: true })
   pText: string;
   @Prop({ required: false })
@@ -26,3 +27,13 @@ export class PostModel extends Document implements IPosts {
 }
 
 export const PostsSchema = SchemaFactory.createForClass(PostModel);
+
+PostsSchema.virtual('author', {
+  ref: 'UserModel',
+  localField: 'authorId',
+  foreignField: '_id',
+  justOne: true,
+});
+
+PostsSchema.set('toObject', { virtuals: true });
+PostsSchema.set('toJSON', { virtuals: true });

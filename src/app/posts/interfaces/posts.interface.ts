@@ -8,14 +8,14 @@ export type PostUserPick = Pick<IUser, PostUserPickList>;
 // TODO: Разобраться с обязательностью полей
 export interface IPosts {
   _id?: Types.ObjectId;
-
-  author: Types.ObjectId | PostUserPick;
+  authorId: Types.ObjectId;
   pText: string;
   pImg?: Array<string>;
   likes: Array<string>;
   views: Array<string>;
   group: string;
   countComments: number;
+  author?: IPostAuthorResponse;
   createdAt?: Date;
   updatedAt?: Date;
 }

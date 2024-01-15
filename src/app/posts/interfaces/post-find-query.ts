@@ -2,6 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmpty, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class IPostsFindQuery {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsMongoId()
+  userId?: string;
+
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()

@@ -54,7 +54,7 @@ export class PostsService {
       return await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
-        author: userId,
+        authorId: new Types.ObjectId(userId),
       });
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
@@ -65,20 +65,15 @@ export class PostsService {
   async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPosts> {
     try {
       const { postId, ...updateDto } = postDto;
-
-      const userInDb = await this.usersService.findOne({ _id: userId });
-      if (!userInDb) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
-      }
-
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
+
       if (!postInDb) {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
-      // TODO Добаить валидацию после разделения анкет
-      // if (userInDb._id !== postInDb.author._id) {
-      //   throw new BadRequestException('Нет доступа!');
-      // }
+
+      if (userId !== postInDb.authorId) {
+        throw new BadRequestException('Нет доступа!');
+      }
 
       await postInDb.updateOne({ ...updateDto }).exec();
       await postInDb.save();
@@ -123,13 +118,17 @@ export class PostsService {
   async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPostsResponse[]> {
     try {
       const query: IPostsFindQuery = { ...queryParams };
+      const finalQuery: FilterQuery<Partial<IPosts>> = {};
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const finalQuery: FilterQuery<Partial<IPosts>> = {};
+      if (query.userId) {
+        const queryUser = await this.usersService.findOne({ _id: query.userId as unknown as Types.ObjectId });
+        queryUser && (finalQuery.authorId = queryUser._id);
+      }
 
       query.search && (finalQuery.pText = { $regex: new RegExp(query.search, 'i') });
       query.group && (finalQuery.group = GroupFilterKeys[query.group]);

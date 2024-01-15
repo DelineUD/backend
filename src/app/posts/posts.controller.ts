@@ -89,7 +89,7 @@ export class PostsController {
    * Нахожднение всех постов.
    * @param userId - id пользователя.
    * @param queryParams - Данные для нахождения поста.
-   * @return - Созданный пост
+   * @return - Список постов
    */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))

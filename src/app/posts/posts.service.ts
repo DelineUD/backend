@@ -51,11 +51,15 @@ export class PostsService {
         countComments: 0,
       };
 
-      return await this.postModel.create({
+      const post = await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
-        authorId: new Types.ObjectId(userId),
+        authorId: new Types.ObjectId(user._id),
       });
+
+      logger.log(`Post successfully created!`);
+
+      return post;
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
       throw err;

@@ -22,7 +22,7 @@ import { ResumesModule } from './resumes/resumes.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`./.${process.env.NODE_ENV}.env`],
+      envFilePath: ['./envs/.backend.env', `./.${process.env.NODE_ENV}.env`],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

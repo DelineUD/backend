@@ -54,7 +54,7 @@ export class PostsService {
       const post = await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
-        authorId: new Types.ObjectId(user._id),
+        authorId: user._id,
       });
 
       logger.log(`Post successfully created!`);
@@ -75,7 +75,7 @@ export class PostsService {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
 
-      if (userId !== postInDb.authorId) {
+      if (String(userId) !== String(postInDb.authorId)) {
         throw new BadRequestException('Нет доступа!');
       }
 

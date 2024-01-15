@@ -54,7 +54,7 @@ export class PostsService {
       return await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
-        author: userId,
+        authorId: new Types.ObjectId(userId),
       });
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
@@ -71,7 +71,7 @@ export class PostsService {
         throw new EntityNotFoundError(`Запись не найдена!`);
       }
 
-      if (userId !== postInDb.author._id) {
+      if (userId !== postInDb.authorId) {
         throw new BadRequestException('Нет доступа!');
       }
 
@@ -118,13 +118,17 @@ export class PostsService {
   async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPostsResponse[]> {
     try {
       const query: IPostsFindQuery = { ...queryParams };
+      const finalQuery: FilterQuery<Partial<IPosts>> = {};
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const finalQuery: FilterQuery<Partial<IPosts>> = {};
+      if (query.userId) {
+        const queryUser = await this.usersService.findOne({ _id: query.userId as unknown as Types.ObjectId });
+        queryUser && (finalQuery.authorId = queryUser._id);
+      }
 
       query.search && (finalQuery.pText = { $regex: new RegExp(query.search, 'i') });
       query.group && (finalQuery.group = GroupFilterKeys[query.group]);

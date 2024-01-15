@@ -39,11 +39,7 @@ export class UsersService {
 
   async findOne(where: Partial<IUser>): Promise<UserModel> {
     try {
-      const user = await this.userModel.findOne({ ...where }).exec();
-      if (!user) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
-      return user;
+      return await this.userModel.findOne({ ...where }).exec();
     } catch (err) {
       logger.error(`Error while findOne: ${(err as Error).message}`);
       throw err;

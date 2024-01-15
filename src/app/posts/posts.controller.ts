@@ -54,7 +54,7 @@ export class PostsController {
    */
   @Post('create')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async create(@UserId() userId: Types.ObjectId, @Body() createPostDto: CreatePostDto): Promise<IPosts> {
+  public async create(@UserId() userId: Types.ObjectId, @Body() createPostDto: CreatePostDto): Promise<IPostsResponse> {
     return await this.postsService.create(userId, createPostDto);
   }
 

@@ -36,7 +36,7 @@ export class PostsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPosts> {
+  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPostsResponse> {
     try {
       const createPostDto = { ...postDto };
 
@@ -59,7 +59,7 @@ export class PostsService {
 
       logger.log(`Post successfully created!`);
 
-      return post;
+      return this.findPostById(userId, { postId: post._id });
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
       throw err;
@@ -153,7 +153,7 @@ export class PostsService {
     }
   }
 
-  async findPostById(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPostsResponse> {
+  async findPostById(userId: Types.ObjectId, params?: IPostsFindParams): Promise<IPostsResponse> {
     try {
       const { postId } = params;
 

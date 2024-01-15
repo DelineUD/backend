@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: ud-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    command: npm run start:dev
+    env_file:
+      - envs/.development.env
+    environment:
+      - DB_HOST=mongodb
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '3001:3000'
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    container_name: ud-mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_DATABASE=test
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./mongo-entrypoint:/docker-entrypoint-initdb.d
+      - /tmp/ud_mongo_data:/data/db
+      - /tmp/ud_mongo_config:/data/configdb
+    networks:
+      - mongo_net
+
+volumes:
+  ud_mongo_data:
+    driver: local
+  ud_mongo_config:
+    driver: local
+
+networks:
+  mongo_net:
+    driver: bridge

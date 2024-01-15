@@ -1,0 +1,17 @@
+# Meta
+.git
+.gitignore
+.dockerignore
+
+# Build deps
+*.env
+node_modules
+npm-debug.log
+
+# Some
+.idea
+.vscode
+.eslintrc
+.prettierrc
+.DS_Store
+README.md

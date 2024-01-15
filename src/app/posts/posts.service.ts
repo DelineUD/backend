@@ -153,7 +153,7 @@ export class PostsService {
     }
   }
 
-  async findPostById(userId: Types.ObjectId, params?: IPostsFindParams): Promise<IPostsResponse> {
+  async findPostById(userId: Types.ObjectId, params: IPostsFindParams): Promise<IPostsResponse> {
     try {
       const { postId } = params;
 

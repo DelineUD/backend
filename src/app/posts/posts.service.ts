@@ -66,7 +66,7 @@ export class PostsService {
     }
   }
 
-  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPosts> {
+  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPostsResponse> {
     try {
       const { postId, ...updateDto } = postDto;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
@@ -84,7 +84,7 @@ export class PostsService {
 
       logger.log('Post successfully updated!');
 
-      return postInDb;
+      return this.findPostById(userId, { postId: postInDb._id });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
       throw err;

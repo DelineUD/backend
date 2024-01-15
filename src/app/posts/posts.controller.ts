@@ -81,7 +81,7 @@ export class PostsController {
    */
   @Post('update')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async update(@UserId() userId: Types.ObjectId, @Body() updatePostDto: UpdatePostDto): Promise<IPosts> {
+  public async update(@UserId() userId: Types.ObjectId, @Body() updatePostDto: UpdatePostDto): Promise<IPostsResponse> {
     return await this.postsService.update(userId, updatePostDto);
   }
 

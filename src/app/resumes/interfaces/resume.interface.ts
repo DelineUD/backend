@@ -9,7 +9,7 @@ export interface IResume {
   _id?: Types.ObjectId; // Sys mongo id
 
   id: string; // Get course id
-  authorId: string; // Get course user id
+  authorId: Types.ObjectId; // Sys user _id
   qualification: string;
   country: string;
   city: string;

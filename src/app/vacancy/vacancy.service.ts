@@ -29,21 +29,26 @@ export class VacancyService {
 
   async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
-      const dto = { authorId: id, ...vacancyParams } as VacancyDto;
+      const userInDb = await this.usersService.findOne({ id });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
+      const dto = { authorId: userInDb._id, ...vacancyParams } as unknown as VacancyDto;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
       const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 
       await Promise.all([
-        await this.vacancyModel.deleteMany({ authorId: id }),
+        await this.vacancyModel.deleteMany({ authorId: userInDb._id }),
         await this.vacancyModel.create(...vacancyMapped),
       ]);
 
       logger.log(`Vacancies successfully created!`);
 
-      return await this.vacancyModel.find({ authorId: id });
+      return await this.vacancyModel.find({ authorId: userInDb._id });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
-      throw new InternalServerErrorException('Ошибка при обновлении вакансий!');
+      throw new InternalServerErrorException(`Ошибка при обновлении вакансий: "${err.message}!"`);
     }
   }
 

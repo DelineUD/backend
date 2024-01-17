@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-import { IVacancy, IVacancyAuthorResponse } from '@app/vacancy/interfaces/vacancy.interface';
-import { UserModel } from '@app/users/models/user.model';
+import { IVacancy } from '@app/vacancy/interfaces/vacancy.interface';
 
 @Schema({
   collection: 'vacancy',
@@ -10,7 +9,7 @@ import { UserModel } from '@app/users/models/user.model';
 })
 export class Vacancy extends Document implements IVacancy {
   @Prop({ required: true }) id: string; // Get course id
-  @Prop({ required: true }) authorId: string; // Get course user id
+  @Prop({ required: true }) authorId: Types.ObjectId; // Sys user _id
   @Prop({ required: true }) name: string;
   @Prop({ required: true }) country: string;
   @Prop({ required: true }) city: string;
@@ -26,7 +25,7 @@ export const VacancySchema = SchemaFactory.createForClass(Vacancy);
 VacancySchema.virtual('author', {
   ref: 'UserModel',
   localField: 'authorId',
-  foreignField: 'id',
+  foreignField: '_id',
   justOne: true,
 });
 

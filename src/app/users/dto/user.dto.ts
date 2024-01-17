@@ -86,20 +86,20 @@ export class UserDto {
   // Courses
   @IsOptional()
   @Transform(validateArrayOfString)
-  courses_new_app?: string[];
+  courses_new_app?: string;
 
   // Programs
   @IsOptional()
   @Transform(validateArrayOfString)
-  programs_new_app?: string[];
+  programs_new_app?: string;
 
   // Specializations
   @IsOptional()
   @Transform(validateArrayOfString)
-  specialization_new_app?: string[];
+  specialization_new_app?: string;
 
   // Narrow Specializations
   @IsOptional()
   @Transform(validateArrayOfString)
-  narrow_spec_new_app?: string[];
+  narrow_spec_new_app?: string;
 }

@@ -9,7 +9,7 @@ export interface IVacancy {
   _id?: Types.ObjectId;
 
   id: string; // Get course id
-  authorId: string;
+  authorId: Types.ObjectId;
   name: string;
   country: string;
   city: string;

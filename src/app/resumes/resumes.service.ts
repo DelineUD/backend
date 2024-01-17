@@ -28,22 +28,27 @@ export class ResumesService {
 
   async update({ id, ...resumeParams }: ICrudResumeParams): Promise<IResume | IResume[]> {
     try {
-      const dto = { authorId: id, ...resumeParams } as ResumeDto;
+      const userInDb = await this.usersService.findOne({ id });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
+      const dto = { authorId: userInDb._id, ...resumeParams } as unknown as ResumeDto;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
 
       const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));
 
       await Promise.all([
-        await this.resumeModel.deleteMany({ authorId: id }),
+        await this.resumeModel.deleteMany({ authorId: userInDb._id }),
         await this.resumeModel.create(...resumesMapped),
       ]);
 
       logger.log(`Resumes successfully created!`);
 
-      return await this.resumeModel.find({ authorId: id });
+      return await this.resumeModel.find({ authorId: userInDb._id });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
-      throw new InternalServerErrorException('Ошибка при обновлении резюме!');
+      throw new InternalServerErrorException(`Ошибка при обновлении резюме: "${err.message}!"`);
     }
   }
 

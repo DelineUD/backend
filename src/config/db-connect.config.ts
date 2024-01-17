@@ -2,7 +2,12 @@ import { ConfigService } from '@nestjs/config';
 import { MongooseModuleOptions } from '@nestjs/mongoose';
 
 const getMongoString = (configService: ConfigService) =>
-  'mongodb://' + configService.get('DB_HOST') + ':' + configService.get('DB_PORT');
+  'mongodb://' +
+  configService.get('DB_HOST') +
+  ':' +
+  configService.get('DB_PORT') +
+  '/' +
+  configService.get('DB_AUTHDATABASE');
 console.log('DB_LOGIN');
 const getMongoOptions = () => ({
   useNewUrlParser: true,

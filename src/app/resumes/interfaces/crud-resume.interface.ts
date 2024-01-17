@@ -6,27 +6,39 @@ import { validateBooleanOfString } from '@shared/validators/validateBooleanOfStr
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class ICrudResumeParams {
-  @ApiProperty({ default: '', required: false })
+  @ApiProperty({ default: '' })
   @IsString()
   readonly id: string;
 
-  @ApiProperty({ default: 'resume_1', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'resume_1' })
   @IsString()
-  readonly id_resume1?: string;
+  readonly id_resume1: string;
 
-  @ApiProperty({ default: 'resume_2', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'resume_2' })
   @IsString()
-  readonly id_resume2?: string;
+  readonly id_resume2: string;
 
-  @ApiProperty({ default: false, required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Россия' })
+  @IsString()
+  readonly country_resume1: string;
+
+  @ApiProperty({ default: 'Россия' })
+  @IsString()
+  readonly country_resume2: string;
+
+  @ApiProperty({ default: 'Санкт-Петербург' })
+  @IsString()
+  readonly city_resume1: string;
+
+  @ApiProperty({ default: 'Санкт-Петербург' })
+  @IsString()
+  readonly city_resume2: string;
+
+  @ApiProperty({ default: false })
   @Transform(validateBooleanOfString)
-  readonly remote_work_resume1?: boolean;
+  readonly remote_work_resume1: boolean;
 
-  @ApiProperty({ default: false, required: false })
-  @IsOptional()
+  @ApiProperty({ default: false })
   @Transform(validateBooleanOfString)
   readonly remote_work_resume2?: boolean;
 

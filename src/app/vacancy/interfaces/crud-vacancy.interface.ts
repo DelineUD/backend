@@ -6,67 +6,55 @@ import { validateBooleanOfString } from '@shared/validators/validateBooleanOfStr
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class ICrudVacancyParams {
-  @ApiProperty({ default: '', required: true })
+  @ApiProperty({ default: '' })
   @IsString()
   readonly id: string;
 
-  @ApiProperty({ default: 'vacancy_1', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'vacancy_1' })
   @IsString()
-  readonly id_vacancy1?: string;
+  readonly id_vacancy1: string;
 
-  @ApiProperty({ default: 'vacancy_2', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'vacancy_2' })
   @IsString()
   readonly id_vacancy2?: string;
 
-  @ApiProperty({ default: 'Вакансия 1', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Вакансия 1' })
   @IsString()
   readonly name_vacancy1?: string;
 
-  @ApiProperty({ default: 'Вакансия 2', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Вакансия 2' })
   @IsString()
   readonly name_vacancy2?: string;
 
-  @ApiProperty({ default: 'Россия', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Россия' })
   @IsString()
   readonly country_vacancy1?: string;
 
-  @ApiProperty({ default: 'Россия', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Россия' })
   @IsString()
   readonly country_vacancy2?: string;
 
-  @ApiProperty({ default: 'Санкт-Петербург', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Санкт-Петербург' })
   @IsString()
   readonly city_vacancy1?: string;
 
-  @ApiProperty({ default: 'Санкт-Петербург', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Санкт-Петербург' })
   @IsString()
   readonly city_vacancy2?: string;
 
-  @ApiProperty({ default: 'Информация о вакансии...', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Информация о вакансии...' })
   @IsString()
   readonly about_vacancy1?: string;
 
-  @ApiProperty({ default: 'Информация о вакансии...', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Информация о вакансии...' })
   @IsString()
   readonly about_vacancy2?: string;
 
-  @ApiProperty({ default: false, required: false })
-  @IsOptional()
+  @ApiProperty({ default: false })
   @Transform(validateBooleanOfString)
   remote_work_vacancy1?: boolean;
 
-  @ApiProperty({ default: false, required: false })
-  @IsOptional()
+  @ApiProperty({ default: false })
   @Transform(validateBooleanOfString)
   remote_work_vacancy2?: boolean;
 

@@ -42,23 +42,20 @@ export class ICrudResumeParams {
   @Transform(validateBooleanOfString)
   readonly remote_work_resume2?: boolean;
 
-  @ApiProperty({ default: 'Квалификация', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Квалификация' })
   @IsString()
   readonly qualification_resume1?: string;
 
-  @ApiProperty({ default: 'Квалификация', required: false })
+  @ApiProperty({ default: 'Квалификация' })
   @IsOptional()
   @IsString()
   readonly qualification_resume2?: string;
 
-  @ApiProperty({ default: 'Обо мне...', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Обо мне...' })
   @IsString()
   readonly about_resume1?: string;
 
-  @ApiProperty({ default: 'Обо мне...', required: false })
-  @IsOptional()
+  @ApiProperty({ default: 'Обо мне...' })
   @IsString()
   readonly about_resume2?: string;
 

@@ -79,13 +79,13 @@ export class VacancyService {
       const { userId } = params;
       const { desc } = query;
 
-      const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
       const vacancies = await this.vacancyModel
-        .find({ authorId: user.id })
+        .find({ authorId: userInDb._id })
         .populate('author', '_id first_name last_name avatar telegram city')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
@@ -105,13 +105,13 @@ export class VacancyService {
     try {
       const { userId, id } = params;
 
-      const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
       const vacancy = await this.vacancyModel
-        .findOne({ authorId: user.id, id: id })
+        .findOne({ authorId: userInDb._id, id: id })
         .populate('author', '_id first_name last_name avatar telegram city')
         .exec();
 

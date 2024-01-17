@@ -75,13 +75,13 @@ export class ResumesService {
       const { userId } = params;
       const { desc } = query;
 
-      const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
       const resumes = await this.resumeModel
-        .find({ authorId: user.id })
+        .find({ authorId: userInDb._id })
         .populate('author', '_id first_name last_name avatar telegram qualification')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
@@ -101,13 +101,13 @@ export class ResumesService {
     try {
       const { userId, id } = params;
 
-      const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
       const resume = await this.resumeModel
-        .findOne({ authorId: user.id, id })
+        .findOne({ authorId: userInDb._id, id })
         .populate('author', '_id first_name last_name avatar telegram qualification')
         .exec();
       if (!resume) {

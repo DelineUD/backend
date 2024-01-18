@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
@@ -19,13 +19,13 @@ export class UserDto {
   password: string;
   @IsOptional()
   @IsString()
-  first_name?: string;
+  first_name: string;
   @IsOptional()
   @IsString()
-  last_name?: string;
+  last_name: string;
   @IsOptional()
   @IsString()
-  birthday?: string;
+  birthday: string;
   @IsOptional()
   @IsString()
   avatar?: string;
@@ -36,10 +36,10 @@ export class UserDto {
   // Contact Information
   @IsOptional()
   @IsString()
-  country?: string;
+  country: string;
   @IsOptional()
   @IsString()
-  city?: string;
+  city: string;
 
   // Additional Information
   @IsOptional()
@@ -53,13 +53,19 @@ export class UserDto {
   qualification?: string;
   @IsOptional()
   @Transform(validateBooleanOfString)
-  ready_communicate?: boolean;
+  ready_communicate: boolean;
   @IsOptional()
   @Transform(validateBooleanOfString)
-  remote_work?: boolean;
+  remote_work: boolean;
+  @IsOptional()
+  @Transform(validateBooleanOfString)
+  hide_phone: boolean;
   @IsOptional()
   @IsString()
-  status?: StatusFilterKeys;
+  status: StatusFilterKeys;
+  @IsOptional()
+  @IsString()
+  qualification_color?: string;
 
   // Social Media
   @IsOptional()
@@ -74,14 +80,6 @@ export class UserDto {
   @IsOptional()
   @IsString()
   vk?: string;
-
-  // Preferences
-  @IsOptional()
-  @Transform(validateBooleanOfString)
-  hide_phone?: boolean;
-  @IsOptional()
-  @IsString()
-  qualification_color?: string;
 
   // Courses
   @IsOptional()

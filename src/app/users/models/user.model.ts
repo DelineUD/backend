@@ -16,23 +16,22 @@ export class UserModel extends Document implements IUser {
   @Prop({ required: true }) password: string;
   @Prop({ required: true }) first_name: string;
   @Prop({ required: true }) last_name: string;
-  @Prop() birthday?: Date;
+  @Prop() birthday: Date;
   @Prop() avatar?: string;
   @Prop() gender?: string;
   @Prop() badge?: string;
-  @Prop() vPass?: number;
 
   // Contact Information
-  @Prop() country?: string;
-  @Prop() city?: string;
+  @Prop() country: string;
+  @Prop() city: string;
 
   // Additional Information
   @Prop() about?: string;
   @Prop() education?: string;
   @Prop() qualification?: string;
   @Prop() ready_communicate?: boolean;
-  @Prop() remote_work?: boolean;
-  @Prop() status?: string;
+  @Prop() remote_work: boolean;
+  @Prop() status: string;
 
   // Social Media
   @Prop() site?: string;
@@ -41,7 +40,7 @@ export class UserModel extends Document implements IUser {
   @Prop() vk?: string;
 
   // Preferences
-  @Prop() hide_phone?: boolean;
+  @Prop() hide_phone: boolean;
   @Prop() qualification_color?: string;
 
   // Courses

@@ -74,7 +74,7 @@ export class UsersService {
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
-      const userMapped = userMapper(filterQueries(restUserDto) as CreateUserDto);
+      const userMapped = userMapper(restUserDto);
       const updateFilters: UpdateFiltersDto = {
         [FilterKeys.Country]: userMapped.country,
         [FilterKeys.City]: userMapped.city,
@@ -83,11 +83,12 @@ export class UsersService {
         [FilterKeys.Programs]: userMapped.programs,
         [FilterKeys.Courses]: userMapped.courses,
       };
+      console.log(userMapped);
 
-      const user = await this.userModel.findOne({ phone: userMapped.phone });
+      const userInDb = await this.userModel.findOne({ phone: userMapped.phone });
       this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
 
-      if (!user) {
+      if (!userInDb) {
         await this.userModel.create({ ...userMapped, password: hashPassword });
         logger.log('User successfully registered!');
         return {
@@ -96,7 +97,7 @@ export class UsersService {
         };
       }
 
-      await user.updateOne({ ...userMapped, password: hashPassword }).exec();
+      await userInDb.updateOne({ ...userMapped, password: hashPassword }).exec();
       logger.log('User successfully updated!');
 
       return {

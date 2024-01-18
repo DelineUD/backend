@@ -1,7 +1,9 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
-import { UserDto } from './user.dto';
+import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
 import { StatusFilterKeys } from '@app/filters/consts';
+import { UserDto } from './user.dto';
 
 export class CreateUserDto extends PartialType(UserDto) {
   @ApiProperty({ default: '' })

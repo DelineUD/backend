@@ -1,26 +1,24 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { UsersService } from '../users/users.service';
 
+import { IUser } from '../users/interfaces/user.interface';
+import { IAuthTokens } from './interfaces/auth-tokens.interface';
+import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
 import { ILoginResponse, ILoginSmsPayload } from './interfaces/login.interface';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
-import { IAuthTokens } from './interfaces/auth-tokens.interface';
-import { IUser } from '../users/interfaces/user.interface';
 
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 
-import { SmsService } from '@app/auth/services/sms.service';
-import { TokensService } from './services/tokens.service';
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import { CreateUserDto } from '@app/users/dto/user-create.dto';
 import { CodesService } from '@app/auth/services/codes.service';
+import { SmsService } from '@app/auth/services/sms.service';
+import { CreateUserDto } from '@app/users/dto/user-create.dto';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { TokensService } from './services/tokens.service';
 
 const logger = new Logger('Auth');
 
@@ -177,6 +175,7 @@ export class AuthService {
         last_name: userInDb.last_name ?? null,
         phone: userInDb.phone ?? null,
         email: userInDb.email ?? null,
+        avatar: userInDb.avatar ?? null,
       };
     } catch (err) {
       logger.error(`Error while getMe: ${(err as Error).message}`);

@@ -27,6 +27,7 @@ export const postListMapper = (posts: IPosts[], user: IUser): IPostsResponse[] =
       isViewed: views.includes(String(user._id)),
       isLiked: likes.includes(String(user._id)),
       group: post.group ?? GroupFilterKeys.pf001,
+      publishInProfile: post.publishInProfile ?? false,
       author: toAuthorPost(post.author as PostUserPick),
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
@@ -48,7 +49,8 @@ export const postMapper = (post: IPosts, user: IUser): IPostsResponse => {
     isViewed: views.includes(String(user._id)),
     isLiked: likes.includes(String(user._id)),
     author: toAuthorPost(author as PostUserPick),
-    createdAt: post.createdAt,
-    updatedAt: post.updatedAt,
+    publishInProfile: postPayload.publishInProfile ?? false,
+    createdAt: postPayload.createdAt,
+    updatedAt: postPayload.updatedAt,
   };
 };

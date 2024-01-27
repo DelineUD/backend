@@ -22,6 +22,8 @@ export class PostModel extends Document implements IPosts {
   views: Array<string>;
   @Prop({ required: true })
   group: GroupFilterKeys;
+  @Prop({ required: false })
+  publishInProfile?: boolean;
   @Prop({ required: true })
   countComments: number;
 }

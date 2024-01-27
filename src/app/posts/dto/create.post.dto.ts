@@ -8,6 +8,8 @@ export class CreatePostDto extends PartialType(PostDto) {
   pText: string;
   @ApiProperty({ default: GroupFilterKeys.pf001 })
   group: GroupFilterKeys;
+  @ApiProperty({ default: false })
+  publishInProfile: boolean;
   @ApiProperty({ default: [] })
   pImg?: Array<string>;
 }

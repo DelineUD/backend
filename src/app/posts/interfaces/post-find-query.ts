@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmpty, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsEmpty, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class IPostsFindQuery {
   @ApiProperty({ required: false })
@@ -16,6 +16,11 @@ export class IPostsFindQuery {
   @IsOptional()
   @IsString()
   group?: string;
+
+  @ApiProperty({ default: false, required: false })
+  @IsOptional()
+  @IsBooleanString()
+  publishInProfile?: boolean;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()

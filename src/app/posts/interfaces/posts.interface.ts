@@ -13,8 +13,9 @@ export interface IPosts {
   pImg?: Array<string>;
   likes: Array<string>;
   views: Array<string>;
-  group: string;
   countComments: number;
+  group: string;
+  publishInProfile?: boolean;
   author?: IPostAuthorResponse;
   createdAt?: Date;
   updatedAt?: Date;
@@ -31,6 +32,7 @@ export interface IPostsResponse {
   isLiked: boolean;
   isViewed: boolean;
   group: string;
+  publishInProfile: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

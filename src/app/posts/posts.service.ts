@@ -136,6 +136,7 @@ export class PostsService {
 
       query.search && (finalQuery.pText = { $regex: new RegExp(query.search, 'i') });
       query.group && (finalQuery.group = GroupFilterKeys[query.group]);
+      query.publishInProfile && (finalQuery.publishInProfile = query.publishInProfile);
       query.lastIndex && (finalQuery._id = { $lt: query.lastIndex });
 
       const posts = await this.postModel

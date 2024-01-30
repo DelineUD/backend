@@ -1,15 +1,25 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsBooleanString, IsOptional, IsString } from 'class-validator';
 
-import { PostDto } from '@app/posts/dto/post.dto';
 import { GroupFilterKeys } from '@app/filters/consts';
+import { PostDto } from './post.dto';
 
 export class CreatePostDto extends PartialType(PostDto) {
-  @ApiProperty({ default: 'Новый пост' })
+  @ApiProperty({ default: 'Текст' })
+  @IsString()
   pText: string;
+
   @ApiProperty({ default: GroupFilterKeys.pf001 })
-  group: GroupFilterKeys;
+  @IsOptional()
+  @IsString()
+  group?: GroupFilterKeys;
+
   @ApiProperty({ default: false })
-  publishInProfile: boolean;
-  @ApiProperty({ default: [] })
-  pImg?: Array<string>;
+  @IsOptional()
+  @IsBooleanString()
+  publishInProfile?: boolean;
+
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  @IsOptional()
+  files?: Express.Multer.File[];
 }

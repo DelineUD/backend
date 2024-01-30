@@ -1,11 +1,9 @@
-import { IsMongoId, IsNotEmpty } from 'class-validator';
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsMongoId } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
-import { PostDto } from '@app/posts/dto/post.dto';
-
-export class DeletePostDto extends PartialType(PostDto) {
+export class DeletePostDto {
   @ApiProperty({ default: '' })
   @IsMongoId()
-  @IsNotEmpty()
-  postId: string;
+  postId: Types.ObjectId;
 }

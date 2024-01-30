@@ -25,6 +25,7 @@ import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { UploadService } from '@app/upload/upload.service';
 
 const logger = new Logger('Posts');
 
@@ -34,9 +35,10 @@ export class PostsService {
     @InjectModel(PostModel.name) private readonly postModel: Model<PostModel>,
     @InjectModel(PostCommentsModel.name) private readonly postCommentsModel: Model<PostCommentsModel>,
     private readonly usersService: UsersService,
+    private readonly uploadService: UploadService,
   ) {}
 
-  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPostsResponse> {
+  async create(userId: Types.ObjectId, postDto: CreatePostDto, files: Express.Multer.File[]): Promise<IPostsResponse> {
     try {
       const createPostDto = { ...postDto };
 
@@ -54,6 +56,7 @@ export class PostsService {
       const post = await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
+        pImg: this.uploadService.getUploadedFiles(files),
         authorId: user._id,
       });
 
@@ -66,7 +69,7 @@ export class PostsService {
     }
   }
 
-  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPostsResponse> {
+  async update(userId: Types.ObjectId, postDto: UpdatePostDto, files: Express.Multer.File[]): Promise<IPostsResponse> {
     try {
       const { postId, ...updateDto } = postDto;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
@@ -79,7 +82,12 @@ export class PostsService {
         throw new BadRequestException('Нет доступа!');
       }
 
-      await postInDb.updateOne({ ...updateDto }).exec();
+      await postInDb
+        .updateOne({
+          ...updateDto,
+          pImg: [...postInDb.pImg, ...this.uploadService.getUploadedFiles(files)],
+        })
+        .exec();
       await postInDb.save();
 
       logger.log('Post successfully updated!');
@@ -179,48 +187,6 @@ export class PostsService {
     }
   }
 
-  async uploadImages(
-    userId: Types.ObjectId,
-    uploadFilesDto: PostUploadDto,
-    files: Express.Multer.File[],
-  ): Promise<IPosts> {
-    try {
-      const { postId } = uploadFilesDto;
-
-      const post = await this.postModel.findOne({ _id: postId, author: userId }).exec();
-      if (!post) {
-        throw new EntityNotFoundError(`Запись не найдена!`);
-      }
-
-      const filesToNames = files.map((file) => `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${file.filename}`);
-
-      if (files?.length && !post.pImg.length) {
-        await post.updateOne({
-          pImg: filesToNames,
-        });
-        await post.save();
-        return await this.postModel.findOne({ _id: postId }).exec();
-      }
-
-      if (files?.length && post.pImg?.length) {
-        await post.updateOne({
-          pImg: [...post.pImg, ...filesToNames],
-        });
-
-        await post.save();
-
-        logger.log('Images successfully uploaded!');
-
-        return await this.postModel.findOne({ _id: postId }).exec();
-      }
-
-      return;
-    } catch (err) {
-      logger.error(`Error while uploadImages: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
   async like(userId: Types.ObjectId, params: IPostsFindParams): Promise<ILike> {
     try {
       const { postId } = params;
@@ -253,7 +219,11 @@ export class PostsService {
     }
   }
 
-  async createComment(userId: Types.ObjectId, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
+  async createComment(
+    userId: Types.ObjectId,
+    createCommentDto: CreatePostCommentDto,
+    files: Express.Multer.File[],
+  ): Promise<ICPosts> {
     try {
       const dto = createCommentDto;
 
@@ -270,6 +240,7 @@ export class PostsService {
       const comment = await this.postCommentsModel.create({
         ...dto,
         ...initialCommentValues,
+        cImg: this.uploadService.getUploadedFiles(files),
         author: userId,
       });
 

@@ -85,7 +85,7 @@ export class PostsService {
       await postInDb
         .updateOne({
           ...updateDto,
-          pImg: [...postInDb.pImg, ...this.uploadService.getUploadedFiles(files)],
+          pImg: files.length ? [...postInDb.pImg, ...this.uploadService.getUploadedFiles(files)] : [],
         })
         .exec();
       await postInDb.save();

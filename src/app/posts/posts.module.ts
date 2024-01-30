@@ -6,6 +6,7 @@ import { PostCommentsModel, PostCommentsSchema } from './models/posts-comments.m
 import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
+import { UploadModule } from '@app/upload/upload.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PostsService } from './posts.service';
       },
     ]),
     UsersModule,
+    UploadModule,
   ],
   controllers: [PostsController],
   providers: [PostsService],

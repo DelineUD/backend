@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   UploadedFiles,
   UseGuards,
@@ -15,14 +14,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 
 import { fileStorage } from '@shared/storage';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { imageFileFilter } from '@utils/imageFileFilter';
-import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
@@ -35,7 +33,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { ICPosts, ICPostsResponse } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
-import { IPosts, IPostsResponse } from './interfaces/posts.interface';
+import { IPostsResponse } from './interfaces/posts.interface';
 import { CreatePostCommentDto } from './dto/create-post-comment.dto';
 import { ILike } from '@app/posts/interfaces/like.interface';
 
@@ -44,19 +42,31 @@ import { ILike } from '@app/posts/interfaces/like.interface';
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
 export class PostsController {
-  constructor(private postsService: PostsService) {}
-
   /**
    * Создание поста.
    * @param userId - id пользователя.
    * @param createPostDto - Данные для создания поста.
+   * @param files - Файлы поста (картинки).
    * @return - Созданный пост
    */
   @Post('create')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async create(@UserId() userId: Types.ObjectId, @Body() createPostDto: CreatePostDto): Promise<IPostsResponse> {
-    return await this.postsService.create(userId, createPostDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FilesInterceptor('files', 4, {
+      storage: fileStorage,
+      fileFilter: imageFileFilter,
+    }),
+  )
+  public async create(
+    @UserId() userId: Types.ObjectId,
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<IPostsResponse> {
+    return await this.postsService.create(userId, createPostDto, files);
   }
+
+  constructor(private postsService: PostsService) {}
 
   /**
    * Удаление поста.
@@ -77,12 +87,24 @@ export class PostsController {
    * Обновление поста.
    * @param userId - id пользователя.
    * @param updatePostDto - Данные для обноввления поста.
+   * @param files - Файлы поста (картинки).
    * @return - Обновленный пост
    */
   @Post('update')
   @UsePipes(new ValidationPipe({ transform: true }))
-  public async update(@UserId() userId: Types.ObjectId, @Body() updatePostDto: UpdatePostDto): Promise<IPostsResponse> {
-    return await this.postsService.update(userId, updatePostDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FilesInterceptor('files', 4, {
+      storage: fileStorage,
+      fileFilter: imageFileFilter,
+    }),
+  )
+  public async update(
+    @UserId() userId: Types.ObjectId,
+    @Body() updatePostDto: UpdatePostDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<IPostsResponse> {
+    return await this.postsService.update(userId, updatePostDto, files);
   }
 
   /**
@@ -111,42 +133,6 @@ export class PostsController {
   @ApiParam({ name: 'postId' })
   async getById(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPostsResponse> {
     return await this.postsService.findPostById(userId, params);
-  }
-
-  /**
-   * Загрузка изображений для поста.
-   * @param userId - Идентификатор пользователя
-   * @param uploadFilesDto - Данные поста для загрузки.
-   * @param files - Файлы.
-   * @returns - Обновленный пост.
-   */
-  @Put('upload-images')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        postId: { type: 'string' },
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @UseInterceptors(
-    FilesInterceptor('file', 4, {
-      storage: fileStorage,
-      fileFilter: imageFileFilter,
-    }),
-  )
-  public async uploadImages(
-    @UserId() userId: Types.ObjectId,
-    @Body() uploadFilesDto: PostUploadDto,
-    @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<IPosts> {
-    return await this.postsService.uploadImages(userId, uploadFilesDto, files);
   }
 
   /**
@@ -182,19 +168,24 @@ export class PostsController {
    * Создание нового комментария к посту.
    * @param userId - id пользователя.
    * @param createComments - Данные для создания поста.
+   * @param files - Файлы комментария (картинки).
    * @returns - Созданный комментарий.
    */
   @Post('comments/create')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiBody({
-    description: 'Новый комментарий',
-    type: CreatePostCommentDto,
-  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FilesInterceptor('files', 4, {
+      storage: fileStorage,
+      fileFilter: imageFileFilter,
+    }),
+  )
   public async createComment(
     @UserId() userId: Types.ObjectId,
     @Body() createComments: CreatePostCommentDto,
+    @UploadedFiles() files: Express.Multer.File[],
   ): Promise<ICPosts> {
-    return await this.postsService.createComment(userId, createComments);
+    return await this.postsService.createComment(userId, createComments, files);
   }
 
   /**

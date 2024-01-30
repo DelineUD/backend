@@ -1,13 +1,12 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsBooleanString, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsMongoId, IsOptional, IsString } from 'class-validator';
 
-import { PostDto } from './post.dto';
 import { GroupFilterKeys } from '@app/filters/consts';
+import { PostDto } from './post.dto';
 
 export class UpdatePostDto extends PartialType(PostDto) {
   @ApiProperty({ default: '' })
   @IsMongoId()
-  @IsNotEmpty()
   postId: string;
 
   @ApiProperty({ default: 'Текст' })
@@ -22,12 +21,10 @@ export class UpdatePostDto extends PartialType(PostDto) {
 
   @ApiProperty({ default: false })
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   publishInProfile?: boolean;
 
-  @ApiProperty({ default: [] })
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  pImg?: Array<string>;
+  files?: Express.Multer.File[];
 }

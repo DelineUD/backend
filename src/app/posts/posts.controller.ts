@@ -46,7 +46,6 @@ export class PostsController {
    * Создание поста.
    * @param userId - id пользователя.
    * @param createPostDto - Данные для создания поста.
-   * @param files - Файлы поста (картинки).
    * @return - Созданный пост
    */
   @Post('create')
@@ -58,12 +57,8 @@ export class PostsController {
       fileFilter: imageFileFilter,
     }),
   )
-  public async create(
-    @UserId() userId: Types.ObjectId,
-    @Body() createPostDto: CreatePostDto,
-    @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<IPostsResponse> {
-    return await this.postsService.create(userId, createPostDto, files);
+  public async create(@UserId() userId: Types.ObjectId, @Body() createPostDto: CreatePostDto): Promise<IPostsResponse> {
+    return await this.postsService.create(userId, createPostDto);
   }
 
   constructor(private postsService: PostsService) {}
@@ -168,30 +163,22 @@ export class PostsController {
    * Создание нового комментария к посту.
    * @param userId - id пользователя.
    * @param createComments - Данные для создания поста.
-   * @param files - Файлы комментария (картинки).
    * @returns - Созданный комментарий.
    */
   @Post('comments/create')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(
-    FilesInterceptor('files', 4, {
-      storage: fileStorage,
-      fileFilter: imageFileFilter,
-    }),
-  )
   public async createComment(
     @UserId() userId: Types.ObjectId,
     @Body() createComments: CreatePostCommentDto,
-    @UploadedFiles() files: Express.Multer.File[],
   ): Promise<ICPosts> {
-    return await this.postsService.createComment(userId, createComments, files);
+    return await this.postsService.createComment(userId, createComments);
   }
 
   /**
    * Получение всех комментариев к посту.
    * @param userId - id пользователя.
    * @param params - { postId: системный id поста }.
+   * @param query - Параметры для получения комментариев
    * @returns - Комментарии к посту.
    */
   @Get(':postId/comments')

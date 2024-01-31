@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsBooleanString, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 import { GroupFilterKeys } from '@app/filters/consts';
 import { PostDto } from './post.dto';
@@ -16,7 +16,7 @@ export class CreatePostDto extends PartialType(PostDto) {
 
   @ApiProperty({ default: false })
   @IsOptional()
-  @IsBooleanString()
+  @IsBoolean()
   publishInProfile?: boolean;
 
   @ApiProperty({ default: [] })

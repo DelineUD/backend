@@ -1,5 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 import { PostCommentDto } from '@app/posts/dto/post-comment.dto';
 
@@ -12,7 +13,7 @@ export class CreatePostCommentDto extends PartialType(PostCommentDto) {
   @IsString()
   cText: string;
 
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  @ApiProperty({ default: [] })
   @IsOptional()
-  files?: Express.Multer.File[];
+  cImg?: string[];
 }

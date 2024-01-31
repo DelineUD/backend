@@ -24,7 +24,7 @@ export class UpdatePostDto extends PartialType(PostDto) {
   @IsBooleanString()
   publishInProfile?: boolean;
 
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  @ApiProperty({ default: [] })
   @IsOptional()
-  files?: Express.Multer.File[];
+  pImg?: string[];
 }

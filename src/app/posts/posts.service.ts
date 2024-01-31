@@ -11,7 +11,6 @@ import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
 import { IPosts, IPostsResponse } from './interfaces/posts.interface';
-import { PostUploadDto } from '@app/posts/dto/post-upload.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
@@ -38,7 +37,7 @@ export class PostsService {
     private readonly uploadService: UploadService,
   ) {}
 
-  async create(userId: Types.ObjectId, postDto: CreatePostDto, files: Express.Multer.File[]): Promise<IPostsResponse> {
+  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPostsResponse> {
     try {
       const createPostDto = { ...postDto };
 
@@ -56,7 +55,6 @@ export class PostsService {
       const post = await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
-        pImg: this.uploadService.getUploadedFiles(files),
         authorId: user._id,
       });
 
@@ -82,17 +80,12 @@ export class PostsService {
         throw new BadRequestException('Нет доступа!');
       }
 
-      await postInDb
-        .updateOne({
-          ...updateDto,
-          pImg: files.length ? [...postInDb.pImg, ...this.uploadService.getUploadedFiles(files)] : [],
-        })
-        .exec();
+      await postInDb.updateOne({ ...updateDto }).exec();
       await postInDb.save();
 
       logger.log('Post successfully updated!');
 
-      return this.findPostById(userId, { postId: postInDb._id });
+      return await this.findPostById(userId, { postId: postInDb._id });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
       throw err;
@@ -219,11 +212,7 @@ export class PostsService {
     }
   }
 
-  async createComment(
-    userId: Types.ObjectId,
-    createCommentDto: CreatePostCommentDto,
-    files: Express.Multer.File[],
-  ): Promise<ICPosts> {
+  async createComment(userId: Types.ObjectId, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
     try {
       const dto = createCommentDto;
 
@@ -240,7 +229,6 @@ export class PostsService {
       const comment = await this.postCommentsModel.create({
         ...dto,
         ...initialCommentValues,
-        cImg: this.uploadService.getUploadedFiles(files),
         author: userId,
       });
 

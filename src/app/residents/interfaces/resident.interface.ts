@@ -19,9 +19,11 @@ export interface IPersonalInfoResident {
   city: string;
   email: string;
   phone: string | null;
-  site: string | null;
   birthday?: Date | null;
   gender?: string | null;
+  site: string | null;
+  instagram: string | null;
+  telegram: string | null;
   contact_link?: string | null;
 }
 

@@ -37,6 +37,8 @@ export const residentMapper = (user: IUser): IResident => {
       site: userPayload.site ?? null,
       birthday: userPayload.birthday ?? null,
       gender: userPayload.gender ?? null,
+      instagram: userPayload.instagram ?? null,
+      telegram: userPayload.telegram ?? null,
       contact_link: userPayload.telegram ?? null,
     },
     description_fields: [

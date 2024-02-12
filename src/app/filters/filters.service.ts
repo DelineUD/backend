@@ -45,10 +45,15 @@ export class FiltersService {
 
   async updateFilters(name: string, model: Model<IFilters>): Promise<IFilters> {
     try {
+      if (!name) {
+        return;
+      }
+
       const filter = await model.findOne({ name }).exec();
       if (!filter) {
         await model.create({ name });
       }
+
       return filter;
     } catch (err) {
       logger.error(`Error while updateFilters: ${(err as Error).message}`);

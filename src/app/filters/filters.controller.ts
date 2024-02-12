@@ -26,6 +26,7 @@ export class FiltersController {
   @Get('resumes')
   public async getResumesFilter(): Promise<IFilters[]> {
     return await Promise.all([
+      await this.filtersService.getCitiesFilter(),
       await this.filtersService.getSpecializationsFilter(),
       await this.filtersService.getNarrowSpecializationsFilter(),
       await this.filtersService.getProgramsFilter(),
@@ -39,6 +40,7 @@ export class FiltersController {
   @Get('vacancies')
   public async getVacanciesFilter(): Promise<IFilters[]> {
     return await Promise.all([
+      await this.filtersService.getCitiesFilter(),
       this.filtersService.getStatusFilter(),
       await this.filtersService.getSpecializationsFilter(),
       await this.filtersService.getNarrowSpecializationsFilter(),
@@ -54,7 +56,6 @@ export class FiltersController {
   public async getResidentsFilter(): Promise<IFilters[]> {
     return await Promise.all([
       this.filtersService.getStatusFilter(),
-      await this.filtersService.getCountriesFilter(),
       await this.filtersService.getCitiesFilter(),
       await this.filtersService.getSpecializationsFilter(),
       await this.filtersService.getNarrowSpecializationsFilter(),

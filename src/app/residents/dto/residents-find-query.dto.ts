@@ -22,7 +22,7 @@ export class ResidentsFindQueryDto {
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsMongoId()
+  @IsString()
   status?: string;
 
   @ApiProperty({ default: '', required: false })

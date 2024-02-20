@@ -27,13 +27,11 @@ export class ResidentsFindQueryDto {
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
   @Transform(validateStringOfObjectId)
   specializations?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
   @Transform(validateStringOfObjectId)
   narrow_specializations?: string;
 
@@ -44,7 +42,6 @@ export class ResidentsFindQueryDto {
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
   @Transform(validateStringOfObjectId)
   courses?: string;
 }

@@ -1,7 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 
-import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
 import { StatusFilterKeys } from '@app/filters/consts';
 import { UserDto } from './user.dto';
 

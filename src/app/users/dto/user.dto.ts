@@ -1,4 +1,4 @@
-import { IsEmail, IsEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';

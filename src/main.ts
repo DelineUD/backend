@@ -43,12 +43,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors({
-    origin: [
-      /** IOS Capacitor Application */
-      'capacitor://localhost',
-      /** Android Capacitor Application */
-      'http://localhost',
-    ],
+    origin: true,
   });
   app.use(`/${process.env.STATIC_PATH}`, express.static(process.env.STATIC_PATH_FOLDER));
 

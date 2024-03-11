@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: ud-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    command: npm run start:dev
+    env_file:
+      - envs/.backend.env
+      - envs/.development.env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - /tmp/udm:/tmp
+    ports:
+      - '3001:3000'
+    depends_on:
+      - database
+
+  database:
+    image: bitnami/mongodb:4.4
+    container_name: ud-mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_DATABASE=test
+      - MONGO_INITDB_ROOT_USERNAME=sans
+      - MONGO_INITDB_ROOT_PASSWORD=sans
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/bitnami/mongodb
+
+volumes:
+  mongo_data:

@@ -17,6 +17,7 @@ import { FiltersController } from './filters/filters.controller';
 import { FiltersModule } from './filters/filters.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 import { ResumesModule } from './resumes/resumes.module';
+import { ComplaintsModule } from '@app/complaints/complaints.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ResumesModule } from './resumes/resumes.module';
     EventsModule,
     VacancyModule,
     ResumesModule,
+    ComplaintsModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [

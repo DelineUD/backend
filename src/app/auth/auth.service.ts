@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { Request } from 'express';
 
 import { UsersService } from '../users/users.service';
@@ -176,9 +177,20 @@ export class AuthService {
         phone: userInDb.phone ?? null,
         email: userInDb.email ?? null,
         avatar: userInDb.avatar ?? null,
+        isEuaApproved: userInDb.isEuaApproved ?? false,
       };
     } catch (err) {
       logger.error(`Error while getMe: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async approveEua(userId: Types.ObjectId): Promise<void> {
+    try {
+      await this.usersService.updateByPayload({ _id: userId }, { isEuaApproved: true });
+      return;
+    } catch (err) {
+      logger.error(`Error while approvedEua: ${(err as Error).message}`);
       throw err;
     }
   }

@@ -1,6 +1,21 @@
-import { Body, Controller, Get, Headers, Post, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { Types } from 'mongoose';
 
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-access.guard';
@@ -12,6 +27,7 @@ import { LoginUserDto } from '../users/dto/user-login.dto';
 import { CreateUserDto } from '../users/dto/user-create.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 import { LoginSmsDto } from './dto/login-sms.dto';
+import { UserId } from '@shared/decorators/user-id.decorator';
 import { ILoginResponse } from '@app/auth/interfaces/login.interface';
 import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
 import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
@@ -91,5 +107,18 @@ export class AuthController {
   @Get('profile')
   async getMe(@Req() req: Request): Promise<Partial<IUser>> {
     return this.authService.getMe(req);
+  }
+
+  /**
+   * Приянять соглашение eua.
+   * @param userId - системный идентификатор пользователя.
+   * @returns - void.
+   */
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('defaultBearerAuth')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('profile/eua')
+  async approveEua(@UserId() userId: Types.ObjectId): Promise<void> {
+    return this.authService.approveEua(userId);
   }
 }

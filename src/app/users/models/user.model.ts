@@ -41,6 +41,7 @@ export class UserModel extends Document implements IUser {
 
   // Preferences
   @Prop() hide_phone: boolean;
+  @Prop() isEuaApproved?: boolean;
   @Prop() qualification_color?: string;
 
   // Courses

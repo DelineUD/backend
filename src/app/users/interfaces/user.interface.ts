@@ -31,6 +31,7 @@ export interface IUser {
   vk?: string;
 
   hide_phone: boolean;
+  isEuaApproved?: boolean;
   qualification_color?: string;
 
   courses: string[];

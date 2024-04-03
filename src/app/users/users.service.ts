@@ -83,7 +83,6 @@ export class UsersService {
         [FilterKeys.Programs]: userMapped.programs,
         [FilterKeys.Courses]: userMapped.courses,
       };
-      console.log(userMapped);
 
       const userInDb = await this.userModel.findOne({ phone: userMapped.phone });
       this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));

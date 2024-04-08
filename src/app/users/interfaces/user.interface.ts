@@ -31,8 +31,10 @@ export interface IUser {
   vk?: string;
 
   hide_phone: boolean;
-  isEuaApproved?: boolean;
+  is_eula_approved?: boolean;
   qualification_color?: string;
+  hidden_authors?: Types.ObjectId[];
+  hidden_posts?: Types.ObjectId[];
 
   courses: string[];
   programs: string[];

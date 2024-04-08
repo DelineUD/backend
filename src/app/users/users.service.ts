@@ -15,7 +15,6 @@ import { CreateUserDto } from './dto/user-create.dto';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { FilterKeys } from '@app/filters/consts';
 import { RegistrationStatus } from '@app/auth/interfaces/regisration-status.interface';
-import { filterQueries } from '@helpers/filterQueries';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 
 const logger = new Logger('Users');

@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -30,6 +32,7 @@ import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/in
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PostsHideDto } from './dto/posts-hide.dto';
 import { ICPosts, ICPostsResponse } from './interfaces/posts.comments.interface';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
@@ -157,6 +160,19 @@ export class PostsController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async liked(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<ILike> {
     return await this.postsService.like(userId, params);
+  }
+
+  /**
+   * Cкрыть запис(и)ь.
+   * @param userId - id пользователя.
+   * @param dto - { postId?: id записи;  authorId?: id автора}.
+   * @returns - void.
+   */
+  @Patch('hide')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async hideUserPosts(@UserId() userId: Types.ObjectId, @Body() dto: PostsHideDto): Promise<void> {
+    return await this.postsService.hide(userId, dto);
   }
 
   /**

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
 
@@ -41,8 +41,10 @@ export class UserModel extends Document implements IUser {
 
   // Preferences
   @Prop() hide_phone: boolean;
-  @Prop() isEuaApproved?: boolean;
+  @Prop() is_eula_approved?: boolean;
   @Prop() qualification_color?: string;
+  @Prop() hidden_authors?: Types.ObjectId[];
+  @Prop() hidden_posts?: Types.ObjectId[];
 
   // Courses
   @Prop() courses: string[];

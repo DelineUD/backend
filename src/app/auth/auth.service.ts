@@ -177,7 +177,7 @@ export class AuthService {
         phone: userInDb.phone ?? null,
         email: userInDb.email ?? null,
         avatar: userInDb.avatar ?? null,
-        isEuaApproved: userInDb.isEuaApproved ?? false,
+        is_eula_approved: userInDb.is_eula_approved ?? false,
       };
     } catch (err) {
       logger.error(`Error while getMe: ${(err as Error).message}`);
@@ -187,7 +187,7 @@ export class AuthService {
 
   async approveEua(userId: Types.ObjectId): Promise<void> {
     try {
-      await this.usersService.updateByPayload({ _id: userId }, { isEuaApproved: true });
+      await this.usersService.updateByPayload({ _id: userId }, { is_eula_approved: true });
       return;
     } catch (err) {
       logger.error(`Error while approvedEua: ${(err as Error).message}`);

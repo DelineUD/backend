@@ -25,6 +25,8 @@ import { GroupFilterKeys } from '@app/filters/consts';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
 import { UploadService } from '@app/upload/upload.service';
+import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
+import { UserModel } from '@app/users/models/user.model';
 
 const logger = new Logger('Posts');
 
@@ -123,7 +125,7 @@ export class PostsService {
   async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPostsResponse[]> {
     try {
       const query: IPostsFindQuery = { ...queryParams };
-      const finalQuery: FilterQuery<Partial<IPosts>> = {};
+      const baseQuery: FilterQuery<Partial<IPosts>> = {};
 
       const user = await this.usersService.findOne({ _id: userId });
       if (!user) {
@@ -132,20 +134,25 @@ export class PostsService {
 
       if (query.userId) {
         const queryUser = await this.usersService.findOne({ _id: query.userId as unknown as Types.ObjectId });
-        queryUser && (finalQuery.authorId = queryUser._id);
+        queryUser && (baseQuery.authorId = queryUser._id);
+      } else {
+        baseQuery.authorId = { $nin: user.hidden_authors };
       }
 
-      query.search && (finalQuery.pText = { $regex: new RegExp(query.search, 'i') });
-      query.group && (finalQuery.group = GroupFilterKeys[query.group]);
-      query.publishInProfile && (finalQuery.publishInProfile = query.publishInProfile);
-      query.lastIndex && (finalQuery._id = { $lt: query.lastIndex });
+      query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
+      query.group && (baseQuery.group = GroupFilterKeys[query.group]);
+      query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
+      baseQuery._id = {
+        $nin: user.hidden_posts,
+        ...(query.lastIndex && { $lt: query.lastIndex }),
+      };
 
       const posts = await this.postModel
-        .find(finalQuery)
+        .find(baseQuery)
         .populate('author', '_id avatar first_name last_name')
         .sort(typeof query.desc === 'undefined' && { createdAt: -1 })
         .limit(10)
-        .skip(!finalQuery.lastIndex ? 0 : 10)
+        .skip(!baseQuery.lastIndex ? 0 : 10)
         .exec();
 
       return postListMapper(posts, user);
@@ -417,4 +424,75 @@ export class PostsService {
       throw err;
     }
   }
+
+  async hide(userId: Types.ObjectId, { authorId, postId }: PostsHideDto): Promise<void> {
+    try {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
+      await Promise.allSettled([await this.hideAuthor(authorId, userInDb), await this.hidePost(postId, userInDb)]);
+
+      return;
+    } catch (err) {
+      logger.error(`Error while hide: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  private async hideAuthor(authorId: string | undefined, userInDb: UserModel): Promise<Types.ObjectId[]> {
+    try {
+      if (!authorId) return;
+
+      const authorInDb = await this.usersService.findOne({ _id: new Types.ObjectId(authorId) });
+      if (!authorInDb) {
+        throw new EntityNotFoundError(`Автор не найден`);
+      }
+
+      if (authorInDb._id === userInDb._id) {
+        throw new BadRequestException('User id is equal author id!');
+      }
+
+      await this.usersService.updateByPayload(
+        { _id: userInDb._id },
+        { hidden_authors: this.getToggledHidden(userInDb.hidden_authors, authorInDb._id) },
+      );
+    } catch (err) {
+      logger.error(`Error while hideAuthor: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  private async hidePost(postId: string | undefined, userInDb: UserModel) {
+    try {
+      if (!postId) return;
+
+      const postInDb = await this.postModel.findOne({ _id: new Types.ObjectId(postId) });
+      if (!postInDb) {
+        throw new EntityNotFoundError(`Запись не найдена`);
+      }
+
+      if (userInDb._id === postInDb.authorId) {
+        throw new BadRequestException('User id is equal post author id!');
+      }
+
+      await this.usersService.updateByPayload(
+        { _id: userInDb._id },
+        { hidden_posts: this.getToggledHidden(userInDb.hidden_posts, postInDb._id) },
+      );
+    } catch (err) {
+      logger.error(`Error while hidePost: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  private getToggledHidden = (arr: Types.ObjectId[], el: Types.ObjectId): Types.ObjectId[] => {
+    const hiddenArray = [...arr];
+    const hiddenIndex = hiddenArray.findIndex((i) => i.equals(el));
+
+    hiddenIndex === -1 ? hiddenArray.push(el) : hiddenArray.splice(hiddenIndex, 1);
+
+    return hiddenArray;
+  };
 }

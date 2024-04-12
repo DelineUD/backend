@@ -149,7 +149,7 @@ export class PostsService {
 
       const posts = await this.postModel
         .find(baseQuery)
-        .populate('author', '_id avatar first_name last_name')
+        .populate('author', '_id avatar first_name last_name blocked_users')
         .sort(typeof query.desc === 'undefined' && { createdAt: -1 })
         .limit(10)
         .skip(!baseQuery.lastIndex ? 0 : 10)
@@ -173,7 +173,7 @@ export class PostsService {
 
       const post = await this.postModel
         .findOne({ _id: postId })
-        .populate('author', '_id first_name last_name avatar')
+        .populate('author', '_id first_name last_name avatar blocked_users')
         .exec();
 
       if (!post) {

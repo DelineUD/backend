@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -52,18 +52,26 @@ export class ResumesService {
     }
   }
 
-  async findAll({ remote_work, desc, ...queryParams }: ResumeFindQueryDto): Promise<IResumeResponse[]> {
+  async findAll(
+    userId: Types.ObjectId,
+    { remote_work, desc, ...queryParams }: ResumeFindQueryDto,
+  ): Promise<IResumeResponse[]> {
     try {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
       const query: FilterQuery<Partial<IResume>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
 
       const resumes = await this.resumeModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar city telegram')
+        .populate('author', '_id first_name last_name avatar city telegram blocked_users')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      return resumeListMapper(resumes);
+      return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при поиске резюме!');
@@ -82,7 +90,7 @@ export class ResumesService {
 
       const resumes = await this.resumeModel
         .find({ authorId: userInDb._id })
-        .populate('author', '_id first_name last_name avatar telegram qualification')
+        .populate('author', '_id first_name last_name avatar telegram qualification blocked_users')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
@@ -90,7 +98,7 @@ export class ResumesService {
         return [];
       }
 
-      return resumeListMapper(resumes);
+      return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
@@ -108,13 +116,13 @@ export class ResumesService {
 
       const resume = await this.resumeModel
         .findOne({ authorId: userInDb._id, id })
-        .populate('author', '_id first_name last_name avatar telegram qualification')
+        .populate('author', '_id first_name last_name avatar telegram qualification blocked_users')
         .exec();
       if (!resume) {
         throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
-      return resumeMapper(resume);
+      return resumeMapper(resume, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw err;

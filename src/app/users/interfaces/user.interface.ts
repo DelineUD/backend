@@ -33,6 +33,7 @@ export interface IUser {
   hide_phone: boolean;
   is_eula_approved?: boolean;
   qualification_color?: string;
+  blocked_users?: Types.ObjectId[];
   hidden_authors?: Types.ObjectId[];
   hidden_posts?: Types.ObjectId[];
 

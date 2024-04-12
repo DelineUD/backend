@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 import { VacancyService } from './vacancy.service';
 import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
@@ -7,6 +8,7 @@ import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
+import { UserId } from '@shared/decorators/user-id.decorator';
 
 @ApiTags('Vacancy')
 @Controller('vacancy')
@@ -15,7 +17,7 @@ export class VacancyController {
 
   /**
    * Создание новой вакансии.
-   * @param vacancyParams - Данные для вакансии.
+   * @param vacancyParams - данные для вакансии.
    * @returns - Вакансии.
    */
   @Post('update')
@@ -26,19 +28,25 @@ export class VacancyController {
 
   /**
    * Получение всех вакансий.
+   * @param userId - идентификатор пользователя.
+   * @param queryParams - параметры для поиска вакансыий.
    * @returns - Все вакансии.
    */
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() queryParams?: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
-    return await this.vacancyService.findAll(queryParams);
+  async findAll(
+    @UserId() userId: Types.ObjectId,
+    @Query() queryParams?: VacancyFindQueryDto,
+  ): Promise<IVacancyResponse[]> {
+    return await this.vacancyService.findAll(userId, queryParams);
   }
 
   /**
    * Получение всех вакансий пользователя.
-   * @param params.userId - id автора.
+   * @param params - параметры для поиска.
+   * @param query - параметры фильтров для поиска.
    * @returns - Список вакансий пользователя.
    */
   @ApiBearerAuth('defaultBearerAuth')
@@ -59,8 +67,8 @@ export class VacancyController {
 
   /**
    * Получение вакансии пользователя по id.
-   * @param params.userId - id автора.
-   * @param params.id - id вакансии.
+   * @param params.userId - Системный идентификатор пользователя.
+   * @param params.id - Идентификатор вакансии.
    * @returns - Найденная вакансия.
    */
   @ApiBearerAuth('defaultBearerAuth')

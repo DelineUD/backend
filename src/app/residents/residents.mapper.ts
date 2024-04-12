@@ -2,61 +2,101 @@ import { IResidentList } from './interfaces/resident.interface-list';
 import { IResident } from './interfaces/resident.interface';
 import { IUser } from '@app/users/interfaces/user.interface';
 
-export const residentListMapper = (user: IUser[]): IResidentList[] => {
-  return user.map(residentsMapper);
+/*
+ * Function for formatting user list data before sending
+ * users -> found user list
+ */
+export const residentListMapper = (residents: IUser[], user: Pick<IUser, '_id' | 'blocked_users'>): IResidentList[] => {
+  return residents.map((r) => residentsMapper(r, { ...user }));
 };
 
-export const residentsMapper = (user: IUser): IResidentList => {
-  const { ...userPayload } = JSON.parse(JSON.stringify(user)) as IUser;
+export const residentsMapper = (resident: IUser, user: Pick<IUser, '_id' | 'blocked_users'>): IResidentList => {
+  const { _id, first_name, last_name, avatar, status, qualification, blocked_users } = resident;
+  const youBlocked = blocked_users?.includes(user._id) ?? false;
+
   return {
-    _id: userPayload._id,
-    first_name: userPayload.first_name,
-    last_name: userPayload.last_name,
-    avatar: userPayload.avatar ?? null,
-    status: userPayload.status ?? null,
-    qualification: userPayload.qualification ?? null,
+    _id,
+    first_name,
+    last_name,
+    avatar: !youBlocked && avatar ? avatar : null,
+    status,
+    qualification: !youBlocked ? qualification : '*'.repeat(qualification.length),
   };
 };
 
-export const residentMapper = (user: IUser): IResident => {
-  const { hide_phone, ...userPayload } = JSON.parse(JSON.stringify(user)) as IUser;
+/*
+ * Function for formatting user data before sending
+ * residentPayload -> found user by id param
+ * { _id, blocked_users } -> sender user details
+ */
+export const residentMapper = (resident: IUser, user: Pick<IUser, '_id' | 'blocked_users'>): IResident => {
+  const {
+    _id,
+    first_name,
+    last_name,
+    phone,
+    about,
+    status,
+    qualification,
+    avatar,
+    hide_phone,
+    country,
+    city,
+    email,
+    site,
+    birthday,
+    gender,
+    instagram,
+    telegram,
+    programs,
+    courses,
+    specializations,
+    narrow_specializations,
+    blocked_users,
+  } = resident;
+
+  const isBlocked = user.blocked_users?.includes(_id) ?? false;
+  const youBlocked = blocked_users?.includes(user._id) ?? false;
+
   return {
-    _id: userPayload._id,
-    first_name: userPayload.first_name,
-    last_name: userPayload.last_name,
-    about: userPayload.about ?? null,
-    status: userPayload.status ?? null,
-    qualification: userPayload.qualification ?? null,
-    avatar: userPayload.avatar ?? null,
+    _id,
+    first_name,
+    last_name,
+    about: about ?? null,
+    status: status ?? null,
+    qualification: !youBlocked ? qualification : '*'.repeat(qualification.length),
+    avatar: !youBlocked && avatar ? avatar : null,
+    is_blocked: isBlocked,
+    you_blocked: youBlocked,
 
     personal_information: {
-      country: userPayload.country,
-      city: userPayload.city,
-      email: userPayload.email,
-      phone: !hide_phone ? String(user.phone) : null,
-      site: userPayload.site ?? null,
-      birthday: userPayload.birthday ?? null,
-      gender: userPayload.gender ?? null,
-      instagram: userPayload.instagram ?? null,
-      telegram: userPayload.telegram ?? null,
-      contact_link: userPayload.telegram ?? null,
+      country,
+      city,
+      email,
+      phone: !hide_phone ? String(phone) : null,
+      site: site ?? null,
+      birthday: birthday ?? null,
+      gender: gender ?? null,
+      instagram: !youBlocked && instagram ? instagram : null,
+      telegram: !youBlocked && telegram ? telegram : null,
+      contact_link: !youBlocked && telegram ? telegram : null,
     },
     description_fields: [
       {
         filed: 'Владение программами',
-        items: userPayload.programs,
+        items: programs,
       },
       {
         filed: 'Пройденные курсы',
-        items: userPayload.courses,
+        items: courses,
       },
       {
         filed: 'Специализация',
-        items: userPayload.specializations,
+        items: specializations,
       },
       {
         filed: 'Узкая специализация',
-        items: userPayload.narrow_specializations,
+        items: narrow_specializations,
       },
     ],
   };

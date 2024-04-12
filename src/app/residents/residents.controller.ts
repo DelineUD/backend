@@ -1,7 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   Res,
@@ -28,6 +32,7 @@ import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
+import { ResidentsBlockDto } from '@app/residents/dto/residents-block.dto';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
@@ -36,12 +41,24 @@ import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface
 export class ResidentsController {
   constructor(private residentsService: ResidentsService) {}
 
+  /**
+   * Нахождение списка резидентов
+   * @param userId - идентификатор пользователя.
+   * @param queryParams - параметры для поиска.
+   * @returns - список резидентов.
+   */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
-    return await this.residentsService.findAll(queryParams);
+  async findAll(@UserId() userId: Types.ObjectId, @Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+    return await this.residentsService.findAll(userId, queryParams);
   }
 
+  /**
+   * Нахождение резидента по параметрам
+   * @param userId - идентификатор пользователя.
+   * @param params - параметры для поиска.
+   * @returns - список резидентов.
+   */
   @Get(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
@@ -49,10 +66,17 @@ export class ResidentsController {
     type: 'string',
     description: 'Системный идентификатор резидента',
   })
-  async findOneById(@Param() params: GetResidentParamsDto): Promise<IResident> {
-    return await this.residentsService.findOneById(params);
+  async findOneById(@UserId() userId: Types.ObjectId, @Param() params: GetResidentParamsDto): Promise<IResident> {
+    return await this.residentsService.findOneById(userId, params);
   }
 
+  /**
+   * Загрузка аватарки
+   * @param userId - идентификатор пользователя.
+   * @param file - файл
+   * @param res - response
+   * @returns - список резидентов.
+   */
   @Post('avatar')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
@@ -79,5 +103,18 @@ export class ResidentsController {
     @Res() res: e.Response,
   ): Promise<e.Response<IUploadAvatar>> {
     return await this.residentsService.uploadAvatar(userId, file, res);
+  }
+
+  /**
+   * Смена блокировки резидента
+   * @param userId - идентификатор пользователя.
+   * @param dto - данные для блокировки.
+   * @returns - список резидентов.
+   */
+  @Patch('block')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async blockResident(@UserId() userId: Types.ObjectId, @Body() dto: ResidentsBlockDto): Promise<void> {
+    return this.residentsService.blockResident(userId, dto);
   }
 }

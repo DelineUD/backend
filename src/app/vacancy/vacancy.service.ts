@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 
@@ -52,14 +52,22 @@ export class VacancyService {
     }
   }
 
-  async findAll({ desc, remote_work, ...queryParams }: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
+  async findAll(
+    userId: Types.ObjectId,
+    { desc, remote_work, ...queryParams }: VacancyFindQueryDto,
+  ): Promise<IVacancyResponse[]> {
     try {
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
       const query: FilterQuery<Partial<IVacancy>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
 
       const vacancies = await this.vacancyModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar telegram qualification')
+        .populate('author', '_id first_name last_name avatar telegram qualification blocked_users')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
@@ -67,7 +75,7 @@ export class VacancyService {
         return [];
       }
 
-      return vacancyListMapper(vacancies);
+      return vacancyListMapper(vacancies, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при поиске вакансий!');
@@ -86,7 +94,7 @@ export class VacancyService {
 
       const vacancies = await this.vacancyModel
         .find({ authorId: userInDb._id })
-        .populate('author', '_id first_name last_name avatar telegram city')
+        .populate('author', '_id first_name last_name avatar telegram city blocked_users')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
@@ -94,7 +102,7 @@ export class VacancyService {
         return [];
       }
 
-      return vacancyListMapper(vacancies);
+      return vacancyListMapper(vacancies, { _id: userId._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
@@ -112,14 +120,14 @@ export class VacancyService {
 
       const vacancy = await this.vacancyModel
         .findOne({ authorId: userInDb._id, id: id })
-        .populate('author', '_id first_name last_name avatar telegram city')
+        .populate('author', '_id first_name last_name avatar telegram city blocked_users')
         .exec();
 
       if (!vacancy) {
         throw new EntityNotFoundError(`Вакансия не найдена`);
       }
 
-      return vacancyMapper(vacancy);
+      return vacancyMapper(vacancy, { _id: userId._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;

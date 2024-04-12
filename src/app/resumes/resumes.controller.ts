@@ -1,13 +1,14 @@
 import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 import { ResumesService } from './resumes.service';
-
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
+import { UserId } from '@shared/decorators/user-id.decorator';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -27,19 +28,24 @@ export class ResumesController {
 
   /**
    * Получение всех резюме.
+   * @param userId - идентификатор пользователя.
+   * @param queryParams - параметры для поиска резюме.
    * @returns - Все резюме.
    */
   @ApiBearerAuth('defaultBearerAuth')
   @UseGuards(JwtAuthGuard)
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@Query() queryParams?: ResumeFindQueryDto): Promise<IResumeResponse[]> {
-    return await this.resumesService.findAll(queryParams);
+  async findAll(
+    @UserId() userId: Types.ObjectId,
+    @Query() queryParams?: ResumeFindQueryDto,
+  ): Promise<IResumeResponse[]> {
+    return await this.resumesService.findAll(userId, queryParams);
   }
 
   /**
    * Получение всех резюме пользователя.
-   * @param params.userId - id автора.
+   * @param params.userId - идентификатор пользователя.
    * @returns - Список всех резюме пользователя.
    */
   @ApiBearerAuth('defaultBearerAuth')
@@ -60,8 +66,8 @@ export class ResumesController {
 
   /**
    * Получение резюме пользователя по id.
-   * @param params.userId - id автора.
-   * @param params.id - id (гет курс) резюме.
+   * @param params.userId - идентификатор пользователя.
+   * @param params.id - идентификатор (гет курс) резюме.
    * @returns - Найденное резюме.
    */
   @ApiBearerAuth('defaultBearerAuth')

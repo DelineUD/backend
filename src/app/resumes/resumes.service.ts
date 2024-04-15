@@ -1,20 +1,20 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { FilterQuery, Model } from 'mongoose';
-
+import { forwardRef, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
+import { DeleteResult } from 'mongodb';
 
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import normalizeDto from '@utils/normalizeDto';
-import { resumeDtoMapper, resumeListMapper, resumeMapper } from '@app/resumes/resume.mapper';
-import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { ResumeDto } from '@app/resumes/dto/resume.dto';
-import { Resume } from './entities/resume.entity';
-import { IResume, IResumeResponse } from './interfaces/resume.interface';
-import { UsersService } from '../users/users.service';
-import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { FiltersService } from '@app/filters/filters.service';
+import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
+import { resumeDtoMapper, resumeListMapper, resumeMapper } from '@app/resumes/resume.mapper';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import normalizeDto from '@utils/normalizeDto';
 import { getMainFilters } from '@helpers/getMainFilters';
+import { UsersService } from '../users/users.service';
+import { Resume } from './entities/resume.entity';
+import { IResume, IResumeResponse } from './interfaces/resume.interface';
+import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 
 const logger = new Logger('Resumes');
 
@@ -22,6 +22,7 @@ const logger = new Logger('Resumes');
 export class ResumesService {
   constructor(
     @InjectModel(Resume.name) private readonly resumeModel: Model<Resume>,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly filtersService: FiltersService,
   ) {}
@@ -117,6 +118,22 @@ export class ResumesService {
       return resumeMapper(resume);
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async deleteAll(userId: Types.ObjectId, where: Partial<IResume>): Promise<DeleteResult> {
+    try {
+      const result = await this.resumeModel.deleteMany({ ...where, authorId: userId });
+      if (!result) {
+        throw new EntityNotFoundError('Ошибка при удалении резюме');
+      }
+
+      logger.log('Resumes successfully deleted!');
+
+      return result;
+    } catch (err) {
+      logger.error(`Error while deleteAll: ${(err as Error).message}`);
       throw err;
     }
   }

@@ -1,24 +1,21 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Promise, Types } from 'mongoose';
 import { Request } from 'express';
-
-import { UsersService } from '../users/users.service';
-
-import { IUser } from '../users/interfaces/user.interface';
-import { IAuthTokens } from './interfaces/auth-tokens.interface';
-import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
-import { ILoginResponse, ILoginSmsPayload } from './interfaces/login.interface';
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { ISensSmsResponse } from './interfaces/send-sms.interface';
-
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { LoginSmsDto } from './dto/login-sms.dto';
-import { SendSmsDto } from './dto/send-sms.dto';
 
 import { CodesService } from '@app/auth/services/codes.service';
 import { SmsService } from '@app/auth/services/sms.service';
 import { CreateUserDto } from '@app/users/dto/user-create.dto';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { IUser } from '../users/interfaces/user.interface';
+import { UsersService } from '../users/users.service';
+import { LoginUserDto } from '../users/dto/user-login.dto';
+import { IAuthTokens } from './interfaces/auth-tokens.interface';
+import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
+import { ILoginResponse, ILoginSmsPayload } from './interfaces/login.interface';
+import { RegistrationStatus } from './interfaces/regisration-status.interface';
+import { ISensSmsResponse } from './interfaces/send-sms.interface';
+import { LoginSmsDto } from './dto/login-sms.dto';
+import { SendSmsDto } from './dto/send-sms.dto';
 import { TokensService } from './services/tokens.service';
 
 const logger = new Logger('Auth');
@@ -42,6 +39,27 @@ export class AuthService {
       return user;
     } catch (err) {
       logger.error(`Error while register: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      const { _id } = await this.usersService.findOne({ id });
+      if (!_id) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
+      await Promise.allSettled([
+        await this.usersService.deleteUser(_id),
+        await this.usersService.deleteUserPosts(_id),
+        await this.usersService.deleteUserResumes(_id),
+        await this.usersService.deleteUserVacancies(_id),
+      ]);
+
+      return;
+    } catch (err) {
+      logger.error(`Error while delete: ${(err as Error).message}`);
       throw err;
     }
   }

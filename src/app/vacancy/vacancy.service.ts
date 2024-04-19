@@ -53,10 +53,18 @@ export class VacancyService {
     }
   }
 
-  async findAll({ desc, remote_work, ...queryParams }: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
+  async findAll(
+    userId: Types.ObjectId,
+    { desc, remote_work, ...queryParams }: VacancyFindQueryDto,
+  ): Promise<IVacancyResponse[]> {
     try {
       const query: FilterQuery<Partial<IVacancy>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
+
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
 
       const vacancies = await this.vacancyModel
         .find(query)
@@ -68,7 +76,7 @@ export class VacancyService {
         return [];
       }
 
-      return vacancyListMapper(vacancies);
+      return vacancyListMapper(vacancies, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при поиске вакансий!');
@@ -95,7 +103,7 @@ export class VacancyService {
         return [];
       }
 
-      return vacancyListMapper(vacancies);
+      return vacancyListMapper(vacancies, { _id: userId._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
@@ -120,7 +128,7 @@ export class VacancyService {
         throw new EntityNotFoundError(`Вакансия не найдена`);
       }
 
-      return vacancyMapper(vacancy);
+      return vacancyMapper(vacancy, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;

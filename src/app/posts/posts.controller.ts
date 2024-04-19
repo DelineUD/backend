@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFiles,
   UseGuards,
   UseInterceptors,
   UsePipes,
@@ -97,12 +96,8 @@ export class PostsController {
       fileFilter: imageFileFilter,
     }),
   )
-  public async update(
-    @UserId() userId: Types.ObjectId,
-    @Body() updatePostDto: UpdatePostDto,
-    @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<IPostsResponse> {
-    return await this.postsService.update(userId, updatePostDto, files);
+  public async update(@UserId() userId: Types.ObjectId, @Body() updatePostDto: UpdatePostDto): Promise<IPostsResponse> {
+    return await this.postsService.update(userId, updatePostDto);
   }
 
   /**

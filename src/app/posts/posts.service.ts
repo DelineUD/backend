@@ -67,7 +67,7 @@ export class PostsService {
     }
   }
 
-  async update(userId: Types.ObjectId, postDto: UpdatePostDto, files: Express.Multer.File[]): Promise<IPostsResponse> {
+  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPostsResponse> {
     try {
       const { postId, ...updateDto } = postDto;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();

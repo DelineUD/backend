@@ -53,10 +53,18 @@ export class ResumesService {
     }
   }
 
-  async findAll({ remote_work, desc, ...queryParams }: ResumeFindQueryDto): Promise<IResumeResponse[]> {
+  async findAll(
+    userId: Types.ObjectId,
+    { remote_work, desc, ...queryParams }: ResumeFindQueryDto,
+  ): Promise<IResumeResponse[]> {
     try {
       const query: FilterQuery<Partial<IResume>> = await getMainFilters(this.filtersService, queryParams);
       remote_work && (query.remote_work = remote_work);
+
+      const userInDb = await this.usersService.findOne({ _id: userId });
+      if (!userInDb) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
 
       const resumes = await this.resumeModel
         .find(query)
@@ -64,7 +72,7 @@ export class ResumesService {
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      return resumeListMapper(resumes);
+      return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при поиске резюме!');
@@ -91,7 +99,7 @@ export class ResumesService {
         return [];
       }
 
-      return resumeListMapper(resumes);
+      return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
@@ -115,7 +123,7 @@ export class ResumesService {
         throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
-      return resumeMapper(resume);
+      return resumeMapper(resume, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw err;

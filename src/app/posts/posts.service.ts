@@ -1,18 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
+import { DeleteResult } from 'mongodb';
 
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-
-import { UsersService } from '../users/users.service';
-import { DeletePostDto } from './dto/delete.post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { postListMapper, postMapper } from './mappers/posts.mapper';
-import { PostCommentsModel } from './models/posts-comments.model';
-import { PostModel } from './models/posts.model';
-import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
-import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
 import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
 import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
@@ -24,9 +15,17 @@ import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
-import { UploadService } from '@app/upload/upload.service';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
 import { UserModel } from '@app/users/models/user.model';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
+import { UsersService } from '../users/users.service';
+import { DeletePostDto } from './dto/delete.post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { postListMapper, postMapper } from './mappers/posts.mapper';
+import { PostCommentsModel } from './models/posts-comments.model';
+import { PostModel } from './models/posts.model';
+import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 
 const logger = new Logger('Posts');
 
@@ -35,8 +34,7 @@ export class PostsService {
   constructor(
     @InjectModel(PostModel.name) private readonly postModel: Model<PostModel>,
     @InjectModel(PostCommentsModel.name) private readonly postCommentsModel: Model<PostCommentsModel>,
-    private readonly usersService: UsersService,
-    private readonly uploadService: UploadService,
+    @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
   ) {}
 
   async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPostsResponse> {
@@ -118,6 +116,29 @@ export class PostsService {
       };
     } catch (err) {
       logger.error(`Error while delete: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async deleteAll(userId: Types.ObjectId, where: Partial<IPosts>): Promise<DeleteResult> {
+    try {
+      const deletedPosts = await this.postModel.deleteMany({ ...where, authorId: userId });
+      if (!deletedPosts) {
+        throw new EntityNotFoundError('Ошибка при удалении записей');
+      }
+
+      logger.log('Posts successfully deleted!');
+
+      const deletedComments = await this.postCommentsModel.deleteMany({ author: userId });
+      if (!deletedComments) {
+        throw new EntityNotFoundError('Ошибка при удалении комментариев');
+      }
+
+      logger.log('Comments successfully deleted!');
+
+      return deletedPosts;
+    } catch (err) {
+      logger.error(`Error while deleteAll: ${(err as Error).message}`);
       throw err;
     }
   }

@@ -5,6 +5,7 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
   Post,
   Query,
@@ -47,6 +48,17 @@ export class AuthController {
   @Post('register-or-update')
   public async register(@Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
     return await this.authService.register(createUserDto);
+  }
+
+  /**
+   * Удаление пользователя.
+   * @param id - идентификатор пользователя.
+   * @returns - void
+   */
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Post('delete/:id')
+  public async delete(@Param('id') id: string): Promise<void> {
+    return await this.authService.delete(id);
   }
 
   /**

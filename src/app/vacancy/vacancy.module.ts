@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -17,10 +17,11 @@ import { UsersModule } from '../users/users.module';
         schema: VacancySchema,
       },
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     FiltersModule,
   ],
   controllers: [VacancyController],
   providers: [VacancyService],
+  exports: [VacancyService],
 })
 export class VacancyModule {}

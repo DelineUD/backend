@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
 
-type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name';
+type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'blocked_users';
 export type PostUserPick = Pick<IUser, PostUserPickList>;
 
 // TODO: Разобраться с обязательностью полей
@@ -16,7 +16,7 @@ export interface IPosts {
   countComments: number;
   group: string;
   publishInProfile?: boolean;
-  author?: IPostAuthorResponse;
+  author?: IPostAuthorResponse & { blocked_users: Types.ObjectId[] };
   createdAt?: Date;
   updatedAt?: Date;
 }

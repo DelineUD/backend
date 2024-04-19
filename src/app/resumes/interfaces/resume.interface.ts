@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
 
-export type UserResumePickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'telegram' | 'qualification';
+export type UserResumePickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'telegram' | 'qualification' | 'blocked_users';
 export type UserResumePick = Pick<IUser, UserResumePickList>;
 
 export interface IResume {
@@ -19,7 +19,7 @@ export interface IResume {
   remote_work: boolean;
   service_cost?: number;
   portfolio?: string;
-  author?: IResumeAuthorResponse;
+  author?: IResumeAuthorResponse & { blocked_users: Types.ObjectId[] };
   createdAt?: string;
   updatedAt?: string;
 }

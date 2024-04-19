@@ -1,19 +1,23 @@
 import { IVacancy, IVacancyAuthorResponse, IVacancyResponse, UserVacancyPick } from './interfaces/vacancy.interface';
 import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
+import { IUser } from '@app/users/interfaces/user.interface';
 
-const toVacancyAuthor = (author: UserVacancyPick): IVacancyAuthorResponse => {
+const toVacancyAuthor = (author: UserVacancyPick, youBlocked: boolean): IVacancyAuthorResponse => {
   return author
     ? {
         _id: author?._id ?? null,
         first_name: author?.first_name ?? null,
         last_name: author?.last_name ?? null,
-        avatar: author?.avatar ?? null,
+        avatar: !youBlocked ? author?.avatar ?? null : null,
         city: author?.city ?? null,
-        contact_link: author?.telegram ?? null,
+        contact_link: !youBlocked ? author?.telegram ?? null : null,
       }
     : null;
 };
 
+/*
+ * Function for transferring data from get course api
+ */
 export const vacancyDtoMapper = (dto: VacancyDto): IVacancy => {
   const { spec, narrow_spec, need_programs, ...rest } = dto;
   return {
@@ -24,34 +28,59 @@ export const vacancyDtoMapper = (dto: VacancyDto): IVacancy => {
   };
 };
 
-export const vacancyMapper = (payload: IVacancy): IVacancyResponse => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { authorId, createdAt, updatedAt, ...vacancy } = JSON.parse(JSON.stringify(payload)) as IVacancy;
+/*
+ * Function for formatting vacancy data before sending
+ * user -> found user
+ */
+export const vacancyMapper = (vacancy: IVacancy, user: Pick<IUser, '_id' | 'blocked_users'>): IVacancyResponse => {
+  if (!vacancy.author) {
+    return null;
+  }
+
+  const {
+    _id,
+    id,
+    name,
+    country,
+    city,
+    about,
+    specializations,
+    narrow_specializations,
+    programs,
+    remote_work,
+    service_cost,
+    author,
+    createdAt,
+    updatedAt,
+  } = vacancy;
+
+  const youBlocked = author.blocked_users.includes(user._id) ?? false;
 
   return {
-    ...vacancy,
-    service_cost: vacancy.service_cost ?? null,
-    author: toVacancyAuthor(vacancy.author as UserVacancyPick),
+    _id,
+    id,
+    name,
+    country,
+    city,
+    about,
+    specializations,
+    narrow_specializations,
+    programs,
+    remote_work,
+    service_cost: service_cost ?? null,
+    author: toVacancyAuthor(author as UserVacancyPick, youBlocked),
     createdAt: String(createdAt),
     updatedAt: String(updatedAt),
   };
 };
 
-export const vacancyListMapper = (payload: IVacancy[]): IVacancyResponse[] => {
-  const vacancies = JSON.parse(JSON.stringify(payload)) as IVacancy[];
-
-  return (
-    vacancies
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .map(({ authorId, createdAt, updatedAt, ...vacancy }) => {
-        return {
-          ...vacancy,
-          service_cost: vacancy.service_cost ?? null,
-          author: toVacancyAuthor(vacancy.author as UserVacancyPick),
-          createdAt: String(createdAt),
-          updatedAt: String(updatedAt),
-        };
-      })
-      .filter((v) => v.author)
-  );
+/*
+ * Function for formatting vacancy list data before sending
+ * user -> found user
+ */
+export const vacancyListMapper = (
+  vacancies: IVacancy[],
+  user: Pick<IUser, '_id' | 'blocked_users'>,
+): IVacancyResponse[] => {
+  return vacancies.map((v) => vacancyMapper(v, user));
 };

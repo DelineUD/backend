@@ -43,6 +43,7 @@ export class UserModel extends Document implements IUser {
   @Prop() hide_phone: boolean;
   @Prop() is_eula_approved?: boolean;
   @Prop() qualification_color?: string;
+  @Prop() blocked_users?: Types.ObjectId[];
   @Prop() hidden_authors?: Types.ObjectId[];
   @Prop() hidden_posts?: Types.ObjectId[];
 

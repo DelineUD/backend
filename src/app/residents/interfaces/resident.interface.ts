@@ -37,4 +37,6 @@ export interface IResident {
   avatar?: string | null;
   personal_information: IPersonalInfoResident;
   description_fields: IDescFieldsResident[];
+  is_blocked: boolean;
+  you_blocked: boolean;
 }

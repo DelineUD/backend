@@ -16,6 +16,7 @@ import { IUser } from '@app/users/interfaces/user.interface';
 import { StatusFilterKeys } from '@app/filters/consts';
 import { getMainFilters } from '@helpers/getMainFilters';
 import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
+import { ResidentsBlockDto } from '@app/residents/dto/residents-block.dto';
 
 const logger = new Logger('Residents');
 
@@ -28,8 +29,16 @@ export class ResidentsService {
     private readonly filtersService: FiltersService,
   ) {}
 
-  async findAll({ search, status, ...queryParams }: Partial<ResidentsFindQueryDto>): Promise<IResidentList[]> {
+  async findAll(
+    userId: Types.ObjectId,
+    { search, status, ...queryParams }: Partial<ResidentsFindQueryDto>,
+  ): Promise<IResidentList[]> {
     try {
+      const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
       const query: FilterQuery<Partial<IUser>> = await getMainFilters(this.filtersService, queryParams);
       status && (query.qualification = StatusFilterKeys[status]);
 
@@ -41,17 +50,28 @@ export class ResidentsService {
         ];
       }
 
-      return await this.usersService.findAll(query).then(residentListMapper);
+      return await this.usersService.findAll(query).then((res) =>
+        residentListMapper(res, {
+          _id: user._id,
+          blocked_users: user.blocked_users,
+        }),
+      );
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async findOneById({ id }: GetResidentParamsDto): Promise<IResident> {
+  async findOneById(userId: Types.ObjectId, { id }: GetResidentParamsDto): Promise<IResident> {
     try {
+      const user = await this.usersService.findOne({ _id: userId });
+      if (!user) {
+        throw new EntityNotFoundError('Пользователь не найден');
+      }
+
       const resident = await this.usersService.findOne({ _id: id });
-      return residentMapper(resident);
+
+      return residentMapper(resident, { _id: user._id, blocked_users: user.blocked_users });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw new EntityNotFoundError(`Пользователь не найден`);
@@ -80,6 +100,35 @@ export class ResidentsService {
     } catch (err) {
       logger.error(`Error while uploadAvatar: ${(err as Error).message}`);
       return res.status(err.status).json({ message: 'Произошла непредвиденная ошибка!' });
+    }
+  }
+
+  async blockResident(userId: Types.ObjectId, { residentId }: ResidentsBlockDto) {
+    try {
+      const blockedId = new Types.ObjectId(residentId);
+
+      if (blockedId.equals(userId)) {
+        throw new BadRequestException(`User id is equal block user id`);
+      }
+
+      const resident = await this.usersService.findOne({ _id: userId });
+      if (!resident) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
+      const blockCandidate = await this.usersService.findOne({ _id: blockedId });
+      if (!blockCandidate) {
+        throw new EntityNotFoundError(`Пользователь не найден`);
+      }
+
+      const blockedArr = resident.blocked_users;
+      const index = blockedArr.findIndex((i) => i.equals(blockedId));
+      index === -1 ? blockedArr.push(blockedId) : blockedArr.splice(index, 1);
+
+      await this.usersService.updateByPayload({ _id: resident._id }, { blocked_users: blockedArr });
+    } catch (err) {
+      logger.error(`Error while blockUser: ${(err as Error).message}`);
+      throw err;
     }
   }
 }

@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
 
-export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'telegram' | 'city';
+export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'telegram' | 'city' | 'blocked_users';
 export type UserVacancyPick = Pick<IUser, UserVacancyPickList>;
 
 export interface IVacancy {
@@ -19,7 +19,7 @@ export interface IVacancy {
   programs: string[];
   remote_work: boolean;
   service_cost?: number;
-  author?: IVacancyAuthorResponse;
+  author?: IVacancyAuthorResponse & { blocked_users: Types.ObjectId[] };
   createdAt?: string;
   updatedAt?: string;
 }

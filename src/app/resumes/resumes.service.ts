@@ -34,7 +34,7 @@ export class ResumesService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { authorId: userInDb._id, ...resumeParams } as unknown as ResumeDto;
+      const dto = { authorId: userInDb._id, ...resumeParams } as Partial<ResumeDto>;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
 
       const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));

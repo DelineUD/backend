@@ -7,7 +7,7 @@ import { INormalizeDto } from '@shared/interfaces/normalize-dto.interface';
  * @returns - Массив нормализованных моделей.
  */
 
-function normalizeDto<T extends INormalizeDto>(dto: T, prefix: string): INormalizeDto[] {
+function normalizeDto<T extends INormalizeDto>(dto: Partial<T>, prefix: string): INormalizeDto[] {
   const { authorId, ...rest } = dto;
   const entities: INormalizeDto[] = [];
 

@@ -35,7 +35,7 @@ export class VacancyService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { authorId: userInDb._id, ...vacancyParams } as unknown as VacancyDto;
+      const dto = { authorId: userInDb._id, ...vacancyParams } as Partial<VacancyDto>;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
       const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
 

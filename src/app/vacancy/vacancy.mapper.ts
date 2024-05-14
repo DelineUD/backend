@@ -54,7 +54,7 @@ export const vacancyMapper = (vacancy: IVacancy, user: Pick<IUser, '_id' | 'bloc
     updatedAt,
   } = vacancy;
 
-  const youBlocked = author.blocked_users.includes(user._id) ?? false;
+  const youBlocked = author.blocked_users?.includes(user._id) ?? false;
 
   return {
     _id,

@@ -72,6 +72,10 @@ export class ResumesService {
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
+      if (!resumes.length) {
+        return [];
+      }
+
       return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);

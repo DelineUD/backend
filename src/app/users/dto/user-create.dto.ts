@@ -15,8 +15,8 @@ export class CreateUserDto extends PartialType(UserDto) {
 
   @ApiProperty({ default: 'Максим' })
   readonly first_name: string;
-  @ApiProperty({ default: 'Баранов' })
-  readonly last_name: string;
+  @ApiProperty({ default: 'Баранов', required: false })
+  readonly last_name?: string;
   @ApiProperty({ default: '02.04.2003' })
   readonly birthday: string;
 

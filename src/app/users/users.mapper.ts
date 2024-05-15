@@ -1,4 +1,3 @@
-import { UserDto } from '@app/users/dto/user.dto';
 import { IUser } from '@app/users/interfaces/user.interface';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 import { splitDtoField } from '@helpers/splitDto';
@@ -15,15 +14,15 @@ export const userMapper = (dto: Omit<CreateUserDto, 'password'>): IUser => {
     birthday,
     ...userRest
   } = dto;
-  const filteredUserDto = filterQueries(userRest) as UserDto;
+  const filteredUserDto = filterQueries(userRest) as IUser;
 
   return {
     ...filteredUserDto,
     phone: transformPhoneNumber(phone),
-    birthday: new Date(birthday.split('.').reverse().join('-')),
+    birthday: new Date(birthday?.split('.').reverse().join('-')),
     courses: splitDtoField(courses_new_app),
     programs: splitDtoField(programs_new_app),
     specializations: splitDtoField(specialization_new_app),
     narrow_specializations: splitDtoField(narrow_spec_new_app),
-  } as IUser;
+  };
 };

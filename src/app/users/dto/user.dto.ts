@@ -22,10 +22,10 @@ export class UserDto {
   first_name: string;
   @IsOptional()
   @IsString()
-  last_name: string;
+  last_name?: string;
   @IsOptional()
   @IsString()
-  birthday: string;
+  birthday?: string;
   @IsOptional()
   @IsString()
   avatar?: string;

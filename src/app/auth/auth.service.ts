@@ -190,8 +190,8 @@ export class AuthService {
 
       return {
         _id: userInDb._id,
-        first_name: userInDb.first_name ?? null,
-        last_name: userInDb.last_name ?? null,
+        first_name: userInDb.first_name,
+        last_name: userInDb.last_name ?? '',
         phone: userInDb.phone ?? null,
         email: userInDb.email ?? null,
         avatar: userInDb.avatar ?? null,

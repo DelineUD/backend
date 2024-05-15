@@ -15,7 +15,7 @@ export class UserModel extends Document implements IUser {
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) password: string;
   @Prop({ required: true }) first_name: string;
-  @Prop({ required: true }) last_name: string;
+  @Prop() last_name: string;
   @Prop() birthday: Date;
   @Prop() avatar?: string;
   @Prop() gender?: string;

@@ -17,7 +17,7 @@ export const residentsMapper = (resident: IUser, user: Pick<IUser, '_id' | 'bloc
   return {
     _id,
     first_name,
-    last_name,
+    last_name: last_name ?? 's',
     avatar: !youBlocked && avatar ? avatar : null,
     status,
     qualification: !youBlocked ? qualification : '*'.repeat(qualification.length),
@@ -61,7 +61,7 @@ export const residentMapper = (resident: IUser, user: Pick<IUser, '_id' | 'block
   return {
     _id,
     first_name,
-    last_name,
+    last_name: last_name ?? '',
     about: about ?? null,
     status: status ?? null,
     qualification: !youBlocked ? qualification : '*'.repeat(qualification.length),

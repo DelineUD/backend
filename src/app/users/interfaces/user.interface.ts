@@ -9,7 +9,7 @@ export interface IUser {
   phone: string;
   password: string;
   first_name: string;
-  last_name: string;
+  last_name?: string;
   birthday: Date;
   avatar?: string;
   gender?: string;

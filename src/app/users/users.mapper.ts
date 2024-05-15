@@ -20,7 +20,7 @@ export const userMapper = (dto: Omit<CreateUserDto, 'password'>): IUser => {
   return {
     ...filteredUserDto,
     phone: transformPhoneNumber(phone),
-    birthday: new Date(birthday),
+    birthday: new Date(birthday.split('.').reverse().join('-')),
     courses: splitDtoField(courses_new_app),
     programs: splitDtoField(programs_new_app),
     specializations: splitDtoField(specialization_new_app),

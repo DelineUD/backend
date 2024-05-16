@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 
@@ -9,6 +9,7 @@ import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { UserId } from '@shared/decorators/user-id.decorator';
+import { DeleteResult } from 'mongodb';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -86,5 +87,24 @@ export class ResumesController {
   })
   async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResumeResponse> {
     return await this.resumesService.findOneById(params);
+  }
+
+  /**
+   * Удаление резюме пользователя по идентификатору.
+   * @returns - Резултат удаления.
+   * @param userId - Идентификатор пользователя
+   * @param id - Идентификатор резюме
+   */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Delete('delete/:id')
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Системный идентификатор резюме',
+  })
+  async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: Types.ObjectId): Promise<DeleteResult> {
+    return await this.resumesService.deleteOneById(userId, id);
   }
 }

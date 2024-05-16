@@ -82,5 +82,5 @@ export const vacancyListMapper = (
   vacancies: IVacancy[],
   user: Pick<IUser, '_id' | 'blocked_users'>,
 ): IVacancyResponse[] => {
-  return vacancies.map((v) => vacancyMapper(v, user));
+  return vacancies.map((v) => vacancyMapper(v, user)).filter((v) => v);
 };

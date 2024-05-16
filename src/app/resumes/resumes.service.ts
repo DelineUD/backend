@@ -99,10 +99,6 @@ export class ResumesService {
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      if (!resumes.length) {
-        return [];
-      }
-
       return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
@@ -130,6 +126,28 @@ export class ResumesService {
       return resumeMapper(resume, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async deleteOneById(userId: Types.ObjectId, id: Types.ObjectId): Promise<DeleteResult> {
+    try {
+      const deletedResume = await this.resumeModel
+        .findOneAndDelete({ author: new Types.ObjectId(userId), _id: id })
+        .exec();
+
+      if (!deletedResume) {
+        throw new EntityNotFoundError('Запись не найдена');
+      }
+
+      logger.log('Resume successfully deleted!');
+
+      return {
+        acknowledged: true,
+        deletedCount: 1,
+      };
+    } catch (err) {
+      logger.error(`Error while deleteOneById: ${(err as Error).message}`);
       throw err;
     }
   }

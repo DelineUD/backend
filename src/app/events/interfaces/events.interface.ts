@@ -8,8 +8,9 @@ export interface IEvents {
 
   author: Types.ObjectId | Pick<IUser, UserPick>;
   hText: string;
+  startDate: Date;
+  stopDate: Date;
   hImg?: string;
-  startDate?: Date;
   addr?: string;
   category?: string;
   access?: string;
@@ -20,5 +21,4 @@ export interface IEvents {
   notGo?: Array<string>;
   createdAt?: Date;
   updatedAt?: Date;
-  stopDate?: Date;
 }

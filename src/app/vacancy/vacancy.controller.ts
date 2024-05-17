@@ -1,5 +1,6 @@
 import { Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
 import { VacancyService } from './vacancy.service';
@@ -9,7 +10,6 @@ import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interfa
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 import { UserId } from '@shared/decorators/user-id.decorator';
-import { DeleteResult } from 'mongodb';
 
 @ApiTags('Vacancy')
 @Controller('vacancy')

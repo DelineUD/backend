@@ -1,17 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Types } from 'mongoose';
+import { DeleteResult } from 'mongodb';
+import { Model, Types } from 'mongoose';
 
 import { Events } from '@app/events/entities/events.entity';
 import { UpdateEventsDto } from '@app/events/dto/update-events.dto';
-import { CreateEventsDto } from '@app/events/dto/create.event.dto';
-import { DeleteEventsDto } from '@app/events/dto/delete-events.dto';
+import { CreateEventDto } from '@app/events/dto/create.event.dto';
 
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { IEvents } from './interfaces/events.interface';
 import { eventListMapper, eventMapper } from './mapper';
+import { EventDto } from '@app/events/dto/event.dto';
+
+const logger = new Logger('Events');
 
 @Injectable()
 export class EventsService {
@@ -61,41 +63,40 @@ export class EventsService {
     }
   }
 
-  async create(eventDto: CreateEventsDto): Promise<IEvents> {
-    const { eventId, author, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
+  async create(file: Express.Multer.File, createEventDto: CreateEventDto): Promise<IEvents> {
+    try {
+      const { startDate, stopDate, ...restDto }: EventDto = createEventDto;
 
-    const newStartDate = new Date(startDate);
-    const newStopDate = new Date(stopDate);
-    const eventInDb = await this.eventsModel.findOne({ _id: eventId }).exec();
-    if (eventInDb) {
-      throw new HttpException('Это событие уже существует!', HttpStatus.CONFLICT);
+      const eventInDb = await this.eventsModel.findOne({ hText: createEventDto.hText }).exec();
+      if (eventInDb) {
+        throw new HttpException('Это событие уже существует!', HttpStatus.CONFLICT);
+      }
+
+      const pathToImage = file && `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${file.filename}`;
+
+      const event: Events = new this.eventsModel({
+        startDate: new Date(startDate?.split('.').reverse().join('-')),
+        stopDate: new Date(stopDate?.split('.').reverse().join('-')),
+        hImg: pathToImage,
+        ...restDto,
+      });
+
+      logger.log('Event successfully created!');
+
+      return event.save();
+    } catch (err) {
+      logger.error(`Error while create: ${(err as Error).message}`);
+      throw err;
     }
-
-    const event: Events = new this.eventsModel({
-      author,
-      hText,
-      hImg,
-      startDate: newStartDate.toISOString(),
-      stopDate: newStopDate.toISOString(),
-      addr,
-      category,
-      access,
-      format,
-      bodyText,
-    });
-
-    await event.save();
-
-    return event;
   }
 
-  async update(eventDto: UpdateEventsDto): Promise<IEvents> {
-    const { eventId, author, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
+  async update(id: Types.ObjectId, eventDto: UpdateEventsDto): Promise<IEvents> {
+    const { author, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);
 
-    const eventInDb = await this.eventsModel.findOne({ _id: eventId }).exec();
+    const eventInDb = await this.eventsModel.findOne({ _id: id }).exec();
 
     if (!eventInDb) {
       throw new EntityNotFoundError(`Событие не найдено!`);
@@ -117,27 +118,26 @@ export class EventsService {
       bodyText,
     });
     await eventInDb.save();
-    return await this.eventsModel.findOne({ _id: eventId }).exec();
+
+    return await this.eventsModel.findOne({ _id: id }).exec();
   }
 
-  async delete(eventDto: DeleteEventsDto): Promise<IEvents> {
-    const { eventId, author } = eventDto;
-
-    const eventInDb = await this.eventsModel.findOne({ _id: eventId }).exec();
-    if (!eventInDb) {
-      throw new EntityNotFoundError('Событие не найдено!');
-    } else if (author === eventInDb.author._id) {
-      await eventInDb.deleteOne({
-        _id: eventId,
-      });
-
-      if (eventInDb) {
-        throw new HttpException('Успешно удалено!', HttpStatus.NO_CONTENT);
+  async deleteOneById(userId: Types.ObjectId, eventId: Types.ObjectId): Promise<DeleteResult> {
+    try {
+      const deleteResult = await this.eventsModel.findByIdAndDelete({ _id: eventId }).exec();
+      if (!deleteResult) {
+        throw new EntityNotFoundError('Событие не найдено');
       }
 
-      return eventInDb;
-    } else {
-      throw new HttpException('У вас нет доступа!', HttpStatus.BAD_REQUEST);
+      logger.log('Event successfully deleted!');
+
+      return {
+        acknowledged: true,
+        deletedCount: 1,
+      };
+    } catch (err) {
+      logger.error(`Error while delete: ${(err as Error).message}`);
+      throw err;
     }
   }
 

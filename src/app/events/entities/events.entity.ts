@@ -8,10 +8,10 @@ import { IEvents } from '@app/events/interfaces/events.interface';
   timestamps: true,
 })
 export class Events extends Document implements IEvents {
-  @Prop({ required: true }) hText: string;
+  @Prop() hText: string;
+  @Prop() startDate: Date;
+  @Prop() stopDate: Date;
   @Prop({ required: false }) hImg?: string;
-  @Prop({ required: false }) startDate?: Date;
-  @Prop({ required: false }) stopDate?: Date;
   @Prop({ required: false }) addr?: string;
   @Prop({ required: false }) category?: string;
   @Prop({ required: false }) access?: string;

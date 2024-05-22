@@ -81,5 +81,5 @@ export const resumeMapper = (resume: IResume, user: Pick<IUser, '_id' | 'blocked
  * user -> found user
  */
 export const resumeListMapper = (resumes: IResume[], user: Pick<IUser, '_id' | 'blocked_users'>): IResumeResponse[] => {
-  return resumes.map((r) => resumeMapper(r, user));
+  return resumes.map((r) => resumeMapper(r, user)).filter((r) => r);
 };

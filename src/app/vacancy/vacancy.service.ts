@@ -72,10 +72,6 @@ export class VacancyService {
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      if (!vacancies.length) {
-        return [];
-      }
-
       return vacancyListMapper(vacancies, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
@@ -120,7 +116,7 @@ export class VacancyService {
       }
 
       const vacancy = await this.vacancyModel
-        .findOne({ authorId: userInDb._id, id: id })
+        .findOne({ authorId: userInDb._id, _id: id })
         .populate('author', '_id first_name last_name avatar telegram city')
         .exec();
 
@@ -131,6 +127,31 @@ export class VacancyService {
       return vacancyMapper(vacancy, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async deleteOneById(userId: Types.ObjectId, id: Types.ObjectId): Promise<DeleteResult> {
+    try {
+      const deletedVacancy = await this.vacancyModel
+        .findOneAndDelete({
+          authorId: new Types.ObjectId(userId),
+          _id: id,
+        })
+        .exec();
+
+      if (!deletedVacancy) {
+        throw new EntityNotFoundError('Запись не найдена');
+      }
+
+      logger.log('Vacancy successfully deleted!');
+
+      return {
+        acknowledged: true,
+        deletedCount: 1,
+      };
+    } catch (err) {
+      logger.error(`Error while deleteOneById: ${(err as Error).message}`);
       throw err;
     }
   }

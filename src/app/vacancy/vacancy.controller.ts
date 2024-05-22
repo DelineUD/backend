@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
 import { VacancyService } from './vacancy.service';
@@ -87,5 +88,24 @@ export class VacancyController {
   })
   async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancyResponse> {
     return await this.vacancyService.findByUserId(params);
+  }
+
+  /**
+   * Удаление вакансии пользователя по идентификатору.
+   * @returns - Резултат удаления.
+   * @param userId - Идентификатор пользователя
+   * @param id - Идентификатор вакансии
+   */
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Delete('delete/:id')
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'Системный идентификатор вакансии',
+  })
+  async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: Types.ObjectId): Promise<DeleteResult> {
+    return await this.vacancyService.deleteOneById(userId, id);
   }
 }

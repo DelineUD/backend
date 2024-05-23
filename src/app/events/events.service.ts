@@ -75,8 +75,8 @@ export class EventsService {
       const pathToImage = file && `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${file.filename}`;
 
       const event: Events = new this.eventsModel({
-        startDate: new Date(startDate?.split('.').reverse().join('-')),
-        stopDate: new Date(stopDate?.split('.').reverse().join('-')),
+        startDate: new Date(startDate),
+        stopDate: new Date(stopDate),
         hImg: pathToImage,
         ...restDto,
       });
@@ -91,7 +91,7 @@ export class EventsService {
   }
 
   async update(id: Types.ObjectId, eventDto: UpdateEventsDto): Promise<IEvents> {
-    const { author, hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
+    const { hText, hImg, startDate, stopDate, addr, category, access, format, bodyText } = eventDto;
 
     const newStartDate = new Date(startDate);
     const newStopDate = new Date(stopDate);
@@ -100,10 +100,6 @@ export class EventsService {
 
     if (!eventInDb) {
       throw new EntityNotFoundError(`Событие не найдено!`);
-    }
-
-    if (author !== eventInDb.author._id) {
-      throw new HttpException('У вас нет доступа!', HttpStatus.BAD_REQUEST);
     }
 
     await eventInDb.updateOne({

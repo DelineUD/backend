@@ -27,8 +27,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { IEvents } from './interfaces/events.interface';
 
 @ApiTags('Events')
-@ApiBearerAuth('defaultBearerAuth')
-@UseGuards(JwtAuthGuard)
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
@@ -45,7 +43,7 @@ export class EventsController {
   @ApiBody({
     schema: {
       type: 'object',
-      required: ['hText', 'author', 'startDate', 'stopDate'],
+      required: ['hText', 'startDate', 'stopDate'],
       properties: {
         file: {
           type: 'string',
@@ -86,7 +84,6 @@ export class EventsController {
    * @param id - идентификатор события
    */
   @Delete('delete/:id')
-  @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
     name: 'id',
     type: 'string',

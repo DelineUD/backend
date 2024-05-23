@@ -1,14 +1,9 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsMongoId, IsOptional, IsString } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsOptional, IsString } from 'class-validator';
 
 import { EventDto } from '@app/events/dto/event.dto';
 
 export class CreateEventDto extends PartialType(EventDto) {
-  @ApiProperty()
-  @IsMongoId()
-  author: Types.ObjectId;
-
   @ApiProperty()
   @IsString()
   hText: string;

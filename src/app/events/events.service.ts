@@ -23,7 +23,7 @@ export class EventsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async getEventsList(userId: Types.ObjectId): Promise<any> {
+  async getEventsList(userId: Types.ObjectId): Promise<IEvents[]> {
     try {
       const userInDb = await this.usersService.findOne({ _id: userId });
       if (!userInDb) {
@@ -37,11 +37,11 @@ export class EventsService {
     }
   }
 
-  async getEventsListByMonth(month: any, year: any, userId: Types.ObjectId): Promise<unknown> {
+  async getEventsListByMonth(month: any, year: any, userId: Types.ObjectId): Promise<IEvents[]> {
     try {
       const userInDb = await this.usersService.findOne({ _id: userId });
 
-      const events = await this.eventsModel.find({}).sort({ startDate: -1 });
+      const events = await this.eventsModel.find().sort({ startDate: -1 });
 
       const queryDate = new Date(`${year}-${month}-01`);
       const newMonth = parseInt(month, 10);

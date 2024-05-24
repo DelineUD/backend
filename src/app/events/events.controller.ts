@@ -93,32 +93,51 @@ export class EventsController {
     return await this.eventsService.deleteOneById(userId, id);
   }
 
+  /**
+   * Получение списка событий.
+   * @returns - резултат удаления.
+   * @param userId - идентификатор пользователя
+   */
   @Get('list')
-  public async getList(@UserId() userId: Types.ObjectId): Promise<any> {
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
+  public async getList(@UserId() userId: Types.ObjectId): Promise<IEvents[]> {
     return await this.eventsService.getEventsList(userId);
   }
 
+  /**
+   * Получение списка событий по дате.
+   * @returns - резултат удаления.
+   * @param userId - идентификатор пользователя
+   * @param month - месяц
+   * @param year - год
+   */
   @Get('by-month')
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   public async getEventListByMonth(
     @UserId() userId: Types.ObjectId,
     @Query('month') month: string,
     @Query('year') year: string,
-  ): Promise<any> {
+  ): Promise<IEvents[]> {
     return await this.eventsService.getEventsListByMonth(month, year, userId);
   }
 
   @Get(':_id')
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @ApiParam({
     name: '_id',
     description: 'Идентификатор события',
     required: true,
   })
   async getById(@Param() params: IEvents, @Request() data: any): Promise<IEvents> {
-    const result = await this.eventsService.getEventById(params, data);
-    return result;
+    return await this.eventsService.getEventById(params, data);
   }
 
   @Post(':_id_event/igo/')
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @ApiParam({
     name: '_id_event',
     description: 'Идентификатор события',
@@ -129,6 +148,8 @@ export class EventsController {
   }
 
   @Post(':_id_event/notgo/')
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @ApiParam({
     name: '_id_event',
     description: 'Идентификатор события',
@@ -139,6 +160,8 @@ export class EventsController {
   }
 
   @Post(':_id_event/favor/')
+  @ApiBearerAuth('defaultBearerAuth')
+  @UseGuards(JwtAuthGuard)
   @ApiParam({
     name: '_id_event',
     description: 'Идентификатор события',

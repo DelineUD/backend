@@ -3,7 +3,6 @@ import { Document, Types } from 'mongoose';
 
 import { IPosts } from '../interfaces/posts.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
-import { VacancySchema } from '@app/vacancy/entities/vacancy.entity';
 
 @Schema({
   collection: 'posts',
@@ -21,7 +20,7 @@ export class PostModel extends Document implements IPosts {
   @Prop({ required: true })
   views: Array<string>;
   @Prop({ required: true })
-  group: GroupFilterKeys;
+  group: GroupFilterKeys[];
   @Prop({ required: false })
   publishInProfile?: boolean;
   @Prop({ required: true })

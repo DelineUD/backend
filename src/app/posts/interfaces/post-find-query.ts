@@ -14,8 +14,8 @@ export class IPostsFindQuery {
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsString()
-  group?: string;
+  @IsString({ each: true })
+  group?: string[];
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()

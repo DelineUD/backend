@@ -33,7 +33,7 @@ const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>) =
     countViews: post.views.length ?? 0,
     isViewed: post.views.includes(String(user._id)),
     isLiked: post.likes.includes(String(user._id)),
-    group: post.group ?? [GroupFilterKeys.pf001],
+    groups: post.groups ?? [GroupFilterKeys.pf001],
     publishInProfile: post.publishInProfile ?? false,
     author: toAuthorPost(post.author as PostUserPick, youBlocked),
     createdAt: post.createdAt,
@@ -42,7 +42,8 @@ const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>) =
 };
 
 export const postMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>): IPostsResponse => {
-  const { _id, pText, countComments, group, pImg, publishInProfile, createdAt, updatedAt, author, likes, views } = post;
+  const { _id, pText, countComments, groups, pImg, publishInProfile, createdAt, updatedAt, author, likes, views } =
+    post;
   const youBlocked = post.author.blocked_users.includes(user._id) ?? false;
 
   return {
@@ -52,7 +53,7 @@ export const postMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_user
     countComments: countComments ?? 0,
     countLikes: likes.length ?? 0,
     countViews: views.length ?? 0,
-    group: group ?? [GroupFilterKeys.pf001],
+    groups: groups ?? [GroupFilterKeys.pf001],
     isViewed: views.includes(String(user._id)),
     isLiked: likes.includes(String(user._id)),
     author: toAuthorPost(author as PostUserPick, youBlocked),

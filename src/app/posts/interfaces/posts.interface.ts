@@ -15,7 +15,7 @@ export interface IPosts {
   likes: Array<string>;
   views: Array<string>;
   countComments: number;
-  group: GroupFilterKeys[];
+  groups: GroupFilterKeys[];
   publishInProfile?: boolean;
   author?: IPostAuthorResponse & { blocked_users: Types.ObjectId[] };
   createdAt?: Date;
@@ -32,7 +32,7 @@ export interface IPostsResponse {
   countViews: number;
   isLiked: boolean;
   isViewed: boolean;
-  group: GroupFilterKeys[];
+  groups: GroupFilterKeys[];
   publishInProfile: boolean;
   createdAt?: Date;
   updatedAt?: Date;

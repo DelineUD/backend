@@ -161,7 +161,7 @@ export class PostsService {
       }
 
       query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
-      query.group && (baseQuery.group = { $in: query.group });
+      query.groups && (baseQuery.groups = { $in: query.groups });
       query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
       baseQuery._id = {
         $nin: user.hidden_posts,

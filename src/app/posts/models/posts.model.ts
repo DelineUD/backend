@@ -20,7 +20,7 @@ export class PostModel extends Document implements IPosts {
   @Prop({ required: true })
   views: Array<string>;
   @Prop({ required: true })
-  group: GroupFilterKeys[];
+  groups: GroupFilterKeys[];
   @Prop({ required: false })
   publishInProfile?: boolean;
   @Prop({ required: true })

@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsBooleanString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { GroupFilterKeys } from '@app/filters/consts';
 import { PostDto } from './post.dto';
@@ -15,7 +15,7 @@ export class CreatePostDto extends PartialType(PostDto) {
   @IsEnum(GroupFilterKeys, { each: true })
   @IsArray()
   @IsUniqueArray({ message: 'Each value in group must be unique' })
-  group?: GroupFilterKeys[];
+  groups?: GroupFilterKeys[];
 
   @ApiProperty({ default: false })
   @IsOptional()

@@ -20,7 +20,7 @@ export class UpdatePostDto extends PartialType(PostDto) {
   @IsEnum(GroupFilterKeys, { each: true })
   @IsArray()
   @IsUniqueArray({ message: 'Each value in group must be unique' })
-  group?: GroupFilterKeys[];
+  groups?: GroupFilterKeys[];
 
   @ApiProperty({ default: false })
   @IsOptional()

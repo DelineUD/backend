@@ -8,8 +8,8 @@ import { NotFoundInterceptor } from '@shared/interceptors/not-found.interceptor'
 import { getMongoConfig } from '@/config/db-connect.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
 import { AuthModule } from './auth/auth.module';
+import { AuthModule as _AuthModule } from './_auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { ResidentsModule } from './residents/residents.module';
 import { EventsModule } from './events/events.module';
@@ -17,7 +17,7 @@ import { FiltersController } from './filters/filters.controller';
 import { FiltersModule } from './filters/filters.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 import { ResumesModule } from './resumes/resumes.module';
-import { ComplaintsModule } from '@app/complaints/complaints.module';
+import { ComplaintsModule } from './complaints/complaints.module';
 
 @Module({
   imports: [
@@ -33,7 +33,7 @@ import { ComplaintsModule } from '@app/complaints/complaints.module';
     MulterModule.register({
       dest: './files',
     }),
-    AuthModule,
+    _AuthModule,
     FiltersModule,
     ResidentsModule,
     PostsModule,

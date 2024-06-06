@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MulterModule } from '@nestjs/platform-express';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -18,6 +18,7 @@ import { FiltersModule } from './filters/filters.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { ComplaintsModule } from '@app/complaints/complaints.module';
+import { MigrationModule } from './migration/migration.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ComplaintsModule } from '@app/complaints/complaints.module';
     VacancyModule,
     ResumesModule,
     ComplaintsModule,
+    MigrationModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [

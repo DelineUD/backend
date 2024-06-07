@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsBooleanString, IsEmpty, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class IPostsFindQuery {
@@ -12,9 +13,10 @@ export class IPostsFindQuery {
   @IsString()
   search?: string;
 
-  @ApiProperty({ default: '', required: false })
+  @ApiProperty({ default: '', required: false, type: [String] })
   @IsOptional()
   @IsString({ each: true })
+  @Transform(({ value }) => (value ? value.split(',') : []))
   groups?: string[];
 
   @ApiProperty({ default: false, required: false })

@@ -1,31 +1,31 @@
 import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
 import { DeleteResult } from 'mongodb';
+import { FilterQuery, Model, Types } from 'mongoose';
 
-import { CreatePostDto } from '@app/posts/dto/create.post.dto';
-import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
-import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
-import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
-import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
-import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
-import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
-import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
-import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
-import { commentListMapper } from '@app/posts/mappers/comments.mapper';
-import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
+import { CreatePostDto } from '@app/posts/dto/create.post.dto';
+import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
+import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
+import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
+import { ILike } from '@app/posts/interfaces/like.interface';
+import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
+import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
+import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
+import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { UserModel } from '@app/users/models/user.model';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
-import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 
 const logger = new Logger('Posts');
 
@@ -161,8 +161,7 @@ export class PostsService {
       }
 
       query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
-      console.log(query.groups);
-      query.groups && (baseQuery.groups = { $in: [...query.groups].map((i) => GroupFilterKeys[i]) });
+      query.groups && (baseQuery.groups = { $in: query.groups.map((i) => GroupFilterKeys[i]) });
       query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
       baseQuery._id = {
         $nin: user.hidden_posts,

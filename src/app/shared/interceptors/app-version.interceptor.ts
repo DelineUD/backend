@@ -2,7 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpExcepti
 import { Observable } from 'rxjs';
 
 /**
- * Интерцептор для о проверки актуальности версии приложения
+ * Интерцептор для проверки актуальности версии приложения
  */
 @Injectable()
 export class AppVersionInterceptor implements NestInterceptor {

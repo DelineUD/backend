@@ -19,10 +19,11 @@ export interface IUser {
   city: string;
 
   about?: string;
+  other?: string;
   education?: string;
   qualification?: string;
+  format?: string;
   ready_communicate?: boolean;
-  remote_work?: boolean;
   status: string;
 
   site?: string;

@@ -27,10 +27,11 @@ export class UserModel extends Document implements IUser {
 
   // Additional Information
   @Prop() about?: string;
+  @Prop() other?: string;
   @Prop() education?: string;
   @Prop() qualification?: string;
+  @Prop() format?: string;
   @Prop() ready_communicate?: boolean;
-  @Prop() remote_work: boolean;
   @Prop() status: string;
 
   // Social Media

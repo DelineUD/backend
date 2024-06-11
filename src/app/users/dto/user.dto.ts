@@ -47,6 +47,9 @@ export class UserDto {
   about?: string;
   @IsOptional()
   @IsString()
+  other?: string;
+  @IsOptional()
+  @IsString()
   education?: string;
   @IsOptional()
   @IsString()

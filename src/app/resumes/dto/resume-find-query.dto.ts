@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBooleanString, IsEmpty, IsMongoId, IsOptional } from 'class-validator';
+import { IsEmpty, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateStringOfObjectId } from '@shared/validators/validateStringOfObjectId';
@@ -37,8 +37,8 @@ export class ResumeFindQueryDto {
 
   @ApiProperty({ default: false, required: false })
   @IsOptional()
-  @IsBooleanString()
-  remote_work?: string;
+  @IsString()
+  format?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

@@ -27,6 +27,8 @@ export class CreateUserDto extends PartialType(UserDto) {
   readonly about?: string;
   @ApiProperty({ default: StatusFilterKeys.sf001, required: false })
   readonly status?: StatusFilterKeys;
+  @ApiProperty({ default: 'Дополнительная информация...', required: false })
+  readonly other?: string;
 
   @ApiProperty({ default: 'Россия', required: false })
   readonly country?: string;

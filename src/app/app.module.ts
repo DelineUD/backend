@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { NotFoundInterceptor } from '@shared/interceptors/not-found.interceptor';
+import { AppVersionInterceptor } from '@shared/interceptors/app-version.interceptor';
 import { getMongoConfig } from '@/config/db-connect.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,6 +19,7 @@ import { FiltersModule } from './filters/filters.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { ComplaintsModule } from '@app/complaints/complaints.module';
+import { MigrationModule } from './migration/migration.module';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { ComplaintsModule } from '@app/complaints/complaints.module';
     VacancyModule,
     ResumesModule,
     ComplaintsModule,
+    MigrationModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [
@@ -48,6 +51,10 @@ import { ComplaintsModule } from '@app/complaints/complaints.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: NotFoundInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AppVersionInterceptor,
     },
   ],
 })

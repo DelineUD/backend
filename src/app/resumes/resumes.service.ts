@@ -55,11 +55,11 @@ export class ResumesService {
 
   async findAll(
     userId: Types.ObjectId,
-    { remote_work, desc, ...queryParams }: ResumeFindQueryDto,
+    { format, desc, ...queryParams }: ResumeFindQueryDto,
   ): Promise<IResumeResponse[]> {
     try {
       const query: FilterQuery<Partial<IResume>> = await getMainFilters(this.filtersService, queryParams);
-      remote_work && (query.remote_work = remote_work);
+      format && (query.format = format);
 
       const userInDb = await this.usersService.findOne({ _id: userId });
       if (!userInDb) {

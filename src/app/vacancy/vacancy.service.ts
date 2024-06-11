@@ -55,11 +55,11 @@ export class VacancyService {
 
   async findAll(
     userId: Types.ObjectId,
-    { desc, remote_work, ...queryParams }: VacancyFindQueryDto,
+    { desc, format, ...queryParams }: VacancyFindQueryDto,
   ): Promise<IVacancyResponse[]> {
     try {
       const query: FilterQuery<Partial<IVacancy>> = await getMainFilters(this.filtersService, queryParams);
-      remote_work && (query.remote_work = remote_work);
+      format && (query.format = format);
 
       const userInDb = await this.usersService.findOne({ _id: userId });
       if (!userInDb) {

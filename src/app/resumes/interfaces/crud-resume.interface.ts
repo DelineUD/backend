@@ -22,9 +22,9 @@ export class ICrudResumeParams {
   @IsString()
   readonly city_resume1: string;
 
-  @ApiProperty({ default: false })
-  @Transform(validateBooleanOfString)
-  readonly remote_work_resume1: boolean;
+  @ApiProperty({ default: 'Удаленная работа' })
+  @IsString()
+  readonly format_resume1: boolean;
 
   @ApiProperty({ default: 'Квалификация' })
   @IsString()
@@ -33,6 +33,10 @@ export class ICrudResumeParams {
   @ApiProperty({ default: 'Обо мне...' })
   @IsString()
   readonly about_resume1: string;
+
+  @ApiProperty({ default: 'Дополнительная информация...' })
+  @IsString()
+  readonly other_resume1: string;
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()

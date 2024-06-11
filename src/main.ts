@@ -36,6 +36,10 @@ async function bootstrap() {
           value: 'mockValue',
         },
       },
+      requestInterceptor: (req: any) => {
+        req.headers['app-version'] = '1.0.8';
+        return req;
+      },
     },
   };
 

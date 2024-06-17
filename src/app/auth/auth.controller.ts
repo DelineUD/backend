@@ -68,6 +68,7 @@ export class AuthController {
    * @param loginUserDto - данные входа.
    * @returns - Пара токенов и тип входа
    */
+  @UseInterceptors(AppVersionInterceptor)
   @UsePipes(new ValidationPipe())
   @Post('login')
   public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginResponse> {
@@ -90,6 +91,7 @@ export class AuthController {
    * @returns - Пара токенов и тип входа
    */
   @Get('login-sms')
+  @UseInterceptors(AppVersionInterceptor)
   @ApiHeader({
     name: 'User-Login-Data',
     description: 'User-Login-Data: phone code',

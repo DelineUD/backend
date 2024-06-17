@@ -19,20 +19,19 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import e from 'express';
-
 import { Types } from 'mongoose';
 
-import { fileStorage } from '@shared/storage';
+import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
+import { ResidentsBlockDto } from '@app/residents/dto/residents-block.dto';
+import { fileStorageConfig } from '@shared/storage/storage.config';
+import { mediaFileFilter } from '@utils/mediaFileFilter';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { ResidentsFindQueryDto } from '@app/residents/dto/residents-find-query.dto';
-import { imageFileFilter } from '@utils/imageFileFilter';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { ResidentsService } from './residents.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
-import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
-import { ResidentsBlockDto } from '@app/residents/dto/residents-block.dto';
 
 @ApiTags('Residents')
 @ApiBearerAuth('defaultBearerAuth')
@@ -49,7 +48,10 @@ export class ResidentsController {
    */
   @Get('list')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async findAll(@UserId() userId: Types.ObjectId, @Query() queryParams?: ResidentsFindQueryDto): Promise<IResidentList[]> {
+  async findAll(
+    @UserId() userId: Types.ObjectId,
+    @Query() queryParams?: ResidentsFindQueryDto,
+  ): Promise<IResidentList[]> {
     return await this.residentsService.findAll(userId, queryParams);
   }
 
@@ -93,8 +95,8 @@ export class ResidentsController {
   })
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: fileStorage,
-      fileFilter: imageFileFilter,
+      storage: fileStorageConfig,
+      fileFilter: mediaFileFilter,
     }),
   )
   async avatarUpload(

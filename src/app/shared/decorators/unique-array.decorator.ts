@@ -9,11 +9,13 @@ export function IsUniqueArray(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          if (!Array.isArray(value)) {
+          const arr: string[] = Array.from([value]).flat();
+
+          if (!Array.isArray(arr)) {
             return false;
           }
-          const uniqueValues = new Set(value);
-          return uniqueValues.size === value.length;
+          const uniqueValues = new Set(arr);
+          return uniqueValues.size === arr.length;
         },
       },
     });

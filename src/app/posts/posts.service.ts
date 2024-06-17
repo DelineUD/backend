@@ -26,6 +26,8 @@ import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
+import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
+import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 
 const logger = new Logger('Posts');
 
@@ -37,14 +39,16 @@ export class PostsService {
     @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
   ) {}
 
-  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPostsResponse> {
+  async create(
+    userId: Types.ObjectId,
+    postDto: CreatePostDto,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<IPostsResponse> {
     try {
-      const createPostDto = { ...postDto };
+      const { files, ...createPostDto } = { ...postDto };
 
       const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
+      if (!user) throw new EntityNotFoundError('Пользователь не найден');
 
       const initialPostValues: Partial<IPosts> = {
         likes: [],
@@ -52,9 +56,12 @@ export class PostsService {
         countComments: 0,
       };
 
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
+
       const post = await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
+        files: files ? files.concat(uploadedPostFiles) : uploadedPostFiles,
         authorId: user._id,
       });
 
@@ -67,20 +74,21 @@ export class PostsService {
     }
   }
 
-  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPostsResponse> {
+  async update(
+    userId: Types.ObjectId,
+    postDto: UpdatePostDto,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<IPostsResponse> {
     try {
-      const { postId, ...updateDto } = postDto;
+      const { postId, files, ...updateDto } = postDto;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
 
-      if (!postInDb) {
-        throw new EntityNotFoundError(`Запись не найдена!`);
-      }
+      if (!postInDb) throw new EntityNotFoundError(`Запись не найдена!`);
+      if (String(userId) !== String(postInDb.authorId)) throw new BadRequestException('Нет доступа!');
 
-      if (String(userId) !== String(postInDb.authorId)) {
-        throw new BadRequestException('Нет доступа!');
-      }
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
 
-      await postInDb.updateOne({ ...updateDto }).exec();
+      await postInDb.updateOne({ ...updateDto, files: files.concat(uploadedPostFiles) }).exec();
       await postInDb.save();
 
       logger.log('Post successfully updated!');

@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
@@ -38,7 +39,18 @@ import { STRATEGIES } from './strategies';
     HttpModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, TokensService, SmsService, CodesService, AppVersionInterceptor, ...STRATEGIES, ...GUARDS],
+  providers: [
+    AuthService,
+    TokensService,
+    SmsService,
+    CodesService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AppVersionInterceptor,
+    },
+    ...STRATEGIES,
+    ...GUARDS,
+  ],
   exports: [AuthService, SmsService],
 })
 export class AuthModule {}

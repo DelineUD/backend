@@ -80,6 +80,7 @@ export class AuthController {
    * @param sendSmsDto - данные для отправки sms.
    * @returns - ответ от стороннего api
    */
+  @UseInterceptors(AppVersionInterceptor)
   @Post('send-sms')
   public async sendSms(@Body() sendSmsDto: SendSmsDto): Promise<ISensSmsResponse> {
     return await this.authService.sendSms(sendSmsDto);

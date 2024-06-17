@@ -1,25 +1,24 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { MulterModule } from '@nestjs/platform-express';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MulterModule } from '@nestjs/platform-express';
 
-import { NotFoundInterceptor } from '@shared/interceptors/not-found.interceptor';
-import { AppVersionInterceptor } from '@shared/interceptors/app-version.interceptor';
 import { getMongoConfig } from '@/config/db-connect.config';
+import { NotFoundInterceptor } from '@shared/interceptors/not-found.interceptor';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { ComplaintsModule } from '@app/complaints/complaints.module';
 import { AuthModule } from './auth/auth.module';
-import { PostsModule } from './posts/posts.module';
-import { ResidentsModule } from './residents/residents.module';
 import { EventsModule } from './events/events.module';
 import { FiltersController } from './filters/filters.controller';
 import { FiltersModule } from './filters/filters.module';
-import { VacancyModule } from './vacancy/vacancy.module';
-import { ResumesModule } from './resumes/resumes.module';
-import { ComplaintsModule } from '@app/complaints/complaints.module';
 import { MigrationModule } from './migration/migration.module';
+import { PostsModule } from './posts/posts.module';
+import { ResidentsModule } from './residents/residents.module';
+import { ResumesModule } from './resumes/resumes.module';
+import { VacancyModule } from './vacancy/vacancy.module';
 
 @Module({
   imports: [
@@ -51,10 +50,6 @@ import { MigrationModule } from './migration/migration.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: NotFoundInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: AppVersionInterceptor,
     },
   ],
 })

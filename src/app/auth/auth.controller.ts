@@ -11,6 +11,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -24,15 +25,16 @@ import { JwtAuthGuard } from './guards/jwt-access.guard';
 import { RegistrationStatus } from './interfaces/regisration-status.interface';
 import { ISensSmsResponse } from './interfaces/send-sms.interface';
 
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { CreateUserDto } from '../users/dto/user-create.dto';
-import { SendSmsDto } from './dto/send-sms.dto';
-import { LoginSmsDto } from './dto/login-sms.dto';
-import { UserId } from '@shared/decorators/user-id.decorator';
-import { ILoginResponse } from '@app/auth/interfaces/login.interface';
 import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
 import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
+import { ILoginResponse } from '@app/auth/interfaces/login.interface';
+import { AppVersionInterceptor } from '@app/shared/interceptors/app-version.interceptor';
 import { IUser } from '@app/users/interfaces/user.interface';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { CreateUserDto } from '../users/dto/user-create.dto';
+import { LoginUserDto } from '../users/dto/user-login.dto';
+import { LoginSmsDto } from './dto/login-sms.dto';
+import { SendSmsDto } from './dto/send-sms.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -115,6 +117,7 @@ export class AuthController {
    * @returns - Пользователь.
    */
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(AppVersionInterceptor)
   @ApiBearerAuth('defaultBearerAuth')
   @Get('profile')
   async getMe(@Req() req: Request): Promise<Partial<IUser>> {

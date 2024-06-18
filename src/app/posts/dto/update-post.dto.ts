@@ -14,28 +14,28 @@ export class UpdatePostDto extends PartialType(PostDto) {
   @IsMongoId()
   postId: string;
 
-  @ApiProperty({ default: 'Текст' })
+  @ApiProperty({ default: 'Текст', required: false })
   @IsOptional()
   @IsString()
   pText?: string;
 
-  @ApiProperty({ default: [GroupFilterKeys.pf001] })
+  @ApiProperty({ default: [GroupFilterKeys.pf001], required: false })
   @IsOptional()
   @IsEnum(GroupFilterKeys, { each: true })
   @IsUniqueArray({ message: 'Each value in group must be unique' })
   groups?: GroupFilterKeys[];
 
-  @ApiProperty({ default: 'false' })
+  @ApiProperty({ default: 'false', required: false })
   @IsOptional()
   @IsBooleanString()
   publishInProfile?: boolean;
 
-  @ApiProperty({ default: [`{"type": "${EFileType.Image}", "url": ""}`] })
+  @ApiProperty({ default: [`{"type": "${EFileType.Image}", "url": ""}`], required: false })
   @IsOptional()
   @Transform(validateArrayOfFiles)
   files?: IPostFile[];
 
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, required: false })
   @IsOptional()
   uploadedFiles?: any[];
 }

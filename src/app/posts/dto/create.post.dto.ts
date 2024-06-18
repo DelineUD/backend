@@ -14,7 +14,7 @@ export class CreatePostDto extends PartialType(PostDto) {
   @IsString()
   pText: string;
 
-  @ApiProperty({ default: [GroupFilterKeys.pf001] })
+  @ApiProperty({ default: [GroupFilterKeys.pf001], required: true })
   @IsEnum(GroupFilterKeys, { each: true })
   @IsUniqueArray({ message: 'Each value in group must be unique' })
   groups: GroupFilterKeys[];
@@ -22,14 +22,14 @@ export class CreatePostDto extends PartialType(PostDto) {
   @ApiProperty({ default: 'false' })
   @IsOptional()
   @IsBooleanString()
-  publishInProfile?: boolean;
+  publishInProfile: boolean;
 
-  @ApiProperty({ default: [`{"type": "${EFileType.Image}", "url": ""}`] })
+  @ApiProperty({ default: [`{"type": "${EFileType.Image}", "url": ""}`], required: false })
   @IsOptional()
   @Transform(validateArrayOfFiles)
   files?: IPostFile[];
 
-  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, required: false })
   @IsOptional()
   uploadedFiles?: any[];
 }

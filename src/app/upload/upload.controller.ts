@@ -11,11 +11,10 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
-import { fileStorage } from '@shared/storage';
-import { imageFileFilter } from '@utils/imageFileFilter';
-import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { UploadService } from '@app/upload/upload.service';
 import { UploadDto } from '@app/upload/dto/upload.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
+import { IUploadFile } from '@app/upload/interfaces/upload-file.interface';
 
 @ApiTags('Uploads')
 @ApiBearerAuth('defaultBearerAuth')
@@ -27,13 +26,11 @@ export class UploadController {
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(
-    FilesInterceptor('files', 6, {
-      storage: fileStorage,
-      fileFilter: imageFileFilter,
-    }),
-  )
-  public async upload(@Body() uploadDto: UploadDto, @UploadedFiles() files: Express.Multer.File[]) {
-    return await this.uploadService.uploadImages(uploadDto, files);
+  @UseInterceptors(FilesInterceptor('uploadedFiles', 6))
+  public async upload(
+    @Body() uploadDto: UploadDto,
+    @UploadedFiles() uploadedFiles: Express.Multer.File[],
+  ): Promise<IUploadFile[]> {
+    return await this.uploadService.upload(uploadDto, uploadedFiles);
   }
 }

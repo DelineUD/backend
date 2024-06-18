@@ -27,7 +27,7 @@ const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>) =
   return {
     _id: post._id,
     pText: post.pText,
-    pImg: post.pImg,
+    files: post.files,
     countComments: post.countComments ?? 0,
     countLikes: post.likes.length ?? 0,
     countViews: post.views.length ?? 0,
@@ -42,14 +42,14 @@ const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>) =
 };
 
 export const postMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>): IPostsResponse => {
-  const { _id, pText, countComments, groups, pImg, publishInProfile, createdAt, updatedAt, author, likes, views } =
+  const { _id, pText, countComments, groups, files, publishInProfile, createdAt, updatedAt, author, likes, views } =
     post;
   const youBlocked = post.author.blocked_users.includes(user._id) ?? false;
 
   return {
     _id,
     pText,
-    pImg,
+    files,
     countComments: countComments ?? 0,
     countLikes: likes.length ?? 0,
     countViews: views.length ?? 0,

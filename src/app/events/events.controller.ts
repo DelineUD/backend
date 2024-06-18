@@ -18,11 +18,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
+import { fileStorageConfig } from '@shared/storage/storage.config';
 import { UserId } from '@shared/decorators/user-id.decorator';
-import { fileStorage } from '@shared/storage';
 import { CreateEventDto } from '@app/events/dto/create.event.dto';
 import { EventsService } from '@app/events/events.service';
-import { imageFileFilter } from '@utils/imageFileFilter';
+import { mediaFileFilter } from '@utils/mediaFileFilter';
 import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
 import { IEvents } from './interfaces/events.interface';
 
@@ -66,8 +66,8 @@ export class EventsController {
   })
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: fileStorage,
-      fileFilter: imageFileFilter,
+      storage: fileStorageConfig,
+      fileFilter: mediaFileFilter,
     }),
   )
   public async create(

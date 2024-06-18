@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
@@ -27,10 +27,12 @@ export class ICrudVacancyParams {
 
   @ApiProperty({ default: 'Информация о вакансии...' })
   @IsString()
+  @IsOptional()
   readonly about_vacancy1: string;
 
   @ApiProperty({ default: 'Дополнительная информация...' })
   @IsString()
+  @IsOptional()
   readonly other_vacancy1: string;
 
   @ApiProperty({ default: false })

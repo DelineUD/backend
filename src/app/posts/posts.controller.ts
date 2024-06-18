@@ -60,10 +60,6 @@ export class PostsController {
       fileFilter: mediaFileFilter,
     }),
   )
-  @ApiBody({
-    description: 'Create new post',
-    type: CreatePostDto,
-  })
   public async create(
     @UserId() userId: Types.ObjectId,
     @Body() createPostDto: CreatePostDto,

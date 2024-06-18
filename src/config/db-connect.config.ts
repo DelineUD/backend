@@ -8,7 +8,7 @@ const getMongoString = (configService: ConfigService) =>
   configService.get('DB_PORT') +
   '/' +
   configService.get('DB_AUTHDATABASE');
-console.log('DB_LOGIN');
+
 const getMongoOptions = () => ({
   useNewUrlParser: true,
   useUnifiedTopology: true,

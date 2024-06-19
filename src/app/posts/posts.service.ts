@@ -88,7 +88,12 @@ export class PostsService {
 
       const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
 
-      await postInDb.updateOne({ ...updateDto, files: files.concat(uploadedPostFiles) }).exec();
+      await postInDb
+        .updateOne({
+          ...updateDto,
+          files: files ? files.concat(uploadedPostFiles) : uploadedPostFiles,
+        })
+        .exec();
       await postInDb.save();
 
       logger.log('Post successfully updated!');

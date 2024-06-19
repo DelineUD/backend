@@ -16,6 +16,7 @@ export class MigrationService {
   async runMigrations() {
     try {
       await this.migration0();
+      await this.migration1();
     } catch (err) {
       logger.error(`Error while runMigrations: ${(err as Error).message}`);
       throw err;
@@ -49,8 +50,34 @@ export class MigrationService {
           $unset: 'group',
         },
       ]);
-    } catch (error) {
-      logger.error(`Error while ${this.migration0.name}: ${error.message}`);
+    } catch (err) {
+      logger.error(`Error while ${this.migration0.name}: ${err.message}`);
+    }
+  }
+
+  /**
+   * Миграция для изменение поле pImg на files с изменением типа string[] -> IFile[]
+   */
+  async migration1() {
+    try {
+      await this.postModel.updateMany({ pImg: { $exists: true }, files: { $exists: false } }, [
+        {
+          $set: {
+            files: {
+              $map: {
+                input: '$pImg',
+                as: 'url',
+                in: { type: 'image', url: '$$url' },
+              },
+            },
+          },
+        },
+        {
+          $unset: 'pImg',
+        },
+      ]);
+    } catch (err) {
+      logger.error(`Error while ${this.migration1.name}: ${err.message}`);
     }
   }
 }

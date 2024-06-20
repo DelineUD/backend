@@ -6,14 +6,20 @@ import {
   HttpStatus,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 
+import { fileStorage } from '@shared/storage';
 import { IUser } from '@app/_users/interfaces/user.interface';
+import { AuthRegisterOtpDto } from '@app/_auth/dto/auth-register-otp.dto';
+import { imageFileFilter } from '@utils/imageFileFilter';
 import { JwtAuthRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-access.guard';
 import { AuthRegisterDto } from './dto/auth-register.dto';
@@ -34,12 +40,48 @@ export class AuthController {
   /**
    * Регистрация пользователя
    * @param authRegisterDto - данные для регистрации
+   * @param avatar - файл для аватара пользователя
    * @returns - пара токенов
    */
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: AuthRegisterDto })
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: fileStorage,
+      fileFilter: imageFileFilter,
+    }),
+  )
   @Post('register')
-  public async register(@Body() authRegisterDto: AuthRegisterDto): Promise<IAuthRegisterResponse> {
-    return await this.authService.register(authRegisterDto);
+  public async register(
+    @Body() authRegisterDto: AuthRegisterDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ): Promise<IAuthRegisterResponse> {
+    return await this.authService.register(authRegisterDto, avatar);
+  }
+
+  /**
+   * Отправка sms с кодом для подтверждения номера при регистрации
+   * @param authSendOtpDto - данные для отправки sms кода
+   * @returns - 200 | 400
+   */
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @HttpCode(HttpStatus.OK)
+  @Post('register/send/otp')
+  public async registerOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<void> {
+    return await this.authService.registerOtpSend(authSendOtpDto);
+  }
+
+  /**
+   * Подтверждения номера при регистрации
+   * @param authRegisterOtpDto - данные для подтверждения номера
+   * @returns - 200 | 400
+   */
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @HttpCode(HttpStatus.OK)
+  @Post('register/otp')
+  public async registerOtp(@Body() authRegisterOtpDto: AuthRegisterOtpDto): Promise<void> {
+    return await this.authService.registerOtp(authRegisterOtpDto);
   }
 
   /**
@@ -71,9 +113,9 @@ export class AuthController {
    */
   @UsePipes(new ValidationPipe({ transform: true }))
   @HttpCode(HttpStatus.OK)
-  @Post('send/otp')
-  public async sendOtp(@Body() authSendOtpDto: AuthSendOtpDto): Promise<void> {
-    return await this.authService.sendOtp(authSendOtpDto);
+  @Post('login/send/otp')
+  public async loginOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<void> {
+    return await this.authService.loginOtpSend(authSendOtpDto);
   }
 
   /**

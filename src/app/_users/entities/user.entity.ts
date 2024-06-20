@@ -5,27 +5,26 @@ import { IAdditional, IBun, IContact, IPreference, ISocial, IUser } from '../int
 
 @Schema({ collection: '_users', timestamps: true })
 export class UserEntity extends Document implements IUser {
-  @Prop({ required: true }) _id: Types.ObjectId;
+  @Prop({ required: true, type: Types.ObjectId }) _id: Types.ObjectId;
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) email: string;
   @Prop({ required: true }) password: string;
   @Prop({ required: true }) first_name: string;
   @Prop({ required: true }) last_name: string;
   @Prop({ required: true }) birthday: Date;
-  @Prop() avatar?: string;
+  @Prop({ required: false }) avatar?: string;
   @Prop({
-    type: { city: String, country: String },
+    type: { city: { type: String, required: true }, country: { type: String, required: false } },
     _id: false,
     required: true,
   })
   contact_info: IContact;
   @Prop({
     type: {
-      remote_work: Boolean,
-      ready_communicate: Boolean,
-      status: String,
-      qualification: String,
-      about: String,
+      format: { type: String, required: true },
+      status: { type: String, required: true },
+      qualification: { type: String, required: true },
+      about: { type: String, required: false, maxlength: 1000 },
     },
     _id: false,
     required: true,
@@ -33,17 +32,18 @@ export class UserEntity extends Document implements IUser {
   additional_info: IAdditional;
   @Prop({
     type: {
-      blocked_users: [{ type: Types.ObjectId, ref: 'User' }],
-      hidden_authors: [{ type: Types.ObjectId, ref: 'User' }],
-      hidden_posts: [{ type: Types.ObjectId, ref: 'Post' }],
+      blocked_users: { type: [{ type: Types.ObjectId, ref: 'User' }], required: false },
+      hidden_authors: { type: [{ type: Types.ObjectId, ref: 'User' }], required: false },
+      hidden_posts: { type: [{ type: Types.ObjectId, ref: 'Post' }], required: false },
     },
     _id: false,
+    required: false,
   })
   bun_info?: IBun;
   @Prop({
     type: {
-      is_hide_phone: Boolean,
-      is_hide_birthday: Boolean,
+      is_hide_phone: { type: String, required: true },
+      is_hide_birthday: { type: String, required: true },
     },
     _id: false,
     required: true,
@@ -51,20 +51,21 @@ export class UserEntity extends Document implements IUser {
   preferences: IPreference;
   @Prop({
     type: {
-      telegram: String,
-      instagram: String,
-      vk: String,
-      site: String,
+      telegram: { type: String, required: false },
+      instagram: { type: String, required: false },
+      vk: { type: String, required: false },
+      site: { type: String, required: false },
     },
     _id: false,
+    required: false,
   })
   socials?: ISocial;
-  @Prop({ type: [String] }) courses?: string[];
-  @Prop({ type: [String] }) programs?: string[];
-  @Prop({ type: [String] }) specializations?: string[];
-  @Prop({ type: [String] }) narrow_specializations?: string[];
-  @Prop() is_eula_approved?: boolean;
-  @Prop() getcourse_id?: string;
+  @Prop({ type: [String], required: false }) courses?: string[];
+  @Prop({ type: [String], required: false }) programs?: string[];
+  @Prop({ type: [String], required: false }) specializations?: string[];
+  @Prop({ type: [String], required: false }) narrow_specializations?: string[];
+  @Prop({ type: Boolean, required: false }) is_eula_approved?: boolean;
+  @Prop({ type: Boolean, required: false }) getcourse_id?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserEntity);

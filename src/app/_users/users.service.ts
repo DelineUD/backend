@@ -4,10 +4,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 
 import { AuthLoginDto } from '@app/_auth/dto/auth-login.dto';
+import { UserCreateDto } from '@app/_users/dto/user-create.dto';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 import { UserEntity } from './entities/user.entity';
 import { IUser } from './interfaces/user.interface';
+import { createUserMapper } from '@app/_users/users.mapper';
 
 const logger = new Logger('Users');
 
@@ -15,12 +17,21 @@ const logger = new Logger('Users');
 export class UsersService {
   constructor(@InjectModel(UserEntity.name) private readonly userModel: Model<UserEntity>) {}
 
+  async create(dto: UserCreateDto): Promise<IUser> {
+    try {
+      return await this.userModel.create(createUserMapper(dto));
+    } catch (err) {
+      logger.error(`Error while create: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
   async findAll(filter: FilterQuery<Partial<IUser>>): Promise<IUser[]> {
     try {
-      return this.userModel.find({ ...filter }).exec();
+      return await this.userModel.find({ ...filter }).exec();
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
-      throw new EntityNotFoundError(err);
+      throw new EntityNotFoundError();
     }
   }
 
@@ -29,24 +40,22 @@ export class UsersService {
       return await this.userModel.findOne({ ...where }).exec();
     } catch (err) {
       logger.error(`Error while findOne: ${(err as Error).message}`);
-      throw err;
+      throw new EntityNotFoundError();
     }
   }
 
   async findByLogin({ phone, password }: AuthLoginDto): Promise<IUser> {
     try {
       const validPhone = transformPhoneNumber(phone);
-      const useInDb = await this.userModel.findOne({ phone: validPhone }).exec();
+      const userInDb = await this.userModel.findOne({ phone: validPhone }).exec();
 
-      if (!useInDb) throw new EntityNotFoundError(`Пользователь с телефоном ${validPhone} не найден`);
+      if (!userInDb) throw new EntityNotFoundError('Пользователь с этим номером не зарегистрирован');
 
-      const areEqual = await compare(password, useInDb.password);
+      const areEqual = await compare(password, userInDb.password);
 
-      if (!areEqual) {
-        throw new BadRequestException('Неверный пароль!');
-      }
+      if (!areEqual) throw new BadRequestException('Неверный пароль.');
 
-      return useInDb;
+      return userInDb;
     } catch (err) {
       logger.error(`Error while findByLogin: ${(err as Error).message}`);
       throw err;
@@ -56,48 +65,19 @@ export class UsersService {
   async findByPhone(phone: string): Promise<IUser> {
     try {
       const validPhone = transformPhoneNumber(phone);
-      const useInDb = await this.userModel.findOne({ phone: validPhone }).exec();
 
-      if (!useInDb) throw new EntityNotFoundError(`Пользователь не найден`);
-
-      return useInDb;
+      return await this.userModel.findOne({ phone: validPhone }).exec();
     } catch (err) {
       logger.error(`Error while findByPhone: ${err}`);
       throw err;
     }
   }
 
-  async updateByPayload(where: Partial<IUser>, payload: Partial<IUser>): Promise<IUser> {
-    try {
-      const updatedUser = await this.userModel.findOneAndUpdate({ ...where }, { ...payload }, { new: true });
-
-      if (!updatedUser) throw new EntityNotFoundError('Пользователь не найден');
-
-      return updatedUser;
-    } catch (err) {
-      logger.error(`Error while updateByPayload: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async deleteUser(userId: Types.ObjectId): Promise<void> {
+  async deleteOne(userId: Types.ObjectId): Promise<void> {
     try {
       await this.userModel.findOneAndDelete({ _id: userId });
     } catch (err) {
       logger.error(`Error while deleteUser: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async deleteProperty(userId: Types.ObjectId | string, prop: object): Promise<void> {
-    try {
-      const result = await this.userModel.updateOne({ _id: userId }, { $unset: prop });
-
-      if (!result) throw new EntityNotFoundError(`Не найдено`);
-
-      return;
-    } catch (err) {
-      logger.error(`Error while deleteProperty: ${(err as Error).message}`);
       throw err;
     }
   }

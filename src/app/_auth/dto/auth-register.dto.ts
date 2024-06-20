@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
-import { StatusFilterKeys } from '@app/filters/consts';
 import { UserCreateDto } from '@app/_users/dto/user-create.dto';
+import { EUserStatus } from '@shared/consts/user-status.enum';
+import { EUserFormat } from '@shared/consts/user-format.enum';
 
 export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ example: '+79123456789', description: 'Номер телефона пользователя' })
@@ -25,20 +26,20 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ example: 'Москва', description: 'Город пользователя' })
   city: string;
 
-  @ApiProperty({ example: 'Россия', description: 'Страна пользователя' })
-  country: string;
+  @ApiPropertyOptional({ example: 'Россия', description: 'Страна пользователя' })
+  country?: string;
 
-  @ApiProperty({ enum: StatusFilterKeys, description: 'Статус пользователя' })
-  status: StatusFilterKeys;
+  @ApiProperty({ enum: EUserStatus, description: 'Статус пользователя' })
+  status: EUserStatus;
 
-  @ApiProperty({ example: true, description: 'Готовность пользователя к общению' })
-  ready_communicate: boolean;
-
-  @ApiProperty({ example: true, description: 'Предпочтение пользователя к удаленной работе' })
-  remote_work: boolean;
+  @ApiProperty({ enum: EUserFormat, description: 'Предпочтение пользователя к удаленной работе' })
+  format: EUserFormat;
 
   @ApiPropertyOptional({ example: 'Магистр компьютерных наук', description: 'Квалификация пользователя' })
-  qualification?: string;
+  qualification: string;
+
+  @ApiPropertyOptional({ type: 'string', format: 'binary' })
+  avatar?: any;
 
   @ApiPropertyOptional({ example: 'Краткое описание пользователя', description: 'Информация о пользователе' })
   about?: string;

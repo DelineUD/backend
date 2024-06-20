@@ -1,8 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
+import { genSalt, hash } from 'bcrypt';
 
 import { SmsService } from '@app/sms/sms.service';
 import { UsersService } from '@app/_users/users.service';
+import { AuthRegisterOtpDto } from '@app/_auth/dto/auth-register-otp.dto';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { FilterKeys } from '@app/filters/consts';
+import { FiltersService } from '@app/filters/filters.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { AuthRegisterDto } from './dto/auth-register.dto';
 import { IAuthRegisterResponse } from './types/auth-register-response';
@@ -25,18 +30,30 @@ export class AuthService {
     private readonly tokensService: TokensService,
     private readonly codesService: CodesService,
     private readonly smsService: SmsService,
+    private readonly filtersService: FiltersService,
     private readonly usersService: UsersService,
   ) {}
 
-  async register(dto: AuthRegisterDto): Promise<IAuthRegisterResponse> {
+  async register({ password, ...dto }: AuthRegisterDto, avatar: Express.Multer.File): Promise<IAuthRegisterResponse> {
     try {
-      const res = {}; // TODO create user
+      const salt = await genSalt(10);
+      const hashPassword = await hash(password, salt);
 
-      if (!res) throw new BadRequestException('Ошибка при регистрации!');
+      const user = await this.usersService.create({ ...dto, avatar, password: hashPassword });
 
-      const tokens = { access_token: '', refresh_token: '' }; // TODO create tokens
+      if (!user) throw new BadRequestException('Произошла непредвиденная ошибка!');
 
-      return tokens as unknown as IAuthLoginResponse;
+      const updateFilters: UpdateFiltersDto = {
+        [FilterKeys.Country]: user.contact_info.country,
+        [FilterKeys.City]: user.contact_info.city,
+        [FilterKeys.Spec]: user.specializations,
+        [FilterKeys.NarrowSpec]: user.narrow_specializations,
+        [FilterKeys.Programs]: user.programs,
+        [FilterKeys.Courses]: user.courses,
+      };
+      this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
+
+      return await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
     } catch (err) {
       logger.error(`Error while register: ${(err as Error).message}`);
       throw err;
@@ -47,8 +64,6 @@ export class AuthService {
     try {
       const userInDb = await this.usersService.findByLogin(dto);
 
-      if (!userInDb) throw new EntityNotFoundError();
-
       const tokens = await this.tokensService.generateTokens({
         _id: userInDb._id,
         phone: userInDb.phone,
@@ -56,9 +71,51 @@ export class AuthService {
       });
       await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
 
-      return tokens as unknown as IAuthLoginResponse;
+      return tokens;
     } catch (err) {
       logger.error(`Error while login: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async registerOtp(dto: AuthRegisterOtpDto): Promise<void> {
+    const { phone, otp } = dto;
+
+    if (!phone || !otp) throw new BadRequestException('Неверные данные!');
+
+    const userInDb = await this.usersService.findByPhone(phone);
+    if (userInDb) throw new BadRequestException(`Пользователь c этим номером уже зарегистрирован.`);
+
+    const otpCode = await this.codesService.findCodeByPayload({
+      user_phone: userInDb.phone,
+    });
+    if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
+
+    if (otpCode.otp !== +otp && Number(process.env.QUICK_CODE) !== +otp)
+      throw new ForbiddenException(`Неверно введен код из СМС.`);
+
+    return;
+  }
+
+  async registerOtpSend(dto: AuthSendOtpDto): Promise<void> {
+    try {
+      const { phone } = dto;
+
+      const userInDb = await this.usersService.findByPhone(phone);
+      if (userInDb) throw new BadRequestException(`Пользователь c этим номером уже зарегистрирован.`);
+
+      const otpCode = await this.codesService.generateCode({ userPhone: userInDb.phone });
+      const msg = `Код для подтверждения: ${otpCode.otp}.`;
+
+      const { status_code } = await this.smsService.send(phone, msg);
+      if (status_code !== 100) {
+        await this.codesService.deleteCodeById(otpCode._id);
+        throw new BadRequestException('Ошибка при отправке sms!');
+      }
+
+      return;
+    } catch (err) {
+      logger.error(`Error while sendSms: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -73,8 +130,7 @@ export class AuthService {
       if (!userInDb) throw new EntityNotFoundError(`Пользователь не найден`);
 
       const authCode = await this.codesService.findCodeByPayload({
-        userId: userInDb._id,
-        userPhone: userInDb.phone,
+        user_phone: userInDb.phone,
       });
       if (!authCode) throw new ForbiddenException(`Срок действия кода истек!`);
 
@@ -96,14 +152,14 @@ export class AuthService {
     }
   }
 
-  async sendOtp(dto: AuthSendOtpDto): Promise<void> {
+  async loginOtpSend(dto: AuthSendOtpDto): Promise<void> {
     try {
       const { phone } = dto;
 
       const userInDb = await this.usersService.findByPhone(phone);
       if (!userInDb) throw new EntityNotFoundError(`Пользователь не найден`);
 
-      const authCode = await this.codesService.generateCode(userInDb._id, userInDb.phone);
+      const authCode = await this.codesService.generateCode({ userPhone: userInDb.phone });
       const msg = `${authCode.otp} — ваш код для входа в приложение Умный Дизайн. Никому не сообщайте его!`;
 
       const { status_code } = await this.smsService.send(userInDb.phone, msg);

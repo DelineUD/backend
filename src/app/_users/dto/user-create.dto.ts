@@ -1,5 +1,5 @@
 import {
-  IsBoolean,
+  IsBooleanString,
   IsDateString,
   IsEmail,
   IsEnum,
@@ -9,7 +9,8 @@ import {
   IsString,
 } from 'class-validator';
 
-import { StatusFilterKeys } from '@app/filters/consts';
+import { EUserStatus } from '@shared/consts/user-status.enum';
+import { EUserFormat } from '@shared/consts/user-format.enum';
 
 export class UserCreateDto {
   @IsPhoneNumber('RU')
@@ -31,17 +32,17 @@ export class UserCreateDto {
   @IsNotEmpty()
   city: string;
   @IsString()
-  @IsNotEmpty()
-  country: string;
-  @IsEnum(StatusFilterKeys)
-  status: StatusFilterKeys;
-  @IsBoolean()
-  ready_communicate: boolean;
-  @IsBoolean()
-  remote_work: boolean;
+  @IsOptional()
+  country?: string;
+  @IsEnum(EUserStatus)
+  status: EUserStatus;
+  @IsEnum(EUserFormat)
+  format: EUserFormat;
+  @IsString()
+  qualification: string;
   @IsString()
   @IsOptional()
-  qualification?: string;
+  avatar?: any;
   @IsString()
   @IsOptional()
   about?: string;
@@ -57,10 +58,10 @@ export class UserCreateDto {
   @IsString()
   @IsOptional()
   site?: string;
-  @IsBoolean()
+  @IsBooleanString()
   @IsOptional()
   is_hide_phone?: boolean;
-  @IsBoolean()
+  @IsBooleanString()
   @IsOptional()
   is_hide_birthday?: boolean;
   @IsString()

@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 
-import { StatusFilterKeys } from '@app/filters/consts';
+import { EUserStatus } from '@shared/consts/user-status.enum';
+import { EUserFormat } from '@shared/consts/user-format.enum';
 
 export interface IContact {
   city: string;
@@ -20,11 +21,10 @@ export interface IPreference {
 }
 
 export interface IAdditional {
-  remote_work: boolean;
-  ready_communicate: boolean;
-  status: StatusFilterKeys;
-  qualification?: string;
-  about: string;
+  format: EUserFormat;
+  status: EUserStatus;
+  qualification: string;
+  about?: string;
 }
 
 export interface IBun {

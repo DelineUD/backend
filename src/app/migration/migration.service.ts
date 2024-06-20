@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { PostModel } from '@app/posts/models/posts.model';
+import { PostCommentsModel } from '@app/posts/models/posts-comments.model';
 
 const logger = new Logger('Migrations');
 
@@ -11,6 +12,8 @@ export class MigrationService {
   constructor(
     @InjectModel(PostModel.name)
     private readonly postModel: Model<PostModel>,
+    @InjectModel(PostCommentsModel.name)
+    private readonly postCommentModel: Model<PostCommentsModel>,
   ) {}
 
   async runMigrations() {
@@ -61,6 +64,22 @@ export class MigrationService {
   async migration1() {
     try {
       await this.postModel.updateMany({ pImg: { $exists: true }, files: { $exists: false } }, [
+        {
+          $set: {
+            files: {
+              $map: {
+                input: '$pImg',
+                as: 'url',
+                in: { type: 'image', url: '$$url' },
+              },
+            },
+          },
+        },
+        {
+          $unset: 'pImg',
+        },
+      ]);
+      await this.postCommentModel.updateMany({ pImg: { $exists: true }, files: { $exists: false } }, [
         {
           $set: {
             files: {

@@ -16,28 +16,28 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 
+import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
+import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
+import { ILike } from '@app/posts/interfaces/like.interface';
+import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
+import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
-import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
-import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
-import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
-import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
-import { IPostsCommentsFindParams, IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
-import { ILike } from '@app/posts/interfaces/like.interface';
+import { fileStorageConfig } from '@shared/storage/storage.config';
+import { mediaFileFilter } from '@utils/mediaFileFilter';
+import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
+import { CreatePostCommentDto } from './dto/create-post-comment.dto';
 import { CreatePostDto } from './dto/create.post.dto';
 import { DeletePostDto } from './dto/delete.post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsHideDto } from './dto/posts-hide.dto';
-import { CreatePostCommentDto } from './dto/create-post-comment.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-access.guard';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { ICPosts, ICPostsResponse } from './interfaces/posts.comments.interface';
 import { IPostsResponse } from './interfaces/posts.interface';
 import { PostsService } from './posts.service';
-import { fileStorageConfig } from '@shared/storage/storage.config';
-import { mediaFileFilter } from '@utils/mediaFileFilter';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
@@ -106,7 +106,7 @@ export class PostsController {
     @Body() updatePostDto: UpdatePostDto,
     @UploadedFiles() uploadedFiles: Express.Multer.File[],
   ): Promise<IPostsResponse> {
-    return await this.postsService.update(userId, updatePostDto, uploadedFiles);
+    return await this.postsService.update(userId, updatePostDto, uploadedFiles ?? []);
   }
 
   /**
@@ -199,7 +199,7 @@ export class PostsController {
     @Body() createComments: CreatePostCommentDto,
     @UploadedFiles() uploadedFiles: Express.Multer.File[],
   ): Promise<ICPosts> {
-    return await this.postsService.createComment(userId, createComments, uploadedFiles);
+    return await this.postsService.createComment(userId, createComments, uploadedFiles ?? []);
   }
 
   /**

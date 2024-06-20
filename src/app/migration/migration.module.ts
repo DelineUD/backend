@@ -2,16 +2,23 @@ import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { PostModel, PostsSchema } from '@app/posts/models/posts.model';
+import { PostCommentsModel, PostCommentsSchema } from '@app/posts/models/posts-comments.model';
 import { MigrationService } from './migration.service';
 
 const logger = new Logger('Migrations');
 
 @Module({
   imports: [
-    MongooseModule.forFeatureAsync([
+    MongooseModule.forFeature([
       {
         name: PostModel.name,
-        useFactory: () => PostsSchema,
+        schema: () => PostsSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: PostCommentsModel.name,
+        schema: () => PostCommentsSchema,
       },
     ]),
   ],

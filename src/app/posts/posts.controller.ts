@@ -183,15 +183,23 @@ export class PostsController {
    * Создание нового комментария к посту.
    * @param userId - id пользователя.
    * @param createComments - Данные для создания поста.
+   * @param uploadedFiles - файлы
    * @returns - Созданный комментарий.
    */
   @Post('comments/create')
   @UsePipes(new ValidationPipe({ transform: true }))
+  @UseInterceptors(
+    FilesInterceptor('uploadedFiles', 4, {
+      storage: fileStorageConfig,
+      fileFilter: mediaFileFilter,
+    }),
+  )
   public async createComment(
     @UserId() userId: Types.ObjectId,
     @Body() createComments: CreatePostCommentDto,
+    @UploadedFiles() uploadedFiles: Express.Multer.File[],
   ): Promise<ICPosts> {
-    return await this.postsService.createComment(userId, createComments);
+    return await this.postsService.createComment(userId, createComments, uploadedFiles);
   }
 
   /**

@@ -253,23 +253,29 @@ export class PostsService {
     }
   }
 
-  async createComment(userId: Types.ObjectId, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
+  async createComment(
+    userId: Types.ObjectId,
+    createCommentDto: CreatePostCommentDto,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<ICPosts> {
     try {
-      const dto = createCommentDto;
+      const { files, ...dto } = createCommentDto;
 
       const postInDb = await this.postModel.findOne({ _id: dto.postId }).exec();
-      if (!postInDb) {
-        throw new EntityNotFoundError(`Запись не найдена`);
-      }
+      if (!postInDb) throw new EntityNotFoundError(`Запись не найдена`);
+
+      const uploadedCommentFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
 
       const initialCommentValues = {
         likes: [],
         countLikes: 0,
         isLiked: false,
       };
+
       const comment = await this.postCommentsModel.create({
         ...dto,
         ...initialCommentValues,
+        files: files ? files.concat(uploadedCommentFiles) : uploadedCommentFiles,
         author: userId,
       });
 

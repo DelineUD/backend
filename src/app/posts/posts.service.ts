@@ -11,12 +11,14 @@ import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
 import { ILike } from '@app/posts/interfaces/like.interface';
+import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
 import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
 import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
 import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { UserModel } from '@app/users/models/user.model';
+import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { UsersService } from '../users/users.service';
@@ -26,8 +28,6 @@ import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
-import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
-import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 
 const logger = new Logger('Posts');
 
@@ -56,7 +56,7 @@ export class PostsService {
         countComments: 0,
       };
 
-      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles ?? []);
 
       const post = await this.postModel.create({
         ...createPostDto,

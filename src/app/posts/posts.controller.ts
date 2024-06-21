@@ -188,6 +188,7 @@ export class PostsController {
    */
   @Post('comments/create')
   @UsePipes(new ValidationPipe({ transform: true }))
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FilesInterceptor('uploadedFiles', 4, {
       storage: fileStorageConfig,

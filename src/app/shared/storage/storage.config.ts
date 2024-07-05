@@ -9,8 +9,8 @@ configDotenv({ path: path.resolve(`envs/.${process.env.NODE_ENV}.env`) });
 
 export const fileStorageConfig = diskStorage({
   destination: (req, file, callback) => {
-    const isImage = file.originalname.match(/\.(jpg|jpeg|png|gif)$/);
-    const isVideo = file.originalname.match(/\.(mp4|avi|mov)$/);
+    const isImage = file.originalname.match(/\.(jpe?g|JPE?G|png|PNG|gif|GIF)$/);
+    const isVideo = file.originalname.match(/\.(mp4|MP4|avi|AVI|mov|MOV)$/);
 
     let uploadPath: string;
 

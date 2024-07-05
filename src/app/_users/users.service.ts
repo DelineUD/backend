@@ -5,11 +5,11 @@ import { FilterQuery, Model, Types } from 'mongoose';
 
 import { AuthLoginDto } from '@app/_auth/dto/auth-login.dto';
 import { UserCreateDto } from '@app/_users/dto/user-create.dto';
+import { createUserMapper } from '@app/_users/mappers/create-user.mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 import { UserEntity } from './entities/user.entity';
 import { IUser } from './interfaces/user.interface';
-import { createUserMapper } from '@app/_users/users.mapper';
 
 const logger = new Logger('Users');
 
@@ -17,7 +17,7 @@ const logger = new Logger('Users');
 export class UsersService {
   constructor(@InjectModel(UserEntity.name) private readonly userModel: Model<UserEntity>) {}
 
-  async create(dto: UserCreateDto): Promise<IUser> {
+  async create(dto: UserCreateDto): Promise<UserEntity> {
     try {
       return await this.userModel.create(createUserMapper(dto));
     } catch (err) {
@@ -26,7 +26,7 @@ export class UsersService {
     }
   }
 
-  async findAll(filter: FilterQuery<Partial<IUser>>): Promise<IUser[]> {
+  async findAll(filter: FilterQuery<Partial<IUser>>): Promise<UserEntity[]> {
     try {
       return await this.userModel.find({ ...filter }).exec();
     } catch (err) {
@@ -44,7 +44,7 @@ export class UsersService {
     }
   }
 
-  async findByLogin({ phone, password }: AuthLoginDto): Promise<IUser> {
+  async findByLogin({ phone, password }: AuthLoginDto): Promise<UserEntity> {
     try {
       const validPhone = transformPhoneNumber(phone);
       const userInDb = await this.userModel.findOne({ phone: validPhone }).exec();
@@ -62,7 +62,7 @@ export class UsersService {
     }
   }
 
-  async findByPhone(phone: string): Promise<IUser> {
+  async findByPhone(phone: string): Promise<UserEntity> {
     try {
       const validPhone = transformPhoneNumber(phone);
 

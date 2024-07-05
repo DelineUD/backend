@@ -3,7 +3,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 
-import { ISendSmsResponse } from '@app/sms/interfaces/send-sms-response.interface';
+import { ISendSmsResponse } from './interfaces/send-sms-response.interface';
 
 @Injectable()
 export class SmsService {

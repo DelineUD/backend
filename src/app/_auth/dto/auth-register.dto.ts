@@ -5,13 +5,13 @@ import { EUserStatus } from '@shared/consts/user-status.enum';
 import { EUserFormat } from '@shared/consts/user-format.enum';
 
 export class AuthRegisterDto extends PartialType(UserCreateDto) {
-  @ApiProperty({ example: '+79123456789', description: 'Номер телефона пользователя' })
+  @ApiProperty({ example: '+79992456800', description: 'Номер телефона пользователя' })
   phone: string;
 
   @ApiProperty({ example: 'user@example.com', description: 'Электронная почта пользователя' })
   email: string;
 
-  @ApiProperty({ example: 'password123', description: 'Пароль пользователя' })
+  @ApiProperty({ example: 'root', description: 'Пароль пользователя' })
   password: string;
 
   @ApiProperty({ example: 'Иван', description: 'Имя пользователя' })
@@ -35,7 +35,7 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ enum: EUserFormat, description: 'Предпочтение пользователя к удаленной работе' })
   format: EUserFormat;
 
-  @ApiPropertyOptional({ example: 'Магистр компьютерных наук', description: 'Квалификация пользователя' })
+  @ApiProperty({ example: 'Магистр компьютерных наук', description: 'Квалификация пользователя' })
   qualification: string;
 
   @ApiPropertyOptional({ type: 'string', format: 'binary' })

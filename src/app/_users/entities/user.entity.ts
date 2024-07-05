@@ -5,7 +5,6 @@ import { IAdditional, IBun, IContact, IPreference, ISocial, IUser } from '../int
 
 @Schema({ collection: '_users', timestamps: true })
 export class UserEntity extends Document implements IUser {
-  @Prop({ required: true, type: Types.ObjectId }) _id: Types.ObjectId;
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) email: string;
   @Prop({ required: true }) password: string;

@@ -1,5 +1,4 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,8 +6,8 @@ import { Model, Types } from 'mongoose';
 
 import { Tokens } from '@app/_auth/entities/tokens.entity';
 import { IAuthTokens } from '@app/_auth/interfaces/auth-tokens.interface';
-import { IUser } from '@app/_users/interfaces/user.interface';
 import { IJwtPayload } from '@app/_auth/interfaces/jwt.interface';
+import { UserEntity } from '@app/_users/entities/user.entity';
 
 @Injectable()
 export class TokensService {
@@ -22,16 +21,16 @@ export class TokensService {
   async findUserRefreshToken(userId: Types.ObjectId) {
     try {
       const token = this.tokensModel.findOne({ userId });
-      if (!token) {
-        throw new UnauthorizedException('Невалидный токен!');
-      }
+
+      if (!token) throw new UnauthorizedException('Невалидный токен!');
+
       return token;
     } catch (err) {
       throw err;
     }
   }
 
-  async generateTokens(payload: Pick<IUser, '_id' | 'phone' | 'email'>): Promise<IAuthTokens> {
+  async generateTokens(payload: Pick<UserEntity, '_id' | 'phone' | 'email'>): Promise<IAuthTokens> {
     try {
       const [access_token, refresh_token] = await Promise.all([
         this.jwtService.signAsync(
@@ -58,7 +57,7 @@ export class TokensService {
 
   async updateRefreshToken(userId: Types.ObjectId, token: string) {
     try {
-      return await this.tokensModel.findOneAndUpdate({ userId }, { refresh_token: token }, { upsert: true });
+      return await this.tokensModel.findOneAndUpdate({ user_id: userId }, { refresh_token: token }, { upsert: true });
     } catch (err) {
       throw err;
     }

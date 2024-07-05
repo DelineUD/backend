@@ -8,19 +8,19 @@ import { AuthRegisterOtpDto } from '@app/_auth/dto/auth-register-otp.dto';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { FilterKeys } from '@app/filters/consts';
 import { FiltersService } from '@app/filters/filters.service';
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { AuthRegisterDto } from './dto/auth-register.dto';
-import { IAuthRegisterResponse } from './types/auth-register-response';
 import { AuthLoginDto } from './dto/auth-login.dto';
-import { IAuthLoginResponse } from './types/auth-login-response';
+import { AuthLoginResponseType } from './types/auth-login-response.type';
 import { AuthLoginOtpDto } from './dto/auth-login-otp.dto';
 import { AuthSendOtpDto } from './dto/auth-send-otp.dto';
-import { AuthProfileCheckDto } from './dto/auth-profile-check.dto';
 import { CodesService } from './services/codes.service';
 import { TokensService } from './services/tokens.service';
 import { IAuthTokens } from './interfaces/auth-tokens.interface';
 import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
+import { AuthRegisterResponseType } from './types/auth-register-response.type';
+import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 import { IProfileResponse } from './interfaces/profile-response.interface';
+import { profileMapper } from './mappers/profile.mapper';
 
 const logger = new Logger('_Auth');
 
@@ -34,12 +34,21 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async register({ password, ...dto }: AuthRegisterDto, avatar: Express.Multer.File): Promise<IAuthRegisterResponse> {
+  async register(
+    { password, ...dto }: AuthRegisterDto,
+    avatar: Express.Multer.File,
+  ): Promise<AuthRegisterResponseType> {
     try {
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
 
-      const user = await this.usersService.create({ ...dto, avatar, password: hashPassword });
+      const pathToAvatar = avatar ? `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${avatar.filename}` : null;
+
+      const user = await this.usersService.create({
+        ...dto,
+        avatar: pathToAvatar,
+        password: hashPassword,
+      });
 
       if (!user) throw new BadRequestException('Произошла непредвиденная ошибка!');
 
@@ -60,7 +69,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: AuthLoginDto): Promise<IAuthLoginResponse> {
+  async login(dto: AuthLoginDto): Promise<AuthLoginResponseType> {
     try {
       const userInDb = await this.usersService.findByLogin(dto);
 
@@ -84,50 +93,52 @@ export class AuthService {
     if (!phone || !otp) throw new BadRequestException('Неверные данные!');
 
     const userInDb = await this.usersService.findByPhone(phone);
-    if (userInDb) throw new BadRequestException(`Пользователь c этим номером уже зарегистрирован.`);
+    if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
     const otpCode = await this.codesService.findCodeByPayload({
-      user_phone: userInDb.phone,
+      user_phone: phone,
     });
     if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
 
     if (otpCode.otp !== +otp && Number(process.env.QUICK_CODE) !== +otp)
       throw new ForbiddenException(`Неверно введен код из СМС.`);
 
+    await this.codesService.deleteCodeById(otpCode._id);
+
     return;
   }
 
-  async registerOtpSend(dto: AuthSendOtpDto): Promise<void> {
+  async registerOtpSend(dto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     try {
       const { phone } = dto;
 
       const userInDb = await this.usersService.findByPhone(phone);
-      if (userInDb) throw new BadRequestException(`Пользователь c этим номером уже зарегистрирован.`);
+      if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-      const otpCode = await this.codesService.generateCode({ userPhone: userInDb.phone });
+      const otpCode = await this.codesService.generateCode({ userPhone: phone });
       const msg = `Код для подтверждения: ${otpCode.otp}.`;
 
-      const { status_code } = await this.smsService.send(phone, msg);
-      if (status_code !== 100) {
+      const smsRes = await this.smsService.send(phone, msg);
+      if (smsRes.status_code !== 100) {
         await this.codesService.deleteCodeById(otpCode._id);
         throw new BadRequestException('Ошибка при отправке sms!');
       }
 
-      return;
+      return smsRes;
     } catch (err) {
       logger.error(`Error while sendSms: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async loginOtp(dto: AuthLoginOtpDto): Promise<IAuthLoginResponse> {
+  async loginOtp(dto: AuthLoginOtpDto): Promise<AuthLoginResponseType> {
     try {
       const { phone, otp } = dto;
 
       if (!phone || !otp) throw new BadRequestException('Неверные данные для входа!');
 
       const userInDb = await this.usersService.findByPhone(phone);
-      if (!userInDb) throw new EntityNotFoundError(`Пользователь не найден`);
+      if (!userInDb) throw new BadRequestException('Пользователь c этим номером не зарегистрирован.');
 
       const authCode = await this.codesService.findCodeByPayload({
         user_phone: userInDb.phone,
@@ -145,30 +156,30 @@ export class AuthService {
       await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
       await this.codesService.deleteCodeById(authCode._id);
 
-      return tokens as unknown as IAuthLoginResponse;
+      return tokens;
     } catch (err) {
       logger.error(`Error while loginOtp: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async loginOtpSend(dto: AuthSendOtpDto): Promise<void> {
+  async loginOtpSend(dto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     try {
       const { phone } = dto;
 
       const userInDb = await this.usersService.findByPhone(phone);
-      if (!userInDb) throw new EntityNotFoundError(`Пользователь не найден`);
+      if (!userInDb) throw new BadRequestException('Пользователь c этим номером не зарегистрирован.');
 
       const authCode = await this.codesService.generateCode({ userPhone: userInDb.phone });
       const msg = `${authCode.otp} — ваш код для входа в приложение Умный Дизайн. Никому не сообщайте его!`;
 
-      const { status_code } = await this.smsService.send(userInDb.phone, msg);
-      if (status_code !== 100) {
+      const smsRes = await this.smsService.send(userInDb.phone, msg);
+      if (smsRes.status_code !== 100) {
         await this.codesService.deleteCodeById(authCode._id);
         throw new BadRequestException('Ошибка при отправке sms!');
       }
 
-      return;
+      return smsRes;
     } catch (err) {
       logger.error(`Error while sendSms: ${(err as Error).message}`);
       throw err;
@@ -201,18 +212,6 @@ export class AuthService {
     }
   }
 
-  async checkProfile(dto: AuthProfileCheckDto): Promise<void> {
-    try {
-      const userInDb = await this.usersService.findOne({ ...dto });
-
-      if (!userInDb) throw new EntityNotFoundError(`Пользователь не найден`);
-
-      return;
-    } catch (err) {
-      logger.error(`Error while checkProfile: ${(err as Error).message}`);
-    }
-  }
-
   async getProfile(req: Request): Promise<IProfileResponse> {
     try {
       const user = req.user;
@@ -220,15 +219,7 @@ export class AuthService {
       const userInDb = await this.usersService.findOne({ ...user });
       if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
 
-      return {
-        _id: userInDb._id,
-        first_name: userInDb.first_name,
-        last_name: userInDb.last_name,
-        phone: userInDb.phone,
-        email: userInDb.email,
-        avatar: userInDb.avatar ?? null,
-        is_eula_approved: userInDb.is_eula_approved ?? false,
-      };
+      return profileMapper(userInDb);
     } catch (err) {
       logger.error(`Error while getMe: ${(err as Error).message}`);
       throw err;

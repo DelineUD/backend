@@ -34,7 +34,6 @@ export interface IBun {
 }
 
 export interface IUser {
-  _id: Types.ObjectId;
   phone: string;
   email: string;
   password: string;

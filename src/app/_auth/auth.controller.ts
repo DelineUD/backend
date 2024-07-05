@@ -17,7 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 
 import { fileStorage } from '@shared/storage';
-import { IUser } from '@app/_users/interfaces/user.interface';
+import { UserEntity } from '@app/_users/entities/user.entity';
 import { AuthRegisterOtpDto } from '@app/_auth/dto/auth-register-otp.dto';
 import { imageFileFilter } from '@utils/imageFileFilter';
 import { JwtAuthRefreshGuard } from './guards/jwt-refresh.guard';
@@ -26,10 +26,10 @@ import { AuthRegisterDto } from './dto/auth-register.dto';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthLoginOtpDto } from './dto/auth-login-otp.dto';
 import { AuthSendOtpDto } from './dto/auth-send-otp.dto';
-import { AuthProfileCheckDto } from './dto/auth-profile-check.dto';
 import { IAuthTokens } from './interfaces/auth-tokens.interface';
-import { IAuthRegisterResponse } from './types/auth-register-response';
-import { IAuthLoginResponse } from './types/auth-login-response';
+import { AuthRegisterResponseType } from './types/auth-register-response.type';
+import { AuthLoginResponseType } from './types/auth-login-response.type';
+import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 import { AuthService } from './auth.service';
 
 @ApiTags('_Auth')
@@ -56,7 +56,7 @@ export class AuthController {
   public async register(
     @Body() authRegisterDto: AuthRegisterDto,
     @UploadedFile() avatar: Express.Multer.File,
-  ): Promise<IAuthRegisterResponse> {
+  ): Promise<AuthRegisterResponseType> {
     return await this.authService.register(authRegisterDto, avatar);
   }
 
@@ -68,7 +68,7 @@ export class AuthController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @HttpCode(HttpStatus.OK)
   @Post('register/send/otp')
-  public async registerOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<void> {
+  public async registerOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     return await this.authService.registerOtpSend(authSendOtpDto);
   }
 
@@ -91,7 +91,7 @@ export class AuthController {
    */
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post('login')
-  public async login(@Body() authLoginDto: AuthLoginDto): Promise<IAuthLoginResponse> {
+  public async login(@Body() authLoginDto: AuthLoginDto): Promise<AuthLoginResponseType> {
     return await this.authService.login(authLoginDto);
   }
 
@@ -102,7 +102,7 @@ export class AuthController {
    */
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post('login/otp')
-  public async loginOtp(@Body() authLoginOtpDto: AuthLoginOtpDto): Promise<IAuthLoginResponse> {
+  public async loginOtp(@Body() authLoginOtpDto: AuthLoginOtpDto): Promise<AuthLoginResponseType> {
     return await this.authService.loginOtp(authLoginOtpDto);
   }
 
@@ -114,7 +114,7 @@ export class AuthController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @HttpCode(HttpStatus.OK)
   @Post('login/send/otp')
-  public async loginOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<void> {
+  public async loginOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     return await this.authService.loginOtpSend(authSendOtpDto);
   }
 
@@ -132,17 +132,6 @@ export class AuthController {
   }
 
   /**
-   * Проверка пользователя на регистрацию
-   * @param authProfileCheckDto - данные проверки пользователя на регистрацию
-   * @returns - 200 | 400
-   */
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @Get('profile/check')
-  async profileCheck(@Body() authProfileCheckDto: AuthProfileCheckDto): Promise<void> {
-    return this.authService.checkProfile(authProfileCheckDto);
-  }
-
-  /**
    * Получение пользователя
    * @param req - данные запрса через access стратегию
    * @returns -   пользователь
@@ -150,7 +139,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('defaultBearerAuth')
   @Get('profile')
-  async getMe(@Req() req: Request): Promise<Partial<IUser>> {
+  async getMe(@Req() req: Request): Promise<Partial<UserEntity>> {
     return this.authService.getProfile(req);
   }
 }

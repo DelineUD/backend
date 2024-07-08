@@ -87,11 +87,14 @@ export class PostsService {
       if (String(userId) !== String(postInDb.authorId)) throw new BadRequestException('Нет доступа!');
 
       const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
+      const updatedFiles = files
+        ? postInDb.files.concat(files).concat(uploadedPostFiles)
+        : postInDb.files.concat(uploadedPostFiles);
 
       await postInDb
         .updateOne({
           ...updateDto,
-          files: files ? files.concat(uploadedPostFiles) : uploadedPostFiles,
+          files: updatedFiles,
         })
         .exec();
       await postInDb.save();

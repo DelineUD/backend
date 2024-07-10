@@ -1,41 +1,40 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires, import/order
-const ffmpeg2 = require('@ffmpeg-installer/ffmpeg');
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
-import * as ffmpeg from 'fluent-ffmpeg';
-import * as fs from 'fs';
+import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as ffmpeg from 'fluent-ffmpeg';
 
-const logger = new Logger('Converts');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ffmpegStatic = require('ffmpeg-static');
+
+const logger = new Logger('Convert');
 
 @Injectable()
 export class ConvertsService {
-  async convertToMp4(inputFile: Express.Multer.File, newFileName: string): Promise<Express.Multer.File> {
+  async convertToMp4(inputFilePath: string, newFileName?: string): Promise<string> {
     try {
-      const { filename } = inputFile;
+      const inputFormat = path.extname(inputFilePath).slice(1);
+      const fileName = newFileName ?? path.basename(inputFilePath).split('.')[0];
 
-      const inputFormat = path.extname(filename).slice(1);
       const outputDir = path.join(process.env.STATIC_PATH_FOLDER, process.env.VIDEOS_FOLDER);
+      const outputPath = path.join(outputDir, `${fileName}.mp4`);
 
-      const outputPath = path.join(outputDir, `${newFileName}.mp4`);
-      const inputPath = path.join(outputDir, filename);
-
-      if (!fs.existsSync(inputPath)) throw new ForbiddenException(`Failed to convert file: ${inputPath} not found`);
+      if (!fs.existsSync(inputFilePath)) {
+        throw new ForbiddenException(`Failed to convert file: ${inputFilePath} not found`);
+      }
 
       if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
-      const inputStream = fs.createReadStream(inputPath);
-      const outStream = fs.createWriteStream(outputPath);
-
-      ffmpeg.setFfmpegPath(ffmpeg2.path);
+      // Convert file to mp4
+      ffmpeg.setFfmpegPath(ffmpegStatic);
       await new Promise<void>((resolve, reject) => {
-        ffmpeg(inputPath)
+        ffmpeg(inputFilePath)
           .inputFormat(inputFormat)
           .audioCodec('aac')
           .videoCodec('libx264')
-          .outputOptions('-movflags frag_keyframe+empty_moov')
-          .toFormat('mov')
+          .outputOptions(['-movflags frag_keyframe+empty_moov', '-level 3.0'])
+          .toFormat('mp4')
           .on('progress', (progress) => {
             if (progress.percent) {
               logger.log(`Convert processing: ${Math.floor(progress.percent)}% done`);
@@ -46,31 +45,65 @@ export class ConvertsService {
             reject(err);
           })
           .on('end', () => {
-            logger.log(`${filename} converted to ${newFileName}.mp4`);
+            logger.log(`${inputFilePath} converted to ${newFileName}.mp4`);
             resolve();
           })
-          // .pipe(outStream, { end: true });
           .save(outputPath)
           .run();
       });
 
-      const stats = fs.statSync(outputPath);
-      const file: Express.Multer.File = {
-        fieldname: 'file',
-        originalname: `${newFileName}.mp4`,
-        encoding: '7bit',
-        mimetype: 'video/mp4',
-        size: stats.size,
-        destination: path.dirname(outputPath),
-        filename: path.basename(outputPath),
-        path: outputPath,
-        buffer: null,
-        stream: fs.createReadStream(outputPath),
-      };
-
-      return file;
+      return outputPath;
     } catch (err) {
       logger.error(`Error while convertToMp4: ${err.message}`);
+      throw err;
+    }
+  }
+
+  private getMulterFile(filePath: string): Express.Multer.File {
+    try {
+      const stats = fs.statSync(filePath);
+
+      return {
+        fieldname: 'file',
+        originalname: `${path.basename(filePath, path.extname(filePath))}`,
+        encoding: '7bit',
+        mimetype: `video/${path.extname(filePath).slice(1)}`,
+        size: stats.size,
+        destination: path.dirname(filePath),
+        filename: path.basename(filePath),
+        path: filePath,
+        buffer: null,
+        stream: fs.createReadStream(filePath),
+      };
+    } catch (err) {
+      logger.error(`Error while getMulterFile: ${err.message}`);
+      throw err;
+    }
+  }
+
+  async getConvertedStaticFiles(
+    uploadedFiles: Express.Multer.File[],
+    converter: (inputFilePath: string, newFileName?: string) => Promise<string>,
+  ): Promise<Express.Multer.File[]> {
+    try {
+      const convertedFilesPromises = uploadedFiles.map(async (file) => {
+        let convertedFile: Express.Multer.File;
+
+        if (file.originalname.match(/\.(avi|mov)$/i)) {
+          const inputFilePath = path.join(process.env.STATIC_PATH_FOLDER, process.env.VIDEOS_FOLDER, file.filename);
+          const outputPath = await converter(inputFilePath);
+          convertedFile = this.getMulterFile(outputPath);
+          console.log(convertedFile);
+        } else {
+          convertedFile = file;
+        }
+
+        return convertedFile;
+      });
+
+      return await Promise.all(convertedFilesPromises);
+    } catch (err) {
+      logger.error(`Error while getConvertedStaticFiles: ${err.message}`);
       throw err;
     }
   }

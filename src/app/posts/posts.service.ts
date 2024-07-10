@@ -58,20 +58,13 @@ export class PostsService {
         countComments: 0,
       };
 
-      const convertedFilesPromises = uploadedFiles.map(async (file) => {
-        let mp4File: Express.Multer.File;
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
 
-        if (file.originalname.match(/\.(avi|mov)$/i)) {
-          const newFileName = file.filename.split('.')[0];
-          mp4File = await this.convertsService.convertToMp4(file, newFileName);
-        } else {
-          mp4File = file;
-        }
-
-        return mp4File;
-      });
-      const convertedFiles: Express.Multer.File[] = await Promise.all(convertedFilesPromises);
-
+      // Files with type
       const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
 
       const post = await this.postModel.create({
@@ -102,7 +95,14 @@ export class PostsService {
       if (!postInDb) throw new EntityNotFoundError(`Запись не найдена!`);
       if (String(userId) !== String(postInDb.authorId)) throw new BadRequestException('Нет доступа!');
 
-      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
+
+      // Files with type
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
       const updatedFiles = files
         ? postInDb.files.concat(files).concat(uploadedPostFiles)
         : postInDb.files.concat(uploadedPostFiles);

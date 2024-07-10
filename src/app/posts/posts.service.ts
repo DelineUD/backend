@@ -10,6 +10,7 @@ import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
+import { ConvertsService } from '@app/converts/converts.service';
 import { ILike } from '@app/posts/interfaces/like.interface';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
@@ -37,6 +38,7 @@ export class PostsService {
     @InjectModel(PostModel.name) private readonly postModel: Model<PostModel>,
     @InjectModel(PostCommentsModel.name) private readonly postCommentsModel: Model<PostCommentsModel>,
     @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
+    private readonly convertsService: ConvertsService,
   ) {}
 
   async create(
@@ -56,7 +58,21 @@ export class PostsService {
         countComments: 0,
       };
 
-      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles ?? []);
+      const convertedFilesPromises = uploadedFiles.map(async (file) => {
+        let mp4File: Express.Multer.File;
+
+        if (file.originalname.match(/\.(avi|mov)$/i)) {
+          const newFileName = file.filename.split('.')[0];
+          mp4File = await this.convertsService.convertToMp4(file, newFileName);
+        } else {
+          mp4File = file;
+        }
+
+        return mp4File;
+      });
+      const convertedFiles: Express.Multer.File[] = await Promise.all(convertedFilesPromises);
+
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
 
       const post = await this.postModel.create({
         ...createPostDto,

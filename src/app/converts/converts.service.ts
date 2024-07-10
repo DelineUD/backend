@@ -1,8 +1,9 @@
-import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/no-var-requires, import/order
+const ffmpeg2 = require('@ffmpeg-installer/ffmpeg');
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import * as ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as ffmpeg from 'fluent-ffmpeg';
-import ffmpegStaticPath from 'ffmpeg-static';
 
 const logger = new Logger('Converts');
 
@@ -24,14 +25,17 @@ export class ConvertsService {
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
+      const inputStream = fs.createReadStream(inputPath);
       const outStream = fs.createWriteStream(outputPath);
 
-      ffmpeg.setFfmpegPath(ffmpegStaticPath);
+      ffmpeg.setFfmpegPath(ffmpeg2.path);
       await new Promise<void>((resolve, reject) => {
         ffmpeg(inputPath)
           .inputFormat(inputFormat)
           .audioCodec('aac')
           .videoCodec('libx264')
+          .outputOptions('-movflags frag_keyframe+empty_moov')
+          .toFormat('mov')
           .on('progress', (progress) => {
             if (progress.percent) {
               logger.log(`Convert processing: ${Math.floor(progress.percent)}% done`);
@@ -45,7 +49,9 @@ export class ConvertsService {
             logger.log(`${filename} converted to ${newFileName}.mp4`);
             resolve();
           })
-          .pipe(outStream, { end: true });
+          // .pipe(outStream, { end: true });
+          .save(outputPath)
+          .run();
       });
 
       const stats = fs.statSync(outputPath);

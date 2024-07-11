@@ -7,6 +7,7 @@ import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
 import { vacancyDtoMapper, vacancyListMapper, vacancyMapper } from '@app/vacancy/vacancy.mapper';
 import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { FiltersService } from '@app/filters/filters.service';
+import { IDeleteVacancyQuery } from '@app/vacancy/interfaces/delete-vacancy.interface';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 import { IResume } from '@app/resumes/interfaces/resume.interface';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
@@ -35,9 +36,11 @@ export class VacancyService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { authorId: userInDb._id, ...vacancyParams } as Partial<VacancyDto>;
+      const dto = vacancyParams as Partial<VacancyDto>;
       const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
-      const vacancyMapped = normalizedDto.map((r) => vacancyDtoMapper(r));
+      const vacancyMapped = normalizedDto.map((v) => {
+        return vacancyDtoMapper({ authorId: userInDb._id, ...v });
+      });
 
       await Promise.all([
         await this.vacancyModel.deleteMany({ authorId: userInDb._id }),
@@ -168,6 +171,25 @@ export class VacancyService {
       return result;
     } catch (err) {
       logger.error(`Error while deleteAll: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async deleteByGetCoursePayload(query: IDeleteVacancyQuery): Promise<DeleteResult> {
+    try {
+      const dto = query as Partial<IVacancy>;
+      const normalizedQueries = normalizeDto(dto, '_vacancy') as Partial<IVacancy>;
+
+      const result = await this.vacancyModel.deleteMany({ ...normalizedQueries });
+      if (!result) {
+        throw new EntityNotFoundError('Ошибка при удалении вакансий');
+      }
+
+      logger.log('Vacancies successfully deleted!');
+
+      return result;
+    } catch (err) {
+      logger.error(`Error while deleteByGetCoursePayload: ${(err as Error).message}`);
       throw err;
     }
   }

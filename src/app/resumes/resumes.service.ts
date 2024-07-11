@@ -6,6 +6,7 @@ import { DeleteResult } from 'mongodb';
 import { ResumeDto } from '@app/resumes/dto/resume.dto';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { FiltersService } from '@app/filters/filters.service';
+import { IDeleteResumeQuery } from '@app/resumes/interfaces/delete-resume.interface';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { resumeDtoMapper, resumeListMapper, resumeMapper } from '@app/resumes/resume.mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
@@ -34,10 +35,11 @@ export class ResumesService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const dto = { authorId: userInDb._id, ...resumeParams } as Partial<ResumeDto>;
+      const dto = resumeParams as Partial<ResumeDto>;
       const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
-
-      const resumesMapped = normalizedDto.map((r) => resumeDtoMapper(r));
+      const resumesMapped = normalizedDto.map((r) => {
+        return resumeDtoMapper({ authorId: userInDb._id, ...r });
+      });
 
       await Promise.all([
         await this.resumeModel.deleteMany({ authorId: userInDb._id }),
@@ -164,6 +166,25 @@ export class ResumesService {
       return result;
     } catch (err) {
       logger.error(`Error while deleteAll: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async deleteByGetCoursePayload(query: IDeleteResumeQuery): Promise<DeleteResult> {
+    try {
+      const dto = query as Partial<IResume>;
+      const normalizedQueries = normalizeDto(dto, '_resume') as Partial<IResume>;
+
+      const result = await this.resumeModel.deleteMany({ ...normalizedQueries });
+      if (!result) {
+        throw new EntityNotFoundError('Ошибка при удалении вакансий');
+      }
+
+      logger.log('Resumes successfully deleted!');
+
+      return result;
+    } catch (err) {
+      logger.error(`Error while deleteByGetCoursePayload: ${(err as Error).message}`);
       throw err;
     }
   }

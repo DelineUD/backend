@@ -3,13 +3,14 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
-import { VacancyService } from './vacancy.service';
-import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
-import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
-import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
-import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
-import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 import { UserId } from '@shared/decorators/user-id.decorator';
+import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
+import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
+import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
+import { IDeleteVacancyQuery } from '@app/vacancy/interfaces/delete-vacancy.interface';
+import { VacancyService } from './vacancy.service';
+import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
+import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
 
 @ApiTags('Vacancy')
 @Controller('vacancy')
@@ -107,5 +108,16 @@ export class VacancyController {
   })
   async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: Types.ObjectId): Promise<DeleteResult> {
     return await this.vacancyService.deleteOneById(userId, id);
+  }
+
+  /**
+   * Удаление вакансии пользователя c Get Course.
+   * @returns - Резултат удаления.
+   * @param query - параметры для удаления
+   */
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Post('delete')
+  async deleteByGetCoursePayload(@Query() query: IDeleteVacancyQuery): Promise<DeleteResult> {
+    return await this.vacancyService.deleteByGetCoursePayload(query);
   }
 }

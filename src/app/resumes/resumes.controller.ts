@@ -1,15 +1,16 @@
 import { Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
-import { ResumesService } from './resumes.service';
+import { UserId } from '@shared/decorators/user-id.decorator';
+import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
 import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
+import { IDeleteResumeQuery } from '@app/resumes/interfaces/delete-resume.interface';
+import { ResumesService } from './resumes.service';
 import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
-import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
-import { UserId } from '@shared/decorators/user-id.decorator';
-import { DeleteResult } from 'mongodb';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -106,5 +107,16 @@ export class ResumesController {
   })
   async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: Types.ObjectId): Promise<DeleteResult> {
     return await this.resumesService.deleteOneById(userId, id);
+  }
+
+  /**
+   * Удаление резюме пользователя c Get Course.
+   * @returns - Резултат удаления.
+   * @param query - параметры для удаления
+   */
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Post('delete')
+  async deleteByGetCoursePayload(@Query() query: IDeleteResumeQuery): Promise<DeleteResult> {
+    return await this.resumesService.deleteByGetCoursePayload(query);
   }
 }

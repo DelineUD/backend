@@ -3,7 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { PostModel } from '@app/posts/models/posts.model';
-import { PostCommentsModel } from '@app/posts/models/posts-comments.model';
+import { Resume } from '@app/resumes/entities/resume.entity';
+import { UserModel } from '@app/users/models/user.model';
+import { Vacancy } from '@app/vacancy/entities/vacancy.entity';
 
 const logger = new Logger('Migrations');
 
@@ -12,13 +14,16 @@ export class MigrationService {
   constructor(
     @InjectModel(PostModel.name)
     private readonly postModel: Model<PostModel>,
-    @InjectModel(PostCommentsModel.name)
-    private readonly postCommentModel: Model<PostCommentsModel>,
+    @InjectModel(UserModel.name)
+    private readonly userModel: Model<UserModel>,
+    @InjectModel(Vacancy.name)
+    private readonly vacancyModel: Model<Vacancy>,
+    @InjectModel(Resume.name)
+    private readonly resumeModel: Model<Resume>,
   ) {}
 
   async runMigrations() {
     try {
-      await this.migration0();
       await this.migration1();
     } catch (err) {
       logger.error(`Error while runMigrations: ${(err as Error).message}`);
@@ -53,50 +58,63 @@ export class MigrationService {
           $unset: 'group',
         },
       ]);
-    } catch (err) {
-      logger.error(`Error while ${this.migration0.name}: ${err.message}`);
+    } catch (error) {
+      logger.error(`Error while ${this.migration0.name}: ${error.message}`);
     }
   }
 
-  /**
-   * Миграция для изменение поле pImg на files с изменением типа string[] -> IFile[]
-   */
   async migration1() {
     try {
-      await this.postModel.updateMany({ pImg: { $exists: true }, files: { $exists: false } }, [
+      await this.userModel.updateMany({ remote_work: { $exists: true } }, [
         {
           $set: {
-            files: {
-              $map: {
-                input: '$pImg',
-                as: 'url',
-                in: { type: 'image', url: '$$url' },
+            format: {
+              $cond: {
+                if: { $eq: ['$remote_work', true] },
+                then: 'Удаленная работа',
+                else: '$$REMOVE',
               },
             },
           },
         },
         {
-          $unset: 'pImg',
+          $unset: 'remote_work',
         },
       ]);
-      await this.postCommentModel.updateMany({ pImg: { $exists: true }, files: { $exists: false } }, [
+      await this.resumeModel.updateMany({}, [
         {
           $set: {
-            files: {
-              $map: {
-                input: '$pImg',
-                as: 'url',
-                in: { type: 'image', url: '$$url' },
+            format: {
+              $cond: {
+                if: { $eq: ['$remote_work', true] },
+                then: 'Удаленная работа',
+                else: 'Работа в указанном городе, с выездами на объект',
               },
             },
           },
         },
         {
-          $unset: 'pImg',
+          $unset: 'remote_work',
         },
       ]);
-    } catch (err) {
-      logger.error(`Error while ${this.migration1.name}: ${err.message}`);
+      await this.vacancyModel.updateMany({}, [
+        {
+          $set: {
+            format: {
+              $cond: {
+                if: { $eq: ['$remote_work', true] },
+                then: 'Удаленная работа',
+                else: 'Работа в указанном городе, с выездами на объект',
+              },
+            },
+          },
+        },
+        {
+          $unset: 'remote_work',
+        },
+      ]);
+    } catch (error) {
+      logger.error(`Error while ${this.migration1.name}: ${error.message}`);
     }
   }
 }

@@ -1,8 +1,7 @@
-import { IsNumberString, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
-import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class ICrudResumeParams {
@@ -22,9 +21,9 @@ export class ICrudResumeParams {
   @IsString()
   readonly city_resume1: string;
 
-  @ApiProperty({ default: false })
-  @Transform(validateBooleanOfString)
-  readonly remote_work_resume1: boolean;
+  @ApiProperty({ default: 'Удаленная работа' })
+  @IsString()
+  readonly format_resume1: boolean;
 
   @ApiProperty({ default: 'Квалификация' })
   @IsString()
@@ -32,7 +31,13 @@ export class ICrudResumeParams {
 
   @ApiProperty({ default: 'Обо мне...' })
   @IsString()
+  @IsOptional()
   readonly about_resume1: string;
+
+  @ApiProperty({ default: 'Дополнительная информация...' })
+  @IsString()
+  @IsOptional()
+  readonly other_resume1: string;
 
   @ApiProperty({ default: 'Специализация 1, Специализация 2', required: false })
   @IsOptional()

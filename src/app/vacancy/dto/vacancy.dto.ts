@@ -7,7 +7,9 @@ export class VacancyDto {
   country: string;
   city: string;
   about: string;
+  other: string;
   qualification: string;
+  format: string;
   spec: string[];
   narrow_spec: string[];
   need_programs: string[];

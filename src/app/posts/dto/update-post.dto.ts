@@ -1,7 +1,12 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 import { GroupFilterKeys } from '@app/filters/consts';
+import { IPostFile } from '@app/posts/interfaces/post-file.interface';
+import { validateArrayOfFiles } from '@shared/validators/validateArrayOfFiles';
+import { IsUniqueArray } from '@shared/decorators/unique-array.decorator';
+import { EFileType } from '@shared/interfaces/file.interface';
 import { PostDto } from './post.dto';
 
 export class UpdatePostDto extends PartialType(PostDto) {
@@ -9,22 +14,28 @@ export class UpdatePostDto extends PartialType(PostDto) {
   @IsMongoId()
   postId: string;
 
-  @ApiProperty({ default: 'Текст' })
+  @ApiProperty({ default: 'Текст', required: false })
   @IsOptional()
   @IsString()
   pText?: string;
 
-  @ApiProperty({ default: GroupFilterKeys.pf001 })
+  @ApiProperty({ default: [GroupFilterKeys.pf001], required: false })
   @IsOptional()
-  @IsString()
-  group?: string;
+  @IsEnum(GroupFilterKeys, { each: true })
+  @IsUniqueArray({ message: 'Each value in group must be unique' })
+  groups?: GroupFilterKeys[];
 
-  @ApiProperty({ default: false })
+  @ApiProperty({ default: 'false', required: false })
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   publishInProfile?: boolean;
 
-  @ApiProperty({ default: [] })
+  @ApiProperty({ default: [`{"type": "${EFileType.Image}", "url": ""}`], required: false })
   @IsOptional()
-  pImg?: string[];
+  @Transform(validateArrayOfFiles)
+  files?: IPostFile[];
+
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' }, required: false })
+  @IsOptional()
+  uploadedFiles?: any[];
 }

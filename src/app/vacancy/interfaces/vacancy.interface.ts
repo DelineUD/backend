@@ -14,10 +14,11 @@ export interface IVacancy {
   country: string;
   city: string;
   about: string;
+  other?: string;
   specializations: string[];
   narrow_specializations: string[];
   programs: string[];
-  remote_work: boolean;
+  format: string;
   service_cost?: number;
   author?: IVacancyAuthorResponse & { blocked_users: Types.ObjectId[] };
   createdAt?: string;
@@ -33,10 +34,11 @@ export interface IVacancyResponse {
   country: string;
   city: string;
   about: string;
+  other: string | null;
+  format: string;
   specializations: string[];
   narrow_specializations: string[];
   programs: string[];
-  remote_work: boolean;
   service_cost: number;
   createdAt: string;
   updatedAt: string;

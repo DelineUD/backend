@@ -7,6 +7,7 @@ import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 import { UploadModule } from '@app/upload/upload.module';
+import { ConvertModule } from '@app/converts/converts.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UploadModule } from '@app/upload/upload.module';
     ]),
     forwardRef(() => UsersModule),
     UploadModule,
+    ConvertModule,
   ],
   controllers: [PostsController],
   providers: [PostsService],

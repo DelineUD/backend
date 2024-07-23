@@ -125,7 +125,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthRefreshGuard)
   @ApiBearerAuth('defaultBearerAuth')
-  @ApiHeader({ name: 'refreshToken' })
+  @ApiHeader({ name: 'refresh_token' })
   @Post('tokens/refresh')
   async refreshTokens(@Req() req: Request): Promise<IAuthTokens> {
     return this.authService.refreshTokens(req);

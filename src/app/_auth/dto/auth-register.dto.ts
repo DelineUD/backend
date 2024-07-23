@@ -14,16 +14,16 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ example: 'root', description: 'Пароль пользователя' })
   password: string;
 
-  @ApiProperty({ example: 'Иван', description: 'Имя пользователя' })
+  @ApiProperty({ example: 'Максим', description: 'Имя пользователя' })
   first_name: string;
 
-  @ApiProperty({ example: 'Иванов', description: 'Фамилия пользователя' })
+  @ApiProperty({ example: 'Максимыч', description: 'Фамилия пользователя' })
   last_name: string;
 
   @ApiProperty({ example: '1990-01-01', description: 'Дата рождения пользователя' })
   birthday: string;
 
-  @ApiProperty({ example: 'Москва', description: 'Город пользователя' })
+  @ApiProperty({ example: 'Санкт-Петербург', description: 'Город пользователя' })
   city: string;
 
   @ApiPropertyOptional({ example: 'Россия', description: 'Страна пользователя' })

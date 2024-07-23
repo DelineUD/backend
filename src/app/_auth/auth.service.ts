@@ -118,13 +118,13 @@ export class AuthService {
       const otpCode = await this.codesService.generateCode({ userPhone: phone });
       const msg = `Код для подтверждения: ${otpCode.otp}.`;
 
-      const smsRes = await this.smsService.send(phone, msg);
-      if (smsRes.status_code !== 100) {
+      const { status, status_code } = await this.smsService.send(phone, msg);
+      if (status_code !== 100) {
         await this.codesService.deleteCodeById(otpCode._id);
         throw new BadRequestException('Ошибка при отправке sms!');
       }
 
-      return smsRes;
+      return { status, status_code };
     } catch (err) {
       logger.error(`Error while sendSms: ${(err as Error).message}`);
       throw err;
@@ -189,11 +189,13 @@ export class AuthService {
   async refreshTokens(req: Request): Promise<IAuthTokens> {
     try {
       const { refresh_token, ...validUser } = req.user as IJwtRefreshValidPayload;
-
+   ;
       const userInDb = await this.usersService.findOne({ ...validUser });
       if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
 
       const userToken = await this.tokensService.findUserRefreshToken(userInDb._id);
+
+      console.log(userToken.refresh_token);
       if (!userToken || userToken.refresh_token !== refresh_token) {
         throw new UnauthorizedException('Невалидный токен или срок его действия истек!');
       }

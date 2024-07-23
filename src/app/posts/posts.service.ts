@@ -10,6 +10,7 @@ import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
+import { ConvertsService } from '@app/converts/converts.service';
 import { ILike } from '@app/posts/interfaces/like.interface';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
@@ -37,6 +38,7 @@ export class PostsService {
     @InjectModel(PostModel.name) private readonly postModel: Model<PostModel>,
     @InjectModel(PostCommentsModel.name) private readonly postCommentsModel: Model<PostCommentsModel>,
     @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
+    private readonly convertsService: ConvertsService,
   ) {}
 
   async create(
@@ -56,7 +58,14 @@ export class PostsService {
         countComments: 0,
       };
 
-      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles ?? []);
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
+
+      // Files with type
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
 
       const post = await this.postModel.create({
         ...createPostDto,
@@ -86,7 +95,14 @@ export class PostsService {
       if (!postInDb) throw new EntityNotFoundError(`Запись не найдена!`);
       if (String(userId) !== String(postInDb.authorId)) throw new BadRequestException('Нет доступа!');
 
-      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
+
+      // Files with type
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
       const updatedFiles = files
         ? postInDb.files.concat(files).concat(uploadedPostFiles)
         : postInDb.files.concat(uploadedPostFiles);

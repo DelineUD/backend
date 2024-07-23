@@ -2,14 +2,23 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { IUploadFile } from '@app/upload/interfaces/upload-file.interface';
 import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
+import { ConvertsService } from '@app/converts/converts.service';
 
 const logger = new Logger('Filters');
 
 @Injectable()
 export class UploadService {
+  constructor(private readonly convertsService: ConvertsService) {}
+
   async upload(_, uploadedFiles: Express.Multer.File[]): Promise<IUploadFile[]> {
     try {
-      return getUploadedFilesWithType(uploadedFiles);
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
+
+      return getUploadedFilesWithType(convertedFiles ?? []);
     } catch (err) {
       logger.error(`Error while uploadImages: ${(err as Error).message}`);
       throw err;

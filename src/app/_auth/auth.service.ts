@@ -145,7 +145,7 @@ export class AuthService {
       });
       if (!authCode) throw new ForbiddenException(`Срок действия кода истек!`);
 
-      if (authCode.otp !== +otp && Number(process.env.QUICK_CODE) !== +otp)
+      if (authCode.otp !== Number(otp) && Number(process.env.QUICK_CODE) !== Number(otp))
         throw new ForbiddenException(`Неверный код!`);
 
       const tokens = await this.tokensService.generateTokens({
@@ -195,7 +195,6 @@ export class AuthService {
 
       const userToken = await this.tokensService.findUserRefreshToken(userInDb._id);
 
-      console.log(userToken.refresh_token);
       if (!userToken || userToken.refresh_token !== refresh_token) {
         throw new UnauthorizedException('Невалидный токен или срок его действия истек!');
       }

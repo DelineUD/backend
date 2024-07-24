@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-import { IPosts } from '../interfaces/posts.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
-import { VacancySchema } from '@app/vacancy/entities/vacancy.entity';
+import { IPostFile } from '@app/posts/interfaces/post-file.interface';
+import { IPosts } from '../interfaces/posts.interface';
 
 @Schema({
   collection: 'posts',
@@ -15,13 +15,13 @@ export class PostModel extends Document implements IPosts {
   @Prop({ required: true })
   pText: string;
   @Prop({ required: false })
-  pImg?: Array<string>;
+  files?: IPostFile[];
   @Prop({ required: true })
   likes: Array<string>;
   @Prop({ required: true })
   views: Array<string>;
   @Prop({ required: true })
-  group: GroupFilterKeys;
+  groups: GroupFilterKeys[];
   @Prop({ required: false })
   publishInProfile?: boolean;
   @Prop({ required: true })

@@ -24,7 +24,7 @@ export const commentListMapper = (comments: ICPosts[], userId: Types.ObjectId): 
       _id: comment._id,
       author: toCommentsAuthor(comment.author as UserCPostsPick),
       cText: comment.cText,
-      cImg: comment.cImg,
+      files: comment.files,
       countLikes: comment.countLikes ?? 0,
       isLiked: comment.likes.includes(String(userId)),
       createdAt: comment.createdAt,

@@ -1,6 +1,8 @@
 import { Types } from 'mongoose';
 
 import { IUser } from '@app/users/interfaces/user.interface';
+import { GroupFilterKeys } from '@app/filters/consts';
+import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 
 type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'blocked_users';
 export type PostUserPick = Pick<IUser, PostUserPickList>;
@@ -10,11 +12,11 @@ export interface IPosts {
   _id?: Types.ObjectId;
   authorId: Types.ObjectId;
   pText: string;
-  pImg?: Array<string>;
+  files?: IPostFile[];
   likes: Array<string>;
   views: Array<string>;
   countComments: number;
-  group: string;
+  groups: GroupFilterKeys[];
   publishInProfile?: boolean;
   author?: IPostAuthorResponse & { blocked_users: Types.ObjectId[] };
   createdAt?: Date;
@@ -25,13 +27,13 @@ export interface IPostsResponse {
   _id: Types.ObjectId;
   author: IPostAuthorResponse | null;
   pText: string;
-  pImg: Array<string>;
+  files?: IPostFile[];
   countComments: number;
   countLikes: number;
   countViews: number;
   isLiked: boolean;
   isViewed: boolean;
-  group: string;
+  groups: GroupFilterKeys[];
   publishInProfile: boolean;
   createdAt?: Date;
   updatedAt?: Date;

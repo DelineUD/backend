@@ -1,31 +1,34 @@
 import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
 import { DeleteResult } from 'mongodb';
+import { FilterQuery, Model, Types } from 'mongoose';
 
-import { CreatePostDto } from '@app/posts/dto/create.post.dto';
-import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
-import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
-import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
-import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
-import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
-import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
-import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
-import { ILike } from '@app/posts/interfaces/like.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
-import { commentListMapper } from '@app/posts/mappers/comments.mapper';
-import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
+import { CreatePostDto } from '@app/posts/dto/create.post.dto';
+import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
+import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
+import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
+import { ConvertsService } from '@app/converts/converts.service';
+import { ILike } from '@app/posts/interfaces/like.interface';
+import { IPostFile } from '@app/posts/interfaces/post-file.interface';
+import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
+import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-find.interface';
+import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
+import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
+import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { UserModel } from '@app/users/models/user.model';
+import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
-import { IPosts, IPostsResponse } from './interfaces/posts.interface';
 
 const logger = new Logger('Posts');
 
@@ -35,16 +38,19 @@ export class PostsService {
     @InjectModel(PostModel.name) private readonly postModel: Model<PostModel>,
     @InjectModel(PostCommentsModel.name) private readonly postCommentsModel: Model<PostCommentsModel>,
     @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
+    private readonly convertsService: ConvertsService,
   ) {}
 
-  async create(userId: Types.ObjectId, postDto: CreatePostDto): Promise<IPostsResponse> {
+  async create(
+    userId: Types.ObjectId,
+    postDto: CreatePostDto,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<IPostsResponse> {
     try {
-      const createPostDto = { ...postDto };
+      const { files, ...createPostDto } = { ...postDto };
 
       const user = await this.usersService.findOne({ _id: userId });
-      if (!user) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
+      if (!user) throw new EntityNotFoundError('Пользователь не найден');
 
       const initialPostValues: Partial<IPosts> = {
         likes: [],
@@ -52,9 +58,19 @@ export class PostsService {
         countComments: 0,
       };
 
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
+
+      // Files with type
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
+
       const post = await this.postModel.create({
         ...createPostDto,
         ...initialPostValues,
+        files: files ? files.concat(uploadedPostFiles) : uploadedPostFiles,
         authorId: user._id,
       });
 
@@ -67,20 +83,36 @@ export class PostsService {
     }
   }
 
-  async update(userId: Types.ObjectId, postDto: UpdatePostDto): Promise<IPostsResponse> {
+  async update(
+    userId: Types.ObjectId,
+    postDto: UpdatePostDto,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<IPostsResponse> {
     try {
-      const { postId, ...updateDto } = postDto;
+      const { postId, files, ...updateDto } = postDto;
       const postInDb = await this.postModel.findOne({ _id: postId }).exec();
 
-      if (!postInDb) {
-        throw new EntityNotFoundError(`Запись не найдена!`);
-      }
+      if (!postInDb) throw new EntityNotFoundError(`Запись не найдена!`);
+      if (String(userId) !== String(postInDb.authorId)) throw new BadRequestException('Нет доступа!');
 
-      if (String(userId) !== String(postInDb.authorId)) {
-        throw new BadRequestException('Нет доступа!');
-      }
+      // Convert files
+      const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
+        uploadedFiles,
+        this.convertsService.convertToMp4.bind(this.convertsService),
+      );
 
-      await postInDb.updateOne({ ...updateDto }).exec();
+      // Files with type
+      const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
+      const updatedFiles = files
+        ? postInDb.files.concat(files).concat(uploadedPostFiles)
+        : postInDb.files.concat(uploadedPostFiles);
+
+      await postInDb
+        .updateOne({
+          ...updateDto,
+          files: updatedFiles,
+        })
+        .exec();
       await postInDb.save();
 
       logger.log('Post successfully updated!');
@@ -161,7 +193,7 @@ export class PostsService {
       }
 
       query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
-      query.group && (baseQuery.group = GroupFilterKeys[query.group]);
+      query.groups && (baseQuery.groups = { $in: query.groups.map((i) => GroupFilterKeys[i]) });
       query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
       baseQuery._id = {
         $nin: user.hidden_posts,
@@ -240,23 +272,29 @@ export class PostsService {
     }
   }
 
-  async createComment(userId: Types.ObjectId, createCommentDto: CreatePostCommentDto): Promise<ICPosts> {
+  async createComment(
+    userId: Types.ObjectId,
+    createCommentDto: CreatePostCommentDto,
+    uploadedFiles: Express.Multer.File[],
+  ): Promise<ICPosts> {
     try {
-      const dto = createCommentDto;
+      const { files, ...dto } = createCommentDto;
 
       const postInDb = await this.postModel.findOne({ _id: dto.postId }).exec();
-      if (!postInDb) {
-        throw new EntityNotFoundError(`Запись не найдена`);
-      }
+      if (!postInDb) throw new EntityNotFoundError(`Запись не найдена`);
+
+      const uploadedCommentFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(uploadedFiles);
 
       const initialCommentValues = {
         likes: [],
         countLikes: 0,
         isLiked: false,
       };
+
       const comment = await this.postCommentsModel.create({
         ...dto,
         ...initialCommentValues,
+        files: files ? files.concat(uploadedCommentFiles) : uploadedCommentFiles,
         author: userId,
       });
 

@@ -16,10 +16,10 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 
-import { fileStorage } from '@shared/storage';
 import { UserEntity } from '@app/_users/entities/user.entity';
 import { AuthRegisterOtpDto } from '@app/_auth/dto/auth-register-otp.dto';
-import { imageFileFilter } from '@utils/imageFileFilter';
+import { mediaFileFilter } from '@utils/mediaFileFilter';
+import { fileStorageConfig } from '@shared/storage/storage.config';
 import { JwtAuthRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-access.guard';
 import { AuthRegisterDto } from './dto/auth-register.dto';
@@ -48,8 +48,8 @@ export class AuthController {
   @ApiBody({ type: AuthRegisterDto })
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: fileStorage,
-      fileFilter: imageFileFilter,
+      storage: fileStorageConfig,
+      fileFilter: mediaFileFilter,
     }),
   )
   @Post('register')

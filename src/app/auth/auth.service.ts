@@ -2,12 +2,11 @@ import { BadRequestException, ForbiddenException, Injectable, Logger, Unauthoriz
 import { Promise, Types } from 'mongoose';
 import { Request } from 'express';
 
-import { CodesService } from '@app/auth/services/codes.service';
-import { SmsService } from '@app/auth/services/sms.service';
+import { SmsService } from '@app/sms/sms.service';
 import { CreateUserDto } from '@app/users/dto/user-create.dto';
+import { UsersService } from '@app/users/users.service';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IUser } from '../users/interfaces/user.interface';
-import { UsersService } from '../users/users.service';
 import { LoginUserDto } from '../users/dto/user-login.dto';
 import { IAuthTokens } from './interfaces/auth-tokens.interface';
 import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
@@ -17,6 +16,7 @@ import { ISensSmsResponse } from './interfaces/send-sms.interface';
 import { LoginSmsDto } from './dto/login-sms.dto';
 import { SendSmsDto } from './dto/send-sms.dto';
 import { TokensService } from './services/tokens.service';
+import { CodesService } from './services/codes.service';
 
 const logger = new Logger('Auth');
 

@@ -3,8 +3,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UsersModule } from '@app/users/users.module';
 import { SmsModule } from '@app/sms/sms.module';
+import { UsersModule } from '@app/_users/users.module';
+import { FiltersModule } from '@app/filters/filters.module';
 import { Tokens, TokensSchema } from './entities/tokens.entity';
 import { Codes, CodesSchema } from './entities/codes.entity';
 import { TokensService } from './services/tokens.service';
@@ -31,6 +32,7 @@ import { GUARDS } from './guards';
     JwtModule.register({}),
     PassportModule,
     SmsModule,
+    FiltersModule,
     UsersModule,
   ],
   controllers: [AuthController],

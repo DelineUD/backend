@@ -49,7 +49,7 @@ export class UsersService {
       const validPhone = transformPhoneNumber(phone);
       const userInDb = await this.userModel.findOne({ phone: validPhone }).exec();
 
-      if (!userInDb) throw new EntityNotFoundError('Пользователь с этим номером не зарегистрирован');
+      if (!userInDb) throw new BadRequestException('Пользователь с этим номером не зарегистрирован');
 
       const areEqual = await compare(password, userInDb.password);
 

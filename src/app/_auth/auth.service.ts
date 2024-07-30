@@ -21,6 +21,7 @@ import { AuthRegisterResponseType } from './types/auth-register-response.type';
 import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 import { IProfileResponse } from './interfaces/profile-response.interface';
 import { profileMapper } from './mappers/profile.mapper';
+import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 
 const logger = new Logger('_Auth');
 
@@ -35,10 +36,15 @@ export class AuthService {
   ) {}
 
   async register(
-    { password, ...dto }: AuthRegisterDto,
+    { phone, password, ...dto }: AuthRegisterDto,
     avatar: Express.Multer.File,
   ): Promise<AuthRegisterResponseType> {
     try {
+      const validPhone = transformPhoneNumber(phone);
+
+      const userInDb = await this.usersService.findOne({ phone: validPhone });
+      if (userInDb) throw new BadRequestException('Пользователь с этим номером не зарегистрирован');
+
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
 
@@ -46,6 +52,7 @@ export class AuthService {
 
       const user = await this.usersService.create({
         ...dto,
+        phone: validPhone,
         avatar: pathToAvatar,
         password: hashPassword,
       });
@@ -189,7 +196,6 @@ export class AuthService {
   async refreshTokens(req: Request): Promise<IAuthTokens> {
     try {
       const { refresh_token, ...validUser } = req.user as IJwtRefreshValidPayload;
-   ;
       const userInDb = await this.usersService.findOne({ ...validUser });
       if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
 

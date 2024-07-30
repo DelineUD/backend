@@ -45,7 +45,7 @@ export class ConvertsService {
             reject(err);
           })
           .on('end', () => {
-            logger.log(`${inputFilePath} converted to ${newFileName}.mp4`);
+            logger.log(`${inputFilePath} converted to ${fileName}.mp4`);
             resolve();
           })
           .save(outputPath)
@@ -93,7 +93,6 @@ export class ConvertsService {
           const inputFilePath = path.join(process.env.STATIC_PATH_FOLDER, process.env.VIDEOS_FOLDER, file.filename);
           const outputPath = await converter(inputFilePath);
           convertedFile = this.getMulterFile(outputPath);
-          console.log(convertedFile);
         } else {
           convertedFile = file;
         }

@@ -1,13 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { UploadModule } from '@app/upload/upload.module';
+import { ConvertModule } from '@app/converts/converts.module';
 import { UsersModule } from '../users/users.module';
 import { PostCommentsModel, PostCommentsSchema } from './models/posts-comments.model';
 import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
-import { UploadModule } from '@app/upload/upload.module';
-import { ConvertModule } from '@app/converts/converts.module';
 
 @Module({
   imports: [

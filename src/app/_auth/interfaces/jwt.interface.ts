@@ -1,0 +1,13 @@
+import { Types } from 'mongoose';
+
+export interface IJwtPayload {
+  _id: Types.ObjectId;
+  phone: string;
+  email: string;
+
+  iat: number;
+  exp: number;
+}
+
+export type IJwtAccessValidPayload = Omit<IJwtPayload, 'iat' | 'exp'>;
+export type IJwtRefreshValidPayload = Omit<IJwtPayload, 'iat' | 'exp'> & { refresh_token: string };

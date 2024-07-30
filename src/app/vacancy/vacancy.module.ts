@@ -3,11 +3,10 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { FiltersModule } from '@app/filters/filters.module';
-
+import { UsersModule } from '@app/users/users.module';
 import { VacancyService } from './vacancy.service';
 import { VacancyController } from './vacancy.controller';
 import { Vacancy, VacancySchema } from './entities/vacancy.entity';
-import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -17,8 +16,8 @@ import { UsersModule } from '../users/users.module';
         schema: VacancySchema,
       },
     ]),
-    forwardRef(() => UsersModule),
     FiltersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [VacancyController],
   providers: [VacancyService],

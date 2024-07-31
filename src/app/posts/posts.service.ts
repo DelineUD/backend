@@ -129,10 +129,8 @@ export class PostsService {
       const { postId } = postDto;
 
       const deletedPost = await this.postModel
-        .findOneAndDelete({ _id: postId, author: userId })
-        .populate('author', '_id')
+        .findOneAndDelete({ _id: postId, authorId: new Types.ObjectId(userId) })
         .exec();
-
       if (!deletedPost) {
         throw new EntityNotFoundError('Запись не найдена');
       }

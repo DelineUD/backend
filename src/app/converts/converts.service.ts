@@ -1,7 +1,7 @@
-import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
-import * as path from 'path';
-import * as fs from 'fs';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ffmpegStatic = require('ffmpeg-static');
@@ -33,7 +33,12 @@ export class ConvertsService {
           .inputFormat(inputFormat)
           .audioCodec('aac')
           .videoCodec('libx264')
-          .outputOptions(['-movflags frag_keyframe+empty_moov', '-level 3.0'])
+          .outputOptions([
+            '-profile:v baseline', // Установка профиля baseline для максимальной совместимости
+            '-level 3.0',
+            '-movflags +faststart', // Обеспечивает быструю загрузку видео на веб-страницах
+            '-pix_fmt yuv420p', // Установка формата пикселей для совместимости
+          ])
           .toFormat('mp4')
           .on('progress', (progress) => {
             if (progress.percent) {

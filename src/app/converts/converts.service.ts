@@ -44,7 +44,7 @@ export class ConvertsService {
             '-crf 28',
           ])
           .output(outputPath, { end: true })
-          .toFormat('mp4')
+          .toFormat('webm')
           .on('progress', (progress) => {
             if (progress.percent) {
               logger.log(`Convert processing: ${Math.floor(progress.percent)}% done`);

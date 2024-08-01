@@ -16,7 +16,7 @@ export class ConvertsService {
       const fileName = newFileName ?? path.basename(inputFilePath).split('.')[0];
 
       const outputDir = path.join(process.env.STATIC_PATH_FOLDER, process.env.VIDEOS_FOLDER);
-      const outputPath = path.join(outputDir, `${fileName}.mp4`);
+      const outputPath = path.join(outputDir, `${fileName}.webm`);
 
       if (!fs.existsSync(inputFilePath)) {
         throw new ForbiddenException(`Failed to convert file: ${inputFilePath} not found`);
@@ -32,7 +32,7 @@ export class ConvertsService {
         ffmpeg(inputFilePath)
           .inputFormat(inputFormat)
           .audioCodec('aac')
-          .videoCodec('libx264')
+          .videoCodec('libvpx-vp9')
           .outputOptions([
             '-b:v 1000k', // Установка битрейта для видео
             '-b:a 128k', // Установка битрейта для аудио

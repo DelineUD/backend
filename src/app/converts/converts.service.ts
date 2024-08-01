@@ -34,6 +34,8 @@ export class ConvertsService {
           .audioCodec('aac')
           .videoCodec('libx264')
           .outputOptions([
+            '-movflags frag_keyframe+empty_moov',
+            '-level 3.0',
             '-profile:v baseline', // Установка профиля baseline для максимальной совместимости
             '-level 3.0',
             '-movflags +faststart', // Обеспечивает быструю загрузку видео на веб-страницах

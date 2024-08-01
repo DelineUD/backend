@@ -41,7 +41,6 @@ export class ConvertsService {
             '-level 3.0',
             '-movflags +faststart', // Обеспечивает быструю загрузку видео на веб-страницах
             '-pix_fmt yuv420p', // Установка формата пикселей для совместимости
-            '-crf 28',
           ])
           .output(outputPath, { end: true })
           .toFormat('mp4')
@@ -58,7 +57,6 @@ export class ConvertsService {
             logger.log(`${inputFilePath} converted to ${fileName}.mp4`);
             resolve();
           })
-          // .save(outputPath)
           .run();
       });
 

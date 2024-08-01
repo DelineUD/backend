@@ -34,8 +34,9 @@ export class ConvertsService {
           .audioCodec('aac')
           .videoCodec('libx264')
           .outputOptions([
-            '-movflags frag_keyframe+empty_moov',
-            '-level 3.0',
+            '-b:v 1000k', // Установка битрейта для видео
+            '-b:a 128k', // Установка битрейта для аудио
+            '-map_metadata -1',
             '-profile:v baseline', // Установка профиля baseline для максимальной совместимости
             '-level 3.0',
             '-movflags +faststart', // Обеспечивает быструю загрузку видео на веб-страницах

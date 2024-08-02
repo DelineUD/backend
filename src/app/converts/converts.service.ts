@@ -16,7 +16,7 @@ export class ConvertsService {
       const fileName = newFileName ?? path.basename(inputFilePath).split('.')[0];
 
       const outputDir = path.join(process.env.STATIC_PATH_FOLDER, process.env.VIDEOS_FOLDER);
-      const outputPath = path.join(outputDir, `${fileName}.mp4`);
+      const outputPath = path.join(outputDir, newFileName);
 
       if (!fs.existsSync(inputFilePath)) {
         throw new ForbiddenException(`Failed to convert file: ${inputFilePath} not found`);
@@ -34,15 +34,14 @@ export class ConvertsService {
           .audioCodec('aac')
           .videoCodec('libx264')
           .outputOptions([
-            '-b:v 1000k', // Установка битрейта для видео
-            '-b:a 128k', // Установка битрейта для аудио
+            '-crf 18', // Уровень качества
+            '-vf format=yuv420p', // Формат пикселей
+            '-map 0',
             '-map_metadata -1',
             '-profile:v baseline', // Установка профиля baseline для максимальной совместимости
             '-level 3.0',
             '-movflags +faststart', // Обеспечивает быструю загрузку видео на веб-страницах
-            '-pix_fmt yuv420p', // Установка формата пикселей для совместимости
           ])
-          .output(outputPath, { end: true })
           .toFormat('mp4')
           .on('progress', (progress) => {
             if (progress.percent) {
@@ -57,6 +56,7 @@ export class ConvertsService {
             logger.log(`${inputFilePath} converted to ${fileName}.mp4`);
             resolve();
           })
+          .save(outputPath)
           .run();
       });
 

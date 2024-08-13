@@ -28,7 +28,6 @@ export class FiltersController {
     return await Promise.all([
       await this.filtersService.getCitiesFilter(),
       await this.filtersService.getSpecializationsFilter(),
-      await this.filtersService.getNarrowSpecializationsFilter(),
       await this.filtersService.getProgramsFilter(),
     ]);
   }
@@ -43,7 +42,6 @@ export class FiltersController {
       await this.filtersService.getCitiesFilter(),
       this.filtersService.getStatusFilter(),
       await this.filtersService.getSpecializationsFilter(),
-      await this.filtersService.getNarrowSpecializationsFilter(),
       await this.filtersService.getProgramsFilter(),
     ]);
   }
@@ -58,9 +56,7 @@ export class FiltersController {
       this.filtersService.getStatusFilter(),
       await this.filtersService.getCitiesFilter(),
       await this.filtersService.getSpecializationsFilter(),
-      await this.filtersService.getNarrowSpecializationsFilter(),
       await this.filtersService.getProgramsFilter(),
-      await this.filtersService.getCoursesFilter(),
     ]);
   }
 
@@ -71,15 +67,6 @@ export class FiltersController {
   @Get('posts')
   public async getPostsFilter(): Promise<IFilters[]> {
     return await Promise.all([this.filtersService.getGroupFilter()]);
-  }
-
-  /**
-   * Получение фильтров для стран.
-   * @returns - Фильтры страны.
-   */
-  @Get('countries')
-  async getCountriesFilter(): Promise<IFilters> {
-    return await this.filtersService.getCountriesFilter();
   }
 
   /**
@@ -101,30 +88,12 @@ export class FiltersController {
   }
 
   /**
-   * Получение фильтров для узких специализаций.
-   * @returns - Фильтры узких специализаций.
-   */
-  @Get('narrow-specializations')
-  async getNarrowSpecializationsFilter(): Promise<IFilters> {
-    return await this.filtersService.getNarrowSpecializationsFilter();
-  }
-
-  /**
    * Получение фильтров для программ.
    * @returns - Фильтры программ.
    */
   @Get('programs')
   async getProgramsFilter(): Promise<IFilters> {
     return await this.filtersService.getProgramsFilter();
-  }
-
-  /**
-   * Получение фильтров для курсов.
-   * @returns - Фильтры курсов.
-   */
-  @Get('courses')
-  async getCoursesFilter(): Promise<IFilters> {
-    return await this.filtersService.getCoursesFilter();
   }
 
   /**

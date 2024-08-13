@@ -10,24 +10,18 @@ export async function getMainFilters(
 ): Promise<Partial<FilterQuery<IAllQueryFilters>>> {
   const mainQuery: Partial<FilterQuery<IAllQueryFilters>> = {};
 
-  const { countryPromise, cityPromise, specPromises, nSpecPromises, programsPromises, coursesPromises } =
+  const { cityPromise, specPromises, programsPromises } =
     filtersService.getFiltersPromises(initQuery);
 
-  const [country, city, spec, narrowSpec, programs, courses] = await Promise.allSettled([
-    countryPromise,
+  const [city, spec, programs] = await Promise.allSettled([
     cityPromise,
     Promise.all(specPromises),
-    Promise.all(nSpecPromises),
     Promise.all(programsPromises),
-    Promise.all(coursesPromises),
   ]);
 
-  filterQueryMapper(country) && (mainQuery.country = filterQueryMapper(country));
   filterQueryMapper(city) && (mainQuery.city = filterQueryMapper(city));
   filterQueriesMapper(spec) && (mainQuery.specializations = filterQueriesMapper(spec));
-  filterQueriesMapper(narrowSpec) && (mainQuery.narrow_specializations = filterQueriesMapper(narrowSpec));
   filterQueriesMapper(programs) && (mainQuery.programs = filterQueriesMapper(programs));
-  filterQueriesMapper(courses) && (mainQuery.courses = filterQueriesMapper(courses));
 
   return { ...mainQuery };
 }

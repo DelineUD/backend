@@ -48,7 +48,9 @@ export class AuthService {
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
 
-      const pathToAvatar = avatar ? `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${avatar.filename}` : null;
+      const pathToAvatar = avatar
+        ? `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${process.env.IMAGES_FOLDER}/${avatar.filename}`
+        : null;
 
       const user = await this.usersService.create({
         ...dto,
@@ -60,12 +62,9 @@ export class AuthService {
       if (!user) throw new BadRequestException('Произошла непредвиденная ошибка!');
 
       const updateFilters: UpdateFiltersDto = {
-        [FilterKeys.Country]: user.contact_info.country,
-        [FilterKeys.City]: user.contact_info.city,
+        [FilterKeys.City]: user.city,
         [FilterKeys.Spec]: user.specializations,
-        [FilterKeys.NarrowSpec]: user.narrow_specializations,
         [FilterKeys.Programs]: user.programs,
-        [FilterKeys.Courses]: user.courses,
       };
       this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
 

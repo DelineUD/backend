@@ -2,14 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
-import { Countries } from '@app/filters/entities/countries.entity';
 import { Cities } from '@app/filters/entities/cities.entity';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { IFilters, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 import { Specializations } from '@app/filters/entities/specializations.entity';
-import { NarrowSpecializations } from '@app/filters/entities/narrow-specializations.entity';
 import { Programs } from '@app/filters/entities/programs.entity';
-import { Courses } from '@app/filters/entities/courses.entity';
 import { filtersMapper } from '@app/filters/filters.mapper';
 import { FilterKeys, FilterNames, GroupFilterKeys, StatusFilterKeys } from '@app/filters/consts';
 import { IAllQueryFilters } from '@app/filters/interfaces/all-filters.interface';
@@ -19,23 +16,17 @@ const logger = new Logger('Filters');
 @Injectable()
 export class FiltersService {
   constructor(
-    @InjectModel(Countries.name) private readonly countriesModel: Model<Countries>,
     @InjectModel(Cities.name) private readonly citiesModel: Model<Cities>,
     @InjectModel(Specializations.name) private readonly specializationsModel: Model<Specializations>,
-    @InjectModel(NarrowSpecializations.name) private readonly narrowSpecializationsModel: Model<NarrowSpecializations>,
     @InjectModel(Programs.name) private readonly programsModel: Model<Programs>,
-    @InjectModel(Courses.name) private readonly coursesModel: Model<Courses>,
   ) {}
 
   async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
     try {
       return await Promise.allSettled([
-        await this.updateFilters(updateFiltersDto[FilterKeys.Country], this.countriesModel),
         await this.updateFilters(updateFiltersDto[FilterKeys.City], this.citiesModel),
         await this.updateMultiFilters(updateFiltersDto[FilterKeys.Spec], this.specializationsModel),
-        await this.updateMultiFilters(updateFiltersDto[FilterKeys.NarrowSpec], this.narrowSpecializationsModel),
         await this.updateMultiFilters(updateFiltersDto[FilterKeys.Programs], this.programsModel),
-        await this.updateMultiFilters(updateFiltersDto[FilterKeys.Courses], this.coursesModel),
       ]);
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
@@ -90,26 +81,11 @@ export class FiltersService {
 
   getFiltersPromises(query: Partial<IAllQueryFilters>) {
     return {
-      countryPromise: query[FilterKeys.Country] && this.findCountryByPayload({ _id: query[FilterKeys.Country] }),
       cityPromise: query[FilterKeys.City] && this.findCityByPayload({ _id: query[FilterKeys.City] }),
       specPromises: query[FilterKeys.Spec] && query[FilterKeys.Spec]?.map((id) => this.findSpecByPayload({ _id: id })),
-      nSpecPromises:
-        query[FilterKeys.NarrowSpec] &&
-        query[FilterKeys.NarrowSpec]?.map((id) => this.findNarrowSpecByPayload({ _id: id })),
       programsPromises:
         query[FilterKeys.Programs] && query[FilterKeys.Programs]?.map((id) => this.findProgramsByPayload({ _id: id })),
-      coursesPromises:
-        query[FilterKeys.Courses] && query[FilterKeys.Courses]?.map((id) => this.findCoursesByPayload({ _id: id })),
     };
-  }
-
-  async findCountryByPayload(payload: FilterQuery<Countries>) {
-    try {
-      return this.findEntityByPayload(this.countriesModel, payload);
-    } catch (err) {
-      logger.error(`Error while findCountryByPayload: ${(err as Error).message}`);
-      throw err;
-    }
   }
 
   async findCityByPayload(payload: FilterQuery<Cities>) {
@@ -130,38 +106,11 @@ export class FiltersService {
     }
   }
 
-  async findNarrowSpecByPayload(payload: FilterQuery<NarrowSpecializations>) {
-    try {
-      return this.findEntityByPayload(this.narrowSpecializationsModel, payload);
-    } catch (err) {
-      logger.error(`Error while findNarrowSpecByPayload: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
   async findProgramsByPayload(payload: FilterQuery<Programs>) {
     try {
       return this.findEntityByPayload(this.programsModel, payload);
     } catch (err) {
       logger.error(`Error while findProgramsByPayload: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async findCoursesByPayload(payload: FilterQuery<Courses>) {
-    try {
-      return this.findEntityByPayload(this.coursesModel, payload);
-    } catch (err) {
-      logger.error(`Error while findCoursesByPayload: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async getCountriesFilter(): Promise<IFiltersResponse> {
-    try {
-      return filtersMapper(await this.countriesModel.find().exec(), FilterKeys.Country, FilterNames.Country, false);
-    } catch (err) {
-      logger.error(`Error while getCountriesFilter: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -184,34 +133,11 @@ export class FiltersService {
     }
   }
 
-  async getNarrowSpecializationsFilter(): Promise<IFiltersResponse> {
-    try {
-      return filtersMapper(
-        await this.narrowSpecializationsModel.find().exec(),
-        FilterKeys.NarrowSpec,
-        FilterNames.NarrowSpec,
-        true,
-      );
-    } catch (err) {
-      logger.error(`Error while getNarrowSpecializationsFilter: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
   async getProgramsFilter(): Promise<IFiltersResponse> {
     try {
       return filtersMapper(await this.programsModel.find().exec(), FilterKeys.Programs, FilterNames.Programs, true);
     } catch (err) {
       logger.error(`Error while getProgramsFilter: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async getCoursesFilter(): Promise<IFiltersResponse> {
-    try {
-      return filtersMapper(await this.coursesModel.find().exec(), FilterKeys.Courses, FilterNames.Courses, true);
-    } catch (err) {
-      logger.error(`Error while getCoursesFilter: ${(err as Error).message}`);
       throw err;
     }
   }

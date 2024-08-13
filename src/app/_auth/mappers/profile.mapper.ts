@@ -8,7 +8,7 @@ export function profileMapper({
   phone,
   email,
   avatar,
-  is_eula_approved,
+  preferences: { is_eula_approved },
 }: Partial<UserEntity>): IProfileResponse {
   return {
     _id,

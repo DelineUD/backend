@@ -30,7 +30,7 @@ export class UsersService {
     try {
       return await this.userModel.find({ ...filter }).exec();
     } catch (err) {
-      logger.error(`Error while findAll: ${(err as Error).message}`);
+      logger.error(`Error while findAll: s${(err as Error).message}`);
       throw new EntityNotFoundError();
     }
   }

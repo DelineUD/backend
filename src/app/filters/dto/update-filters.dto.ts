@@ -5,10 +5,6 @@ export class UpdateFiltersDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  country?: string;
-  @ApiProperty({ default: '', required: false })
-  @IsOptional()
-  @IsString()
   city?: string;
   @ApiProperty({ default: [], required: false })
   @IsOptional()
@@ -17,13 +13,5 @@ export class UpdateFiltersDto {
   @ApiProperty({ default: [], required: false })
   @IsOptional()
   @IsString()
-  narrow_specializations?: string[];
-  @ApiProperty({ default: [], required: false })
-  @IsOptional()
-  @IsString()
   programs?: string[];
-  @ApiProperty({ default: [], required: false })
-  @IsOptional()
-  @IsString()
-  courses?: string[];
 }

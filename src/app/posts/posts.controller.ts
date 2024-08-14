@@ -65,7 +65,7 @@ export class PostsController {
     @Body() createPostDto: CreatePostDto,
     @UploadedFiles() uploadedFiles: Express.Multer.File[],
   ): Promise<IPostsResponse> {
-    return await this.postsService.create(userId, createPostDto, uploadedFiles);
+    return await this.postsService.create(userId, createPostDto, uploadedFiles ?? []);
   }
 
   constructor(private postsService: PostsService) {}

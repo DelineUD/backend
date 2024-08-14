@@ -4,7 +4,7 @@ import { Request } from 'express';
 export const mediaFileFilter = async (_: Request, file: Express.Multer.File, callback: any) => {
   try {
     // Check file type and size
-    if (!file.originalname.match(/\.(jpe?g|png|gif|mp4|m4a|avi|mov|ogg)$/i)) {
+    if (!file.originalname.match(/\.(jpe?g|png|webp|gif|mp4|m4a|avi|mov|ogg)$/i)) {
       return callback(new BadRequestException('Only image, video, and valid format files are allowed!'), false);
     }
 

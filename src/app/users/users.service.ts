@@ -78,12 +78,9 @@ export class UsersService {
       const hashPassword = await hash(password, salt);
       const userMapped = userMapper(restUserDto);
       const updateFilters: UpdateFiltersDto = {
-        [FilterKeys.Country]: userMapped.country,
         [FilterKeys.City]: userMapped.city,
         [FilterKeys.Spec]: userMapped.specializations,
-        [FilterKeys.NarrowSpec]: userMapped.narrow_specializations,
         [FilterKeys.Programs]: userMapped.programs,
-        [FilterKeys.Courses]: userMapped.courses,
       };
 
       const userInDb = await this.userModel.findOne({ phone: userMapped.phone });

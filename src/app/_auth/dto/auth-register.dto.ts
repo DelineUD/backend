@@ -1,76 +1,91 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
+import { Transform } from 'class-transformer';
 
+import { ILink } from '@app/_users/interfaces/user.interface';
 import { UserCreateDto } from '@app/_users/dto/user-create.dto';
-import { EUserStatus } from '@shared/consts/user-status.enum';
-import { EUserFormat } from '@shared/consts/user-format.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
+import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
+import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class AuthRegisterDto extends PartialType(UserCreateDto) {
-  @ApiProperty({ example: '+79992456800', description: 'Номер телефона пользователя' })
+  @ApiProperty({ default: '+79992456800', description: 'Номер телефона пользователя' })
   phone: string;
 
-  @ApiProperty({ example: 'user@example.com', description: 'Электронная почта пользователя' })
+  @ApiProperty({ default: 'user@example.com', description: 'Электронная почта пользователя' })
   email: string;
 
-  @ApiProperty({ example: 'root', description: 'Пароль пользователя' })
+  @ApiProperty({ default: 'root', description: 'Пароль пользователя' })
   password: string;
 
-  @ApiProperty({ example: 'Максим', description: 'Имя пользователя' })
+  @ApiProperty({ default: 'Максим', description: 'Имя пользователя' })
   first_name: string;
 
-  @ApiProperty({ example: 'Максимыч', description: 'Фамилия пользователя' })
+  @ApiProperty({ default: 'Максимыч', description: 'Фамилия пользователя' })
   last_name: string;
 
-  @ApiProperty({ example: '1990-01-01', description: 'Дата рождения пользователя' })
-  birthday: string;
+  @ApiProperty({ default: 'Санкт-Петербург', description: 'Город пользователя' })
+  city?: string;
 
-  @ApiProperty({ example: 'Санкт-Петербург', description: 'Город пользователя' })
-  city: string;
-
-  @ApiPropertyOptional({ example: 'Россия', description: 'Страна пользователя' })
-  country?: string;
-
-  @ApiProperty({ enum: EUserStatus, description: 'Статус пользователя' })
-  status: EUserStatus;
-
-  @ApiProperty({ enum: EUserFormat, description: 'Предпочтение пользователя к удаленной работе' })
-  format: EUserFormat;
-
-  @ApiProperty({ example: 'Магистр компьютерных наук', description: 'Квалификация пользователя' })
-  qualification: string;
+  @ApiPropertyOptional({ default: 'Краткое описание пользователя', description: 'Информация о пользователе' })
+  about?: string;
 
   @ApiPropertyOptional({ type: 'string', format: 'binary' })
   avatar?: any;
 
-  @ApiPropertyOptional({ example: 'Краткое описание пользователя', description: 'Информация о пользователе' })
-  about?: string;
+  @ApiProperty({ default: 'IT, Frontend', description: 'Ключевые слова' })
+  keywords?: string;
 
-  @ApiPropertyOptional({ example: '@telegram_username', description: 'Telegram пользователя' })
-  telegram?: string;
+  @ApiProperty({
+    enum: EUserJobFormat,
+    description: 'Формат работы',
+    default: EUserJobFormat.ft001,
+    required: true,
+  })
+  @IsEnum(EUserJobFormat, { each: true })
+  job_format: EUserJobFormat;
 
-  @ApiPropertyOptional({ example: '@instagram_username', description: 'Instagram пользователя' })
-  instagram?: string;
+  @ApiProperty({
+    enum: EUserJobExperience,
+    description: 'нет опыта',
+    default: EUserJobExperience.et004,
+    required: true,
+  })
+  @IsEnum(EUserJobExperience, { each: true })
+  job_experience: EUserJobExperience;
 
-  @ApiPropertyOptional({ example: '@vk_username', description: 'VK пользователя' })
-  vk?: string;
+  @ApiProperty({
+    enum: EUserProjectInvolvement,
+    description: 'Постоянная занятость',
+    default: EUserProjectInvolvement.pit001,
+    required: true,
+  })
+  @IsEnum(EUserProjectInvolvement, { each: true })
+  project_involvement: EUserProjectInvolvement;
 
-  @ApiPropertyOptional({ example: 'https://userwebsite.com', description: 'Сайт пользователя' })
-  site?: string;
+  @ApiProperty({ default: 'Магистр компьютерных наук', description: 'Квалификация пользователя' })
+  qualification: string;
 
-  @ApiPropertyOptional({ example: true, description: 'Скрыть номер телефона пользователя' })
+  @ApiPropertyOptional({
+    default: [
+      { url: 'https://www.google.com', name: 'Google' },
+      { url: 'https://www.yandex.ru', name: 'Yandex' },
+    ],
+    description: 'Ссылки',
+  })
+  @Transform(validateArrayOfLinks)
+  links?: ILink[];
+
+  @ApiPropertyOptional({ default: true, description: 'Скрыть номер телефона пользователя' })
   is_hide_phone?: boolean;
 
-  @ApiPropertyOptional({ example: true, description: 'Скрыть дату рождения пользователя' })
-  is_hide_birthday?: boolean;
-
-  @ApiPropertyOptional({ example: 'JavaScript, Python', description: 'Курсы пользователя' })
-  courses?: string;
-
-  @ApiPropertyOptional({ example: 'Веб-разработка, Анализ данных', description: 'Программы пользователя' })
+  @ApiPropertyOptional({ default: 'Веб-разработка, Анализ данных', description: 'Программы пользователя' })
+  @Transform(validateArrayOfString)
   programs?: string;
 
-  @ApiPropertyOptional({ example: 'Бэкенд-разработка', description: 'Специализации пользователя' })
+  @ApiPropertyOptional({ default: 'Бэкенд-разработка', description: 'Специализации пользователя' })
+  @Transform(validateArrayOfString)
   specializations?: string;
-
-  @ApiPropertyOptional({ example: 'Node.js, Django', description: 'Узкие специализации пользователя' })
-  narrow_specializations?: string;
 }

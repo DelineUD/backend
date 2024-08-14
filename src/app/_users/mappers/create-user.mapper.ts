@@ -1,5 +1,5 @@
 import { UserCreateDto } from '@app/_users/dto/user-create.dto';
-import { IAdditional, IContact, IPreference, ISocial, IUser } from '@app/_users/interfaces/user.interface';
+import { IAdditional, IPreference, IUser } from '@app/_users/interfaces/user.interface';
 import { splitDtoField } from '@helpers/splitDto';
 
 export const createUserMapper = (dto: UserCreateDto): IUser => {
@@ -9,48 +9,37 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     password,
     first_name,
     last_name,
-    birthday,
     city,
-    country,
-    status,
-    format,
-    qualification,
     avatar,
     about,
-    telegram,
-    instagram,
-    vk,
-    site,
-    is_hide_phone,
-    is_hide_birthday,
-    courses,
+    keywords,
+    links,
+    qualification,
+    project_involvement,
+    job_format,
+    job_experience,
     programs,
     specializations,
-    narrow_specializations,
+    is_hide_phone,
+    getcourse_id,
   } = dto;
 
-  const contacts: IContact = {
-    city,
-    ...(country && { country }),
-  };
+  const splitPrograms = splitDtoField(programs);
+  const splitSpecializations = splitDtoField(specializations);
+  const splitKeywords = splitDtoField(keywords);
 
-  const additional: IAdditional = {
-    format,
-    status,
+  const additional_info: IAdditional = {
     qualification,
+    project_involvement,
+    job_format,
+    job_experience,
     ...(about && { about }),
+    ...(splitKeywords.length && { keywords: splitKeywords }),
   };
 
   const preferences: IPreference = {
-    is_hide_birthday,
     is_hide_phone,
-  };
-
-  const socials: ISocial = {
-    ...(telegram && { telegram }),
-    ...(instagram && { instagram }),
-    ...(vk && { vk }),
-    ...(site && { site }),
+    is_eula_approved: false,
   };
 
   return {
@@ -59,16 +48,13 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     password,
     first_name,
     last_name,
-    birthday: new Date(birthday),
     ...(avatar && { avatar }),
-    contact_info: contacts,
-    additional_info: additional,
-    preferences: preferences,
-    socials: socials,
-    courses: splitDtoField(courses) ?? [],
-    programs: splitDtoField(programs) ?? [],
-    specializations: splitDtoField(specializations) ?? [],
-    narrow_specializations: splitDtoField(narrow_specializations) ?? [],
-    is_eula_approved: false,
+    ...(city && { city }),
+    ...(links.length && { links }),
+    additional_info,
+    preferences,
+    ...(splitPrograms.length && { programs: splitPrograms }),
+    ...(splitSpecializations.length && { specializations: splitSpecializations }),
+    ...(getcourse_id && { getcourse_id }),
   };
 };

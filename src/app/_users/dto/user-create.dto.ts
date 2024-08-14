@@ -1,6 +1,6 @@
 import {
+  IsArray,
   IsBooleanString,
-  IsDateString,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -9,8 +9,10 @@ import {
   IsString,
 } from 'class-validator';
 
-import { EUserStatus } from '@shared/consts/user-status.enum';
-import { EUserFormat } from '@shared/consts/user-format.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
+import { ILink } from '@app/_users/interfaces/user.interface';
 
 export class UserCreateDto {
   @IsPhoneNumber('RU')
@@ -26,54 +28,40 @@ export class UserCreateDto {
   @IsString()
   @IsNotEmpty()
   last_name: string;
-  @IsDateString()
-  birthday: string;
-  @IsString()
-  @IsNotEmpty()
-  city: string;
   @IsString()
   @IsOptional()
-  country?: string;
-  @IsEnum(EUserStatus)
-  status: EUserStatus;
-  @IsEnum(EUserFormat)
-  format: EUserFormat;
-  @IsString()
-  qualification: string;
+  avatar?: string;
   @IsString()
   @IsOptional()
-  avatar?: any;
+  city?: string;
   @IsString()
   @IsOptional()
   about?: string;
+  @IsArray()
+  @IsOptional()
+  links?: ILink[];
   @IsString()
   @IsOptional()
-  telegram?: string;
+  keywords?: string;
+  @IsEnum(EUserJobFormat)
+  job_format: EUserJobFormat;
+  @IsEnum(EUserJobFormat)
+  job_experience: EUserJobExperience;
+  @IsEnum(EUserProjectInvolvement)
+  project_involvement: EUserProjectInvolvement;
   @IsString()
-  @IsOptional()
-  instagram?: string;
-  @IsString()
-  @IsOptional()
-  vk?: string;
-  @IsString()
-  @IsOptional()
-  site?: string;
-  @IsBooleanString()
-  @IsOptional()
-  is_hide_phone?: boolean;
-  @IsBooleanString()
-  @IsOptional()
-  is_hide_birthday?: boolean;
-  @IsString()
-  @IsOptional()
-  courses?: string;
+  @IsNotEmpty()
+  qualification: string;
   @IsString()
   @IsOptional()
   programs?: string;
   @IsString()
   @IsOptional()
   specializations?: string;
+  @IsBooleanString()
+  @IsOptional()
+  is_hide_phone?: boolean;
   @IsString()
   @IsOptional()
-  narrow_specializations?: string;
+  getcourse_id?: string;
 }

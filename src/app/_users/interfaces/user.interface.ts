@@ -1,36 +1,33 @@
 import { Types } from 'mongoose';
 
-import { EUserStatus } from '@shared/consts/user-status.enum';
-import { EUserFormat } from '@shared/consts/user-format.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 
-export interface IContact {
-  city: string;
-  country?: string;
-}
-
-export interface ISocial {
-  telegram?: string;
-  instagram?: string;
-  vk?: string;
-  site?: string;
+export interface ILink {
+  url: string;
+  name?: string;
+  _id?: Types.ObjectId;
 }
 
 export interface IPreference {
-  is_hide_phone: boolean;
-  is_hide_birthday: boolean;
+  is_hide_phone?: boolean;
+  is_eula_approved?: boolean;
 }
 
 export interface IAdditional {
-  format: EUserFormat;
-  status: EUserStatus;
-  qualification: string;
   about?: string;
+  keywords?: string[];
+  qualification: string;
+  project_involvement: EUserProjectInvolvement;
+  job_format: EUserJobFormat;
+  job_experience: EUserJobExperience;
 }
 
 export interface IBun {
-  blocked_users: Types.ObjectId[];
-  hidden_authors: Types.ObjectId[];
-  hidden_posts: Types.ObjectId[];
+  blocked_users?: Types.ObjectId[];
+  hidden_authors?: Types.ObjectId[];
+  hidden_posts?: Types.ObjectId[];
 }
 
 export interface IUser {
@@ -39,17 +36,12 @@ export interface IUser {
   password: string;
   first_name: string;
   last_name: string;
-  birthday: Date;
   avatar?: string;
-  contact_info: IContact;
+  city?: string;
   additional_info: IAdditional;
-  bun_info?: IBun;
-  preferences: IPreference;
-  socials?: ISocial;
-  courses?: string[];
+  preferences?: IPreference;
   programs?: string[];
   specializations?: string[];
-  narrow_specializations?: string[];
-  is_eula_approved?: boolean;
+  bun_info?: IBun;
   getcourse_id?: string;
 }

@@ -43,7 +43,7 @@ export class AuthService {
       const validPhone = transformPhoneNumber(phone);
 
       const userInDb = await this.usersService.findOne({ phone: validPhone });
-      if (userInDb) throw new BadRequestException('Пользователь с этим номером не зарегистрирован');
+      if (userInDb) throw new BadRequestException('Пользователь с этим номером уже зарегистрирован.');
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);

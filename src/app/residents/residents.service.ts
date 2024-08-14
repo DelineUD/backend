@@ -31,7 +31,7 @@ export class ResidentsService {
 
   async findAll(
     userId: Types.ObjectId,
-    { search, status, ...queryParams }: Partial<ResidentsFindQueryDto>,
+    { search, ...queryParams }: Partial<ResidentsFindQueryDto>,
   ): Promise<IResidentList[]> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
@@ -40,7 +40,6 @@ export class ResidentsService {
       }
 
       const query: FilterQuery<Partial<IUser>> = await getMainFilters(this.filtersService, queryParams);
-      status && (query.qualification = StatusFilterKeys[status]);
 
       if (search) {
         const [first, last] = [new RegExp(search.split(' ')[0], 'i'), new RegExp(search.split(' ')[1], 'i')];

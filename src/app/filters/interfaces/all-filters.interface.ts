@@ -1,11 +1,10 @@
 export class IAllQueryFilters {
-  country?: string;
   city?: string;
-  status?: string;
   specializations?: string[];
-  narrow_specializations?: string[];
   programs?: string[];
-  courses?: string[];
-  remote_work?: boolean;
+  job_format?: string[];
+  job_experience?: string[];
+  qualifications?: string[];
+  project_involvement?: string[];
   desc?: string | undefined;
 }

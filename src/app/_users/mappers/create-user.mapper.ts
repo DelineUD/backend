@@ -14,7 +14,7 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     about,
     keywords,
     links,
-    qualification,
+    qualifications,
     project_involvement,
     job_format,
     job_experience,
@@ -29,7 +29,7 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
   const splitKeywords = splitDtoField(keywords);
 
   const additional_info: IAdditional = {
-    qualification,
+    ...(qualifications?.length && { qualifications }),
     project_involvement,
     job_format,
     job_experience,
@@ -50,7 +50,7 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     last_name,
     ...(avatar && { avatar }),
     ...(city && { city }),
-    ...(links.length && { links }),
+    ...(links?.length && { links }),
     additional_info,
     preferences,
     ...(splitPrograms.length && { programs: splitPrograms }),

@@ -1,14 +1,16 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-import { ILink } from '@app/_users/interfaces/user.interface';
+import { ILink, IQualification } from '@app/_users/interfaces/user.interface';
 import { UserCreateDto } from '@app/_users/dto/user-create.dto';
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
+import { EUserQualification } from '@shared/consts/user-qualification.enum';
 import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
+import { validateArrayOfQualification } from '@shared/validators/validateArrayOfQualification';
 
 export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ default: '+79992456800', description: 'Номер телефона пользователя' })
@@ -65,8 +67,15 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @IsEnum(EUserProjectInvolvement, { each: true })
   project_involvement: EUserProjectInvolvement;
 
-  @ApiProperty({ default: 'Магистр компьютерных наук', description: 'Квалификация пользователя' })
-  qualification: string;
+  @ApiProperty({
+    default: [
+      { name: EUserQualification.qt001, year: 2024 },
+      { name: EUserQualification.qt002, year: 2023 },
+    ],
+    description: 'Квалификация пользователя',
+  })
+  @Transform(validateArrayOfQualification)
+  qualifications?: IQualification[];
 
   @ApiPropertyOptional({
     default: [

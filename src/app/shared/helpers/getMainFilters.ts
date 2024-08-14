@@ -10,8 +10,7 @@ export async function getMainFilters(
 ): Promise<Partial<FilterQuery<IAllQueryFilters>>> {
   const mainQuery: Partial<FilterQuery<IAllQueryFilters>> = {};
 
-  const { cityPromise, specPromises, programsPromises } =
-    filtersService.getFiltersPromises(initQuery);
+  const { cityPromise, specPromises, programsPromises } = filtersService.getFiltersPromises(initQuery);
 
   const [city, spec, programs] = await Promise.allSettled([
     cityPromise,

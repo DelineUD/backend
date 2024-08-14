@@ -2,8 +2,8 @@ import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateBooleanOfString } from '@shared/validators/validateBooleanOfString';
-import { StatusFilterKeys } from '@app/filters/consts';
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
+import { StatusFilterKeys } from '@app/filters/consts';
 
 export class UserDto {
   @IsString()

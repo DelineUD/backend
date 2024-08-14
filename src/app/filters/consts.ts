@@ -1,24 +1,23 @@
 export enum FilterKeys {
-  Country = 'country',
   City = 'city',
   Spec = 'specializations',
-  NarrowSpec = 'narrow_specializations',
   Programs = 'programs',
-  Courses = 'courses',
-  Remote = 'remote_work',
-  Status = 'status',
+  Experience = 'job_experience',
+  Format = 'job_format',
+  Qualifications = 'qualifications',
+  Involvement = 'project_involvement',
   Group = 'group',
   Desc = 'desc',
 }
 
 export enum FilterNames {
-  Country = 'Страна',
   City = 'Город',
   Spec = 'Специализации',
-  NarrowSpec = 'Узкие специализации',
   Programs = 'Программы',
-  Courses = 'Курсы',
-  Status = 'Статус',
+  Experience = 'Опыт работы',
+  Format = 'Формат работы',
+  Qualifications = 'Квалификация',
+  Involvement = 'Участие в проектах',
   Group = 'Группа',
 }
 

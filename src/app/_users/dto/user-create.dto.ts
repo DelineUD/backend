@@ -12,7 +12,7 @@ import {
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
-import { ILink } from '@app/_users/interfaces/user.interface';
+import { ILink, IQualification } from '@app/_users/interfaces/user.interface';
 
 export class UserCreateDto {
   @IsPhoneNumber('RU')
@@ -49,9 +49,9 @@ export class UserCreateDto {
   job_experience: EUserJobExperience;
   @IsEnum(EUserProjectInvolvement)
   project_involvement: EUserProjectInvolvement;
-  @IsString()
-  @IsNotEmpty()
-  qualification: string;
+  @IsArray()
+  @IsOptional()
+  qualifications?: IQualification[];
   @IsString()
   @IsOptional()
   programs?: string;

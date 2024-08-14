@@ -15,11 +15,11 @@ export class UserEntity extends Document implements IUser {
   @Prop({ required: true }) last_name: string;
   @Prop({ required: false }) avatar?: string;
   @Prop({ required: false }) city?: string;
-  @Prop({ required: false, type: [{ url: String, name: String }] }) links?: ILink[];
+  @Prop({ required: false, type: [{ url: String, name: String }], _id: false }) links?: ILink[];
   @Prop({
     type: {
       about: { type: String, required: false, maxlength: 300 },
-      qualification: { type: String, required: true },
+      qualifications: { type: [{ name: String, year: { type: Number, required: false }, _id: false }], required: false },
       project_involvement: { type: String, enum: EUserProjectInvolvement, required: true },
       job_format: { type: String, enum: EUserJobFormat, required: true },
       job_experience: { type: String, enum: EUserJobExperience, required: true },

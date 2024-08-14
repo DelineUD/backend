@@ -8,8 +8,12 @@ import { IFilters, IFiltersResponse } from '@app/filters/interfaces/filters.inte
 import { Specializations } from '@app/filters/entities/specializations.entity';
 import { Programs } from '@app/filters/entities/programs.entity';
 import { filtersMapper } from '@app/filters/filters.mapper';
-import { FilterKeys, FilterNames, GroupFilterKeys, StatusFilterKeys } from '@app/filters/consts';
+import { FilterKeys, FilterNames, GroupFilterKeys } from '@app/filters/consts';
 import { IAllQueryFilters } from '@app/filters/interfaces/all-filters.interface';
+import { EUserQualification } from '@shared/consts/user-qualification.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 
 const logger = new Logger('Filters');
 
@@ -115,7 +119,7 @@ export class FiltersService {
     }
   }
 
-  async getCitiesFilter(): Promise<IFilters> {
+  async getCitiesFilter(): Promise<IFiltersResponse> {
     try {
       return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, FilterNames.City, false);
     } catch (err) {
@@ -155,15 +159,54 @@ export class FiltersService {
     }
   }
 
-  getStatusFilter(): IFiltersResponse {
+  getQualificationsFilter(): IFiltersResponse {
     try {
-      const statusFilter = Object.keys(StatusFilterKeys).map((key) => ({
+      const qualificationFilter = Object.keys(EUserQualification).map((key) => ({
         _id: key,
-        name: StatusFilterKeys[key as keyof typeof StatusFilterKeys],
+        name: EUserQualification[key as keyof typeof EUserQualification],
       }));
-      return filtersMapper(statusFilter, FilterKeys.Status, FilterNames.Status, false);
+      return filtersMapper(qualificationFilter, FilterKeys.Qualifications, FilterNames.Qualifications, true);
     } catch (err) {
-      logger.error(`Error while getStatusFilter: ${(err as Error).message}`);
+      logger.error(`Error while getQualificationsFilter: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  getFormatFilter(): IFiltersResponse {
+    try {
+      const formatFilter = Object.keys(EUserJobFormat).map((key) => ({
+        _id: key,
+        name: EUserJobFormat[key as keyof typeof EUserJobFormat],
+      }));
+      return filtersMapper(formatFilter, FilterKeys.Format, FilterNames.Format, true);
+    } catch (err) {
+      logger.error(`Error while getFormatFilter: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  getExperienceFilter(): IFiltersResponse {
+    try {
+      const experienceFilter = Object.keys(EUserJobExperience).map((key) => ({
+        _id: key,
+        name: EUserJobExperience[key as keyof typeof EUserJobExperience],
+      }));
+      return filtersMapper(experienceFilter, FilterKeys.Experience, FilterNames.Experience, true);
+    } catch (err) {
+      logger.error(`Error while getExperienceFilter: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  getInvolvementFilter(): IFiltersResponse {
+    try {
+      const involvementFilter = Object.keys(EUserProjectInvolvement).map((key) => ({
+        _id: key,
+        name: EUserProjectInvolvement[key as keyof typeof EUserProjectInvolvement],
+      }));
+      return filtersMapper(involvementFilter, FilterKeys.Involvement, FilterNames.Involvement, true);
+    } catch (err) {
+      logger.error(`Error while getInvolvementFilter: ${(err as Error).message}`);
       throw err;
     }
   }

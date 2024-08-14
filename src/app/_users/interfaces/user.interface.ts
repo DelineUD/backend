@@ -10,6 +10,11 @@ export interface ILink {
   _id?: Types.ObjectId;
 }
 
+export interface IQualification {
+  name: string;
+  year?: number;
+}
+
 export interface IPreference {
   is_hide_phone?: boolean;
   is_eula_approved?: boolean;
@@ -18,7 +23,7 @@ export interface IPreference {
 export interface IAdditional {
   about?: string;
   keywords?: string[];
-  qualification: string;
+  qualifications?: IQualification[];
   project_involvement: EUserProjectInvolvement;
   job_format: EUserJobFormat;
   job_experience: EUserJobExperience;

@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { PostModel } from '@app/posts/models/posts.model';
-import { Resume } from '@app/resumes/entities/resume.entity';
-import { UserModel } from '@app/users/models/user.model';
 import { Vacancy } from '@app/vacancy/entities/vacancy.entity';
+import { Resume } from '../resumes/entities/resume.entity';
+import { UserEntity } from '../users/entities/user.entity';
 
 const logger = new Logger('Migrations');
 
@@ -14,8 +14,8 @@ export class MigrationService {
   constructor(
     @InjectModel(PostModel.name)
     private readonly postModel: Model<PostModel>,
-    @InjectModel(UserModel.name)
-    private readonly userModel: Model<UserModel>,
+    @InjectModel(UserEntity.name)
+    private readonly userModel: Model<UserEntity>,
     @InjectModel(Vacancy.name)
     private readonly vacancyModel: Model<Vacancy>,
     @InjectModel(Resume.name)

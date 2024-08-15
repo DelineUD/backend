@@ -1,8 +1,10 @@
-import { UserCreateDto } from '@app/_users/dto/user-create.dto';
-import { IAdditional, IPreference, IUser } from '@app/_users/interfaces/user.interface';
+import { Types } from 'mongoose';
+
+import { UserCreateDto } from '@/app/users/dto/user-create.dto';
+import { IAdditional, IPreference, IUser } from '@/app/users/interfaces/user.interface';
 import { splitDtoField } from '@helpers/splitDto';
 
-export const createUserMapper = (dto: UserCreateDto): IUser => {
+export const createUserMapper = (_id: Types.ObjectId, dto: UserCreateDto): IUser => {
   const {
     phone,
     email,
@@ -43,6 +45,7 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
   };
 
   return {
+    _id,
     phone,
     email,
     password,

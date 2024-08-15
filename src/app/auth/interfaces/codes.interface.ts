@@ -2,8 +2,6 @@ import { Types } from 'mongoose';
 
 export interface ICodes {
   _id?: Types.ObjectId;
-
-  userId: Types.ObjectId;
-  userPhone: string;
+  user_phone: string;
   otp: number;
 }

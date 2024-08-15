@@ -1,5 +1,5 @@
-import { IProfileResponse } from '@app/_auth/interfaces/profile-response.interface';
-import { UserEntity } from '@app/_users/entities/user.entity';
+import { UserEntity } from '@/app/users/entities/user.entity';
+import { IProfileResponse } from '@app/auth/interfaces/profile-response.interface';
 
 export function profileMapper({
   _id,

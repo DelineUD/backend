@@ -3,15 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { DeleteResult } from 'mongodb';
 import { Model, Types } from 'mongoose';
 
-import { Events } from '@app/events/entities/events.entity';
-import { UpdateEventsDto } from '@app/events/dto/update-events.dto';
 import { CreateEventDto } from '@app/events/dto/create.event.dto';
+import { UpdateEventsDto } from '@app/events/dto/update-events.dto';
+import { Events } from '@app/events/entities/events.entity';
 
+import { EventDto } from '@app/events/dto/event.dto';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UsersService } from '../users/users.service';
 import { IEvents } from './interfaces/events.interface';
 import { eventListMapper, eventMapper } from './mapper';
-import { EventDto } from '@app/events/dto/event.dto';
 
 const logger = new Logger('Events');
 
@@ -181,7 +181,7 @@ export class EventsService {
 
     if (checkResult !== true) {
       await eventInDb.updateOne({
-        iGo: arrGoNotGo.unshift(user._id),
+        iGo: arrGoNotGo.unshift(String(user._id)),
       });
       await eventInDb.save();
       const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
@@ -230,7 +230,7 @@ export class EventsService {
 
     if (arrGoNotGo.length === 0) {
       await eventInDb.updateOne({
-        notGo: arrGoNotGo.unshift(user._id),
+        notGo: arrGoNotGo.unshift(String(user._id)),
       });
       await eventInDb.save();
       const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
@@ -245,7 +245,7 @@ export class EventsService {
 
     if (checkResult !== true) {
       await eventInDb.updateOne({
-        notGo: arrGoNotGo.unshift(user._id),
+        notGo: arrGoNotGo.unshift(String(user._id)),
       });
       await eventInDb.save();
 
@@ -281,7 +281,7 @@ export class EventsService {
 
     if (arrGoNotGo.length === 0) {
       await eventInDb.updateOne({
-        notGo: arrGoNotGo.unshift(user._id),
+        notGo: arrGoNotGo.unshift(String(user._id)),
       });
       await eventInDb.save();
       const newEventInDb = await this.eventsModel.findOne({ _id: event }).exec();
@@ -296,7 +296,7 @@ export class EventsService {
 
     if (checkResult !== true) {
       await eventInDb.updateOne({
-        favor: arrGoNotGo.unshift(user._id),
+        favor: arrGoNotGo.unshift(String(user._id)),
       });
       await eventInDb.save();
 

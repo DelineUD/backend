@@ -1,22 +1,22 @@
 import { forwardRef, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
 import { DeleteResult } from 'mongodb';
+import { FilterQuery, Model, Types } from 'mongoose';
 
-import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
-import { vacancyDtoMapper, vacancyListMapper, vacancyMapper } from '@app/vacancy/vacancy.mapper';
-import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
 import { FiltersService } from '@app/filters/filters.service';
-import { IDeleteVacancyQuery } from '@app/vacancy/interfaces/delete-vacancy.interface';
-import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 import { IResume } from '@app/resumes/interfaces/resume.interface';
+import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
+import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
+import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
+import { IDeleteVacancyQuery } from '@app/vacancy/interfaces/delete-vacancy.interface';
+import { vacancyDtoMapper, vacancyListMapper, vacancyMapper } from '@app/vacancy/vacancy.mapper';
+import { getMainFilters } from '@helpers/getMainFilters';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import normalizeDto from '@utils/normalizeDto';
-import { getMainFilters } from '@helpers/getMainFilters';
-import { Vacancy } from './entities/vacancy.entity';
 import { UsersService } from '../users/users.service';
-import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
+import { Vacancy } from './entities/vacancy.entity';
 import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
+import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
 
 const logger = new Logger('Vacancies');
 
@@ -31,7 +31,8 @@ export class VacancyService {
 
   async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
     try {
-      const userInDb = await this.usersService.findOne({ id });
+      // FIXME: убрать conversation to unknown
+      const userInDb = await this.usersService.findOne({ _id: id as unknown as Types.ObjectId });
       if (!userInDb) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
@@ -75,7 +76,7 @@ export class VacancyService {
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      return vacancyListMapper(vacancies, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
+      return vacancyListMapper(vacancies, { _id: userInDb._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при поиске вакансий!');
@@ -102,7 +103,7 @@ export class VacancyService {
         return [];
       }
 
-      return vacancyListMapper(vacancies, { _id: userId._id, blocked_users: userInDb.blocked_users });
+      return vacancyListMapper(vacancies, { _id: userId._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
@@ -127,7 +128,7 @@ export class VacancyService {
         throw new EntityNotFoundError(`Вакансия не найдена`);
       }
 
-      return vacancyMapper(vacancy, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
+      return vacancyMapper(vacancy, { _id: userInDb._id, bun_info: userInDb?.bun_info });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;

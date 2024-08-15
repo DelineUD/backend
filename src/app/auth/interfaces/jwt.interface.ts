@@ -10,4 +10,4 @@ export interface IJwtPayload {
 }
 
 export type IJwtAccessValidPayload = Omit<IJwtPayload, 'iat' | 'exp'>;
-export type IJwtRefreshValidPayload = Omit<IJwtPayload, 'iat' | 'exp'> & { refreshToken: string };
+export type IJwtRefreshValidPayload = Omit<IJwtPayload, 'iat' | 'exp'> & { refresh_token: string };

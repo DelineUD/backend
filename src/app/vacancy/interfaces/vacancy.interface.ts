@@ -1,9 +1,10 @@
 import { Types } from 'mongoose';
 
-import { IUser } from '@app/users/interfaces/user.interface';
+import { UserEntity } from '@/app/users/entities/user.entity';
+import { IBun } from '@/app/users/interfaces/user.interface';
 
-export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'telegram' | 'city' | 'blocked_users';
-export type UserVacancyPick = Pick<IUser, UserVacancyPickList>;
+export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'city' | 'bun_info';
+export type UserVacancyPick = Pick<UserEntity, UserVacancyPickList>;
 
 export interface IVacancy {
   _id?: Types.ObjectId;
@@ -20,7 +21,7 @@ export interface IVacancy {
   programs: string[];
   format: string;
   service_cost?: number;
-  author?: IVacancyAuthorResponse & { blocked_users: Types.ObjectId[] };
+  author?: IVacancyAuthorResponse & { bun_info: IBun };
   createdAt?: string;
   updatedAt?: string;
 }

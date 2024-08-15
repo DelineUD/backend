@@ -1,45 +1,53 @@
 import { Types } from 'mongoose';
 
-// TODO: Разобраться с обязательностью полей
-export interface IUser {
-  _id?: Types.ObjectId; // Sys mongo id
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 
-  id: string; // Get course id
-  email: string;
-  phone: string;
-  password: string;
-  first_name: string;
-  last_name?: string;
-  birthday: Date;
-  avatar?: string;
-  gender?: string;
-  badge?: string;
+export interface ILink {
+  url: string;
+  name?: string;
+  _id?: Types.ObjectId;
+}
 
-  country: string;
-  city: string;
+export interface IQualification {
+  name: string;
+  year?: number;
+}
 
-  about?: string;
-  other?: string;
-  education?: string;
-  qualification?: string;
-  format?: string;
-  ready_communicate?: boolean;
-  status: string;
-
-  site?: string;
-  instagram?: string;
-  telegram?: string;
-  vk?: string;
-
-  hide_phone: boolean;
+export interface IPreference {
+  is_hide_phone?: boolean;
   is_eula_approved?: boolean;
-  qualification_color?: string;
+}
+
+export interface IAdditional {
+  about?: string;
+  keywords?: string[];
+  qualifications?: IQualification[];
+  project_involvement: EUserProjectInvolvement;
+  job_format: EUserJobFormat;
+  job_experience: EUserJobExperience;
+}
+
+export interface IBun {
   blocked_users?: Types.ObjectId[];
   hidden_authors?: Types.ObjectId[];
   hidden_posts?: Types.ObjectId[];
+}
 
-  courses: string[];
-  programs: string[];
-  specializations: string[];
-  narrow_specializations: string[];
+export interface IUser {
+  _id: Types.ObjectId;
+  phone: string;
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  avatar?: string;
+  city?: string;
+  additional_info: IAdditional;
+  preferences?: IPreference;
+  programs?: string[];
+  specializations?: string[];
+  bun_info?: IBun;
+  getcourse_id?: string;
 }

@@ -1,26 +1,28 @@
-import { IResidentList } from './interfaces/resident.interface-list';
+import { UserEntity } from '../users/entities/user.entity';
 import { IResident } from './interfaces/resident.interface';
-import { IUser } from '@app/users/interfaces/user.interface';
+import { IResidentList } from './interfaces/resident.interface-list';
 
 /*
  * Function for formatting user list data before sending
  * users -> found user list
  */
-export const residentListMapper = (residents: IUser[], user: Pick<IUser, '_id' | 'blocked_users'>): IResidentList[] => {
+export const residentListMapper = (
+  residents: UserEntity[],
+  user: Pick<UserEntity, '_id' | 'bun_info'>,
+): IResidentList[] => {
   return residents.map((r) => residentsMapper(r, { ...user }));
 };
 
-export const residentsMapper = (resident: IUser, user: Pick<IUser, '_id' | 'blocked_users'>): IResidentList => {
-  const { _id, first_name, last_name, avatar, status, qualification, blocked_users } = resident;
-  const youBlocked = blocked_users?.includes(user._id) ?? false;
+export const residentsMapper = (resident: UserEntity, user: Pick<UserEntity, '_id' | 'bun_info'>): IResidentList => {
+  const { _id, first_name, last_name, avatar, bun_info } = resident;
+  const youBlocked = bun_info?.blocked_users?.includes(user._id) ?? false;
 
   return {
     _id,
     first_name,
     last_name: last_name ?? 's',
     avatar: !youBlocked && avatar ? avatar : null,
-    status,
-    qualification: !youBlocked ? qualification : '*'.repeat(qualification.length),
+    qualification: '*'.repeat(5),
   };
 };
 
@@ -29,61 +31,36 @@ export const residentsMapper = (resident: IUser, user: Pick<IUser, '_id' | 'bloc
  * residentPayload -> found user by id param
  * { _id, blocked_users } -> sender user details
  */
-export const residentMapper = (resident: IUser, user: Pick<IUser, '_id' | 'blocked_users'>): IResident => {
-  const {
-    _id,
-    first_name,
-    last_name,
-    phone,
-    about,
-    other,
-    status,
-    qualification,
-    format,
-    avatar,
-    hide_phone,
-    country,
-    city,
-    email,
-    site,
-    birthday,
-    gender,
-    instagram,
-    telegram,
-    programs,
-    courses,
-    specializations,
-    narrow_specializations,
-    blocked_users,
-  } = resident;
+export const residentMapper = (resident: UserEntity, user: Pick<UserEntity, '_id' | 'bun_info'>): IResident => {
+  const { _id, first_name, last_name, phone, avatar, city, email, programs, specializations, bun_info } = resident;
 
-  const isBlocked = user.blocked_users?.includes(_id) ?? false;
-  const youBlocked = blocked_users?.includes(user._id) ?? false;
+  const isBlocked = user.bun_info?.blocked_users?.includes(_id) ?? false;
+  const youBlocked = bun_info?.blocked_users?.includes(user._id) ?? false;
 
   return {
     _id,
     first_name,
     last_name: last_name ?? '',
-    about: about ?? null,
-    status: status ?? null,
-    qualification: !youBlocked ? qualification : '*'.repeat(qualification.length),
-    other: other ?? null,
-    format: format ?? null,
+    about: null,
+    status: null,
+    qualification: '*'.repeat(5),
+    other: null,
+    format: null,
     avatar: !youBlocked && avatar ? avatar : null,
     is_blocked: isBlocked,
     you_blocked: youBlocked,
 
     personal_information: {
-      country,
+      country: null,
       city,
       email,
-      phone: !hide_phone ? String(phone) : null,
-      site: site ?? null,
-      birthday: birthday ?? null,
-      gender: gender ?? null,
-      instagram: !youBlocked && instagram ? instagram : null,
-      telegram: !youBlocked && telegram ? telegram : null,
-      contact_link: !youBlocked && telegram ? telegram : null,
+      phone: String(phone),
+      site: null,
+      birthday: null,
+      gender: null,
+      instagram: null,
+      telegram: null,
+      contact_link: null,
     },
     description_fields: [
       {
@@ -92,7 +69,7 @@ export const residentMapper = (resident: IUser, user: Pick<IUser, '_id' | 'block
       },
       {
         filed: 'Пройденные курсы',
-        items: courses,
+        items: [],
       },
       {
         filed: 'Специализация',
@@ -100,7 +77,7 @@ export const residentMapper = (resident: IUser, user: Pick<IUser, '_id' | 'block
       },
       {
         filed: 'Узкая специализация',
-        items: narrow_specializations,
+        items: [],
       },
     ],
   };

@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
 
-import { UsersModule } from '@app/users/users.module';
+import { UsersModule } from '@/app/users/users.module';
+import { FiltersModule } from '@app/filters/filters.module';
 import { SmsModule } from '@app/sms/sms.module';
-import { Tokens, TokensSchema } from './entities/tokens.entity';
-import { Codes, CodesSchema } from './entities/codes.entity';
-import { TokensService } from './services/tokens.service';
-import { CodesService } from './services/codes.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { STRATEGIES } from './strategies';
+import { Codes, CodesSchema } from './entities/codes.entity';
+import { Tokens, TokensSchema } from './entities/tokens.entity';
 import { GUARDS } from './guards';
+import { CodesService } from './services/codes.service';
+import { TokensService } from './services/tokens.service';
+import { STRATEGIES } from './strategies';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { GUARDS } from './guards';
     JwtModule.register({}),
     PassportModule,
     SmsModule,
+    FiltersModule,
     UsersModule,
   ],
   controllers: [AuthController],

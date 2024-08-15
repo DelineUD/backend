@@ -1,165 +1,209 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { Promise, Types } from 'mongoose';
+import { genSalt, hash } from 'bcrypt';
 import { Request } from 'express';
+import { Types } from 'mongoose';
 
+import { UsersService } from '@/app/users/users.service';
+import { AuthRegisterOtpDto } from '@app/auth/dto/auth-register-otp.dto';
+import { FilterKeys } from '@app/filters/consts';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { FiltersService } from '@app/filters/filters.service';
 import { SmsService } from '@app/sms/sms.service';
-import { CreateUserDto } from '@app/users/dto/user-create.dto';
-import { UsersService } from '@app/users/users.service';
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import { IUser } from '../users/interfaces/user.interface';
-import { LoginUserDto } from '../users/dto/user-login.dto';
+import { transformPhoneNumber } from '@utils/transformPhoneNumber';
+import { AuthLoginOtpDto } from './dto/auth-login-otp.dto';
+import { AuthLoginDto } from './dto/auth-login.dto';
+import { AuthRegisterDto } from './dto/auth-register.dto';
+import { AuthSendOtpDto } from './dto/auth-send-otp.dto';
 import { IAuthTokens } from './interfaces/auth-tokens.interface';
 import { IJwtRefreshValidPayload } from './interfaces/jwt.interface';
-import { ILoginResponse, ILoginSmsPayload } from './interfaces/login.interface';
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { ISensSmsResponse } from './interfaces/send-sms.interface';
-import { LoginSmsDto } from './dto/login-sms.dto';
-import { SendSmsDto } from './dto/send-sms.dto';
-import { TokensService } from './services/tokens.service';
+import { IProfileResponse } from './interfaces/profile-response.interface';
+import { profileMapper } from './mappers/profile.mapper';
 import { CodesService } from './services/codes.service';
+import { TokensService } from './services/tokens.service';
+import { AuthLoginResponseType } from './types/auth-login-response.type';
+import { AuthRegisterResponseType } from './types/auth-register-response.type';
+import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 
-const logger = new Logger('Auth');
+const logger = new Logger('_Auth');
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
     private readonly codesService: CodesService,
     private readonly smsService: SmsService,
+    private readonly filtersService: FiltersService,
+    private readonly usersService: UsersService,
   ) {}
 
-  async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
+  async register(
+    { phone, password, ...dto }: AuthRegisterDto,
+    avatar: Express.Multer.File,
+  ): Promise<AuthRegisterResponseType> {
     try {
-      const user = await this.usersService.createOrUpdate(userDto);
-      if (!user) {
-        return { status: false, message: 'Ошибка при регистрации или обновлении пользователя!' };
-      }
+      const validPhone = transformPhoneNumber(phone);
 
-      return user;
+      const userInDb = await this.usersService.findOne({ phone: validPhone });
+      if (userInDb) throw new BadRequestException('Пользователь с этим номером уже зарегистрирован.');
+
+      const salt = await genSalt(10);
+      const hashPassword = await hash(password, salt);
+
+      const pathToAvatar = avatar
+        ? `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${process.env.IMAGES_FOLDER}/${avatar.filename}`
+        : null;
+
+      const user = await this.usersService.create({
+        ...dto,
+        phone: validPhone,
+        avatar: pathToAvatar,
+        password: hashPassword,
+      });
+
+      if (!user) throw new BadRequestException('Произошла непредвиденная ошибка!');
+
+      const updateFilters: UpdateFiltersDto = {
+        [FilterKeys.City]: user.city,
+        [FilterKeys.Spec]: user.specializations,
+        [FilterKeys.Programs]: user.programs,
+      };
+      this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
+
+      return await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
     } catch (err) {
       logger.error(`Error while register: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async login(dto: AuthLoginDto): Promise<AuthLoginResponseType> {
     try {
-      const { _id } = await this.usersService.findOne({ id });
-      if (!_id) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
+      const userInDb = await this.usersService.findByLogin(dto);
 
-      await Promise.allSettled([
-        await this.usersService.deleteUser(_id),
-        await this.usersService.deleteUserPosts(_id),
-        await this.usersService.deleteUserResumes(_id),
-        await this.usersService.deleteUserVacancies(_id),
-      ]);
+      const tokens = await this.tokensService.generateTokens({
+        _id: userInDb._id,
+        phone: userInDb.phone,
+        email: userInDb.email,
+      });
+      await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
 
-      return;
-    } catch (err) {
-      logger.error(`Error while delete: ${(err as Error).message}`);
-      throw err;
-    }
-  }
+      console.log(tokens);
 
-  async login(loginUserDto: LoginUserDto): Promise<ILoginResponse> {
-    try {
-      const user = await this.usersService.findByLogin(loginUserDto);
-
-      const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
-      await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
-
-      return {
-        ...tokens,
-        type: 'password',
-      };
+      return tokens;
     } catch (err) {
       logger.error(`Error while login: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async sendSms({ phone }: SendSmsDto): Promise<ISensSmsResponse> {
+  async registerOtp(dto: AuthRegisterOtpDto): Promise<void> {
+    const { phone, otp } = dto;
+
+    if (!phone || !otp) throw new BadRequestException('Неверные данные!');
+
+    const userInDb = await this.usersService.findByPhone(phone);
+    if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
+
+    const otpCode = await this.codesService.findCodeByPayload({
+      user_phone: phone,
+    });
+    if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
+
+    if (otpCode.otp !== +otp && Number(process.env.QUICK_CODE) !== +otp)
+      throw new ForbiddenException(`Неверно введен код из СМС.`);
+
+    await this.codesService.deleteCodeById(otpCode._id);
+
+    return;
+  }
+
+  async registerOtpSend(dto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     try {
-      const user = await this.usersService.findByPhone(phone);
-      if (!user) {
-        throw new UnauthorizedException(`Пользователь с номером: ${phone} не найден!`);
-      }
+      const { phone } = dto;
 
-      const authCode = await this.codesService.generateCode(user._id, user.phone);
-      const msg = `${authCode.otp} — ваш код для входа в приложение Умный Дизайн. Никому не сообщайте его!`;
+      const userInDb = await this.usersService.findByPhone(phone);
+      if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-      const { status, status_code } = await this.smsService.send(user.phone, msg);
+      const otpCode = await this.codesService.generateCode({ userPhone: phone });
+      const msg = `Код для подтверждения: ${otpCode.otp}.`;
+
+      const { status, status_code } = await this.smsService.send(phone, msg);
       if (status_code !== 100) {
-        await this.codesService.deleteCodeById(authCode._id);
+        await this.codesService.deleteCodeById(otpCode._id);
+        throw new BadRequestException('Ошибка при отправке sms!');
       }
 
-      return {
-        status,
-        status_code,
-      };
+      return { status, status_code };
     } catch (err) {
       logger.error(`Error while sendSms: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async loginSms(headers: LoginSmsDto): Promise<ILoginResponse> {
+  async loginOtp(dto: AuthLoginOtpDto): Promise<AuthLoginResponseType> {
     try {
-      const loginData = headers['user-login-data'].split(' ');
+      const { phone, otp } = dto;
 
-      if (!loginData || loginData.length < 2) {
-        throw new BadRequestException('Неверные данные для входа: пусто или неверно!');
-      }
-      const payload: ILoginSmsPayload = {
-        phone: loginData[0],
-        vPass: +loginData[1],
-      };
+      if (!phone || !otp) throw new BadRequestException('Неверные данные для входа!');
 
-      const user = await this.usersService.findByPhone(payload.phone);
-      if (!user) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
-      }
+      const userInDb = await this.usersService.findByPhone(phone);
+      if (!userInDb) throw new BadRequestException('Пользователь c этим номером не зарегистрирован.');
 
       const authCode = await this.codesService.findCodeByPayload({
-        userId: user._id,
-        userPhone: user.phone,
+        user_phone: userInDb.phone,
       });
-      if (!authCode) {
-        throw new ForbiddenException(`Срок действия кода истек!`);
-      }
+      if (!authCode) throw new ForbiddenException(`Срок действия кода истек!`);
 
-      if (authCode.otp !== payload.vPass && payload.vPass !== Number(process.env.QUICK_CODE)) {
+      if (authCode.otp !== Number(otp) && Number(process.env.QUICK_CODE) !== Number(otp))
         throw new ForbiddenException(`Неверный код!`);
-      }
 
-      const tokens = await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });
-      await this.tokensService.updateRefreshToken(user._id, tokens.refreshToken);
+      const tokens = await this.tokensService.generateTokens({
+        _id: userInDb._id,
+        phone: userInDb.phone,
+        email: userInDb.email,
+      });
+      await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
       await this.codesService.deleteCodeById(authCode._id);
 
-      return {
-        ...tokens,
-        type: 'sms',
-      };
+      return tokens;
     } catch (err) {
-      logger.error(`Error while loginSms: ${(err as Error).message}`);
+      logger.error(`Error while loginOtp: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async refresh(req: Request): Promise<IAuthTokens> {
+  async loginOtpSend(dto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     try {
-      const { refreshToken, ...validUser } = req.user as IJwtRefreshValidPayload;
+      const { phone } = dto;
 
-      const userInDb = await this.usersService.findOne({ ...validUser });
-      if (!userInDb) {
-        throw new UnauthorizedException('Пользователь не найден!');
+      const userInDb = await this.usersService.findByPhone(phone);
+      if (!userInDb) throw new BadRequestException('Пользователь c этим номером не зарегистрирован.');
+
+      const authCode = await this.codesService.generateCode({ userPhone: userInDb.phone });
+      const msg = `${authCode.otp} — ваш код для входа в приложение Умный Дизайн. Никому не сообщайте его!`;
+
+      const smsRes = await this.smsService.send(userInDb.phone, msg);
+      if (smsRes.status_code !== 100) {
+        await this.codesService.deleteCodeById(authCode._id);
+        throw new BadRequestException('Ошибка при отправке sms!');
       }
 
+      return smsRes;
+    } catch (err) {
+      logger.error(`Error while sendSms: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async refreshTokens(req: Request): Promise<IAuthTokens> {
+    try {
+      const { refresh_token, ...validUser } = req.user as IJwtRefreshValidPayload;
+      const userInDb = await this.usersService.findOne({ ...validUser });
+      if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
+
       const userToken = await this.tokensService.findUserRefreshToken(userInDb._id);
-      if (!userToken || userToken.refreshToken !== refreshToken) {
+
+      if (!userToken || userToken.refresh_token !== refresh_token) {
         throw new UnauthorizedException('Невалидный токен или срок его действия истек!');
       }
 
@@ -168,47 +212,24 @@ export class AuthService {
         phone: userInDb.phone,
         email: userInDb.email,
       });
-      await this.tokensService.updateRefreshToken(userInDb._id, tokens.refreshToken);
+      await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
 
-      return {
-        ...tokens,
-      };
+      return tokens;
     } catch (err) {
-      logger.error(`Error while refresh: ${(err as Error).message}`);
+      logger.error(`Error while tokensRefresh: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async getMe(req: Request): Promise<Partial<IUser>> {
+  async getProfile(req: Request): Promise<IProfileResponse> {
     try {
-      const user = req.user;
+      const user = req.user as { _id: Types.ObjectId; phone: string };
+      const userInDb = await this.usersService.findOne({ phone: user.phone });
+      if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
 
-      const userInDb = await this.usersService.findOne({ ...user });
-      if (!userInDb) {
-        throw new UnauthorizedException('Пользователь не найден!');
-      }
-
-      return {
-        _id: userInDb._id,
-        first_name: userInDb.first_name,
-        last_name: userInDb.last_name ?? '',
-        phone: userInDb.phone ?? null,
-        email: userInDb.email ?? null,
-        avatar: userInDb.avatar ?? null,
-        is_eula_approved: userInDb.is_eula_approved ?? false,
-      };
+      return profileMapper(userInDb);
     } catch (err) {
       logger.error(`Error while getMe: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async approveEua(userId: Types.ObjectId): Promise<void> {
-    try {
-      await this.usersService.updateByPayload({ _id: userId }, { is_eula_approved: true });
-      return;
-    } catch (err) {
-      logger.error(`Error while approvedEua: ${(err as Error).message}`);
       throw err;
     }
   }

@@ -1,16 +1,16 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsEnum } from 'class-validator';
 
-import { ILink, IQualification } from '@app/_users/interfaces/user.interface';
-import { UserCreateDto } from '@app/_users/dto/user-create.dto';
-import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { UserCreateDto } from '@/app/users/dto/user-create.dto';
+import { ILink, IQualification } from '@/app/users/interfaces/user.interface';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 import { EUserQualification } from '@shared/consts/user-qualification.enum';
 import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
-import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 import { validateArrayOfQualification } from '@shared/validators/validateArrayOfQualification';
+import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ default: '+79992456800', description: 'Номер телефона пользователя' })

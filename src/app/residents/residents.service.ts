@@ -1,30 +1,28 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
 import e from 'express';
+import { FilterQuery, Model, Types } from 'mongoose';
 
-import { UserModel } from '../users/models/user.model';
+import { FiltersService } from '@app/filters/filters.service';
+import { ResidentsBlockDto } from '@app/residents/dto/residents-block.dto';
+import { ResidentsFindQueryDto } from '@app/residents/dto/residents-find-query.dto';
+import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
+import { getMainFilters } from '@helpers/getMainFilters';
+import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
+import { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { GetResidentParamsDto } from './dto/get-resident-params.dto';
 import { IResident } from './interfaces/resident.interface';
 import { IResidentList } from './interfaces/resident.interface-list';
 import { residentListMapper, residentMapper } from './residents.mapper';
-import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import { ResidentsFindQueryDto } from '@app/residents/dto/residents-find-query.dto';
-import { FiltersService } from '@app/filters/filters.service';
-import { IUser } from '@app/users/interfaces/user.interface';
-import { StatusFilterKeys } from '@app/filters/consts';
-import { getMainFilters } from '@helpers/getMainFilters';
-import { IUploadAvatar } from '@app/residents/interfaces/upload-avatar.interface';
-import { ResidentsBlockDto } from '@app/residents/dto/residents-block.dto';
 
 const logger = new Logger('Residents');
 
 @Injectable()
 export class ResidentsService {
   constructor(
-    @InjectModel(UserModel.name)
-    private readonly userModel: Model<UserModel>,
+    @InjectModel(UserEntity.name)
+    private readonly userModel: Model<UserEntity>,
     private readonly usersService: UsersService,
     private readonly filtersService: FiltersService,
   ) {}
@@ -39,7 +37,7 @@ export class ResidentsService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const query: FilterQuery<Partial<IUser>> = await getMainFilters(this.filtersService, queryParams);
+      const query: FilterQuery<Partial<UserEntity>> = await getMainFilters(this.filtersService, queryParams);
 
       if (search) {
         const [first, last] = [new RegExp(search.split(' ')[0], 'i'), new RegExp(search.split(' ')[1], 'i')];
@@ -52,7 +50,7 @@ export class ResidentsService {
       return await this.usersService.findAll(query).then((res) =>
         residentListMapper(res, {
           _id: user._id,
-          blocked_users: user.blocked_users,
+          bun_info: user.bun_info,
         }),
       );
     } catch (err) {
@@ -70,7 +68,7 @@ export class ResidentsService {
 
       const resident = await this.usersService.findOne({ _id: id });
 
-      return residentMapper(resident, { _id: user._id, blocked_users: user.blocked_users });
+      return residentMapper(resident, { _id: user._id, bun_info: user.bun_info });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw new EntityNotFoundError(`Пользователь не найден`);
@@ -120,11 +118,11 @@ export class ResidentsService {
         throw new EntityNotFoundError(`Пользователь не найден`);
       }
 
-      const blockedArr = resident.blocked_users;
-      const index = blockedArr.findIndex((i) => i.equals(blockedId));
-      index === -1 ? blockedArr.push(blockedId) : blockedArr.splice(index, 1);
+      const blockedArr = resident.bun_info;
+      const index = blockedArr.blocked_users?.findIndex((i) => i.equals(blockedId));
+      index === -1 ? blockedArr?.blocked_users?.push(blockedId) : blockedArr?.blocked_users?.splice(index, 1);
 
-      await this.usersService.updateByPayload({ _id: resident._id }, { blocked_users: blockedArr });
+      await this.usersService.updateByPayload({ _id: resident._id }, { bun_info: blockedArr });
     } catch (err) {
       logger.error(`Error while blockUser: ${(err as Error).message}`);
       throw err;

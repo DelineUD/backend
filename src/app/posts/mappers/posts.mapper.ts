@@ -1,6 +1,6 @@
-import { IPostAuthorResponse, IPosts, IPostsResponse, PostUserPick } from '../interfaces/posts.interface';
-import { IUser } from '@app/users/interfaces/user.interface';
+import { IUser } from '@/app/users/interfaces/user.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
+import { IPostAuthorResponse, IPosts, IPostsResponse, PostUserPick } from '../interfaces/posts.interface';
 
 const toAuthorPost = (author: PostUserPick, youBlocked: boolean): IPostAuthorResponse => {
   return author
@@ -17,8 +17,8 @@ export const postListMapper = (posts: IPosts[], user: IUser): IPostsResponse[] =
   return posts.map((p) => postsMapper(p, user));
 };
 
-const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>) => {
-  const youBlocked = post.author.blocked_users.includes(user._id) ?? false;
+const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'bun_info'>) => {
+  const youBlocked = post.author.bun_info.blocked_users.includes(user._id) ?? false;
 
   if (!post.author) {
     return null;
@@ -41,10 +41,10 @@ const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>) =
   };
 };
 
-export const postMapper = (post: IPosts, user: Pick<IUser, '_id' | 'blocked_users'>): IPostsResponse => {
+export const postMapper = (post: IPosts, user: Pick<IUser, '_id' | 'bun_info'>): IPostsResponse => {
   const { _id, pText, countComments, groups, files, publishInProfile, createdAt, updatedAt, author, likes, views } =
     post;
-  const youBlocked = post.author.blocked_users.includes(user._id) ?? false;
+  const youBlocked = post.author.bun_info.blocked_users.includes(user._id) ?? false;
 
   return {
     _id,

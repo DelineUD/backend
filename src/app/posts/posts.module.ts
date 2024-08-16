@@ -1,9 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UploadModule } from '@app/upload/upload.module';
+import { UsersModule } from '@/app/users/users.module';
 import { ConvertModule } from '@app/converts/converts.module';
-import { UsersModule } from '@app/users/users.module';
+import { UploadModule } from '@app/upload/upload.module';
 import { PostCommentsModel, PostCommentsSchema } from './models/posts-comments.model';
 import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';

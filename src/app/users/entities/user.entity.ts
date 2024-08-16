@@ -1,13 +1,14 @@
-import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
-import { IAdditional, IBun, ILink, IPreference, IUser } from '../interfaces/user.interface';
-import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
+import { IAdditional, IBun, ILink, IPreference, IUser } from '../interfaces/user.interface';
 
 @Schema({ collection: '_users', timestamps: true })
 export class UserEntity extends Document implements IUser {
+  @Prop({ required: true }) _id: Types.ObjectId;
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) email: string;
   @Prop({ required: true }) password: string;
@@ -19,7 +20,10 @@ export class UserEntity extends Document implements IUser {
   @Prop({
     type: {
       about: { type: String, required: false, maxlength: 300 },
-      qualifications: { type: [{ name: String, year: { type: Number, required: false }, _id: false }], required: false },
+      qualifications: {
+        type: [{ name: String, year: { type: Number, required: false }, _id: false }],
+        required: false,
+      },
       project_involvement: { type: String, enum: EUserProjectInvolvement, required: true },
       job_format: { type: String, enum: EUserJobFormat, required: true },
       job_experience: { type: String, enum: EUserJobExperience, required: true },

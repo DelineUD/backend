@@ -1,6 +1,6 @@
 import { ForbiddenException, Logger } from '@nestjs/common';
 
-import { IQualification } from '@app/_users/interfaces/user.interface';
+import { IQualification } from '@/app/users/interfaces/user.interface';
 import { EUserQualification } from '@shared/consts/user-qualification.enum';
 
 const logger = new Logger('Validate array of qualification');

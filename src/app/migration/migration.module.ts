@@ -3,8 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { PostModel, PostsSchema } from '@app/posts/models/posts.model';
 import { Resume, ResumeSchema } from '@app/resumes/entities/resume.entity';
-import { UserModel, UserSchema } from '@app/users/models/user.model';
 import { Vacancy, VacancySchema } from '@app/vacancy/entities/vacancy.entity';
+import { UserEntity, UserSchema } from '../users/entities/user.entity';
 import { MigrationService } from './migration.service';
 
 const logger = new Logger('Migrations');
@@ -19,7 +19,7 @@ const logger = new Logger('Migrations');
     ]),
     MongooseModule.forFeatureAsync([
       {
-        name: UserModel.name,
+        name: UserEntity.name,
         useFactory: () => UserSchema,
       },
     ]),

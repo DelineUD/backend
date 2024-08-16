@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { DeleteResult } from 'mongodb';
 import { FilterQuery, Model, Types } from 'mongoose';
 
+import { ConvertsService } from '@app/converts/converts.service';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
@@ -10,7 +11,6 @@ import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
 import { PostCommentLikeDto } from '@app/posts/dto/post-comment-like.dto';
 import { PostsHideDto } from '@app/posts/dto/posts-hide.dto';
 import { UpdatePostCommentDto } from '@app/posts/dto/update-post-comment.dto';
-import { ConvertsService } from '@app/converts/converts.service';
 import { ILike } from '@app/posts/interfaces/like.interface';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 import { IPostsFindQuery } from '@app/posts/interfaces/post-find-query';
@@ -18,10 +18,10 @@ import { IPostsCommentsFindQuery } from '@app/posts/interfaces/posts-comments-fi
 import { IPostsFindParams } from '@app/posts/interfaces/posts-find.interface';
 import { ICPosts, ICPostsResponse } from '@app/posts/interfaces/posts.comments.interface';
 import { commentListMapper } from '@app/posts/mappers/comments.mapper';
-import { UserModel } from '@app/users/models/user.model';
 import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
+import { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -178,7 +178,9 @@ export class PostsService {
       const query: IPostsFindQuery = { ...queryParams };
       const baseQuery: FilterQuery<Partial<IPosts>> = {};
 
-      const user = await this.usersService.findOne({ _id: userId });
+      const userObjectId = new Types.ObjectId(userId);
+
+      const user = await this.usersService.findOne({ _id: userObjectId });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
@@ -187,14 +189,14 @@ export class PostsService {
         const queryUser = await this.usersService.findOne({ _id: query.userId as unknown as Types.ObjectId });
         queryUser && (baseQuery.authorId = queryUser._id);
       } else {
-        baseQuery.authorId = { $nin: user.hidden_authors };
+        baseQuery.authorId = { $nin: user.bun_info?.hidden_posts ?? [] };
       }
 
       query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
       query.groups && (baseQuery.groups = { $in: query.groups.map((i) => GroupFilterKeys[i]) });
       query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
       baseQuery._id = {
-        $nin: user.hidden_posts,
+        $nin: user.bun_info?.hidden_posts ?? [],
         ...(query.lastIndex && { $lt: query.lastIndex }),
       };
 
@@ -498,7 +500,7 @@ export class PostsService {
     }
   }
 
-  private async hideAuthor(authorId: string | undefined, userInDb: UserModel): Promise<Types.ObjectId[]> {
+  private async hideAuthor(authorId: string | undefined, userInDb: UserEntity): Promise<Types.ObjectId[]> {
     try {
       if (!authorId) return;
 
@@ -513,7 +515,11 @@ export class PostsService {
 
       await this.usersService.updateByPayload(
         { _id: userInDb._id },
-        { hidden_authors: this.getToggledHidden(userInDb.hidden_authors, authorInDb._id) },
+        {
+          bun_info: {
+            hidden_authors: this.getToggledHidden(userInDb.bun_info.hidden_authors, authorInDb._id),
+          },
+        },
       );
     } catch (err) {
       logger.error(`Error while hideAuthor: ${(err as Error).message}`);
@@ -521,7 +527,7 @@ export class PostsService {
     }
   }
 
-  private async hidePost(postId: string | undefined, userInDb: UserModel) {
+  private async hidePost(postId: string | undefined, userInDb: UserEntity) {
     try {
       if (!postId) return;
 
@@ -536,7 +542,11 @@ export class PostsService {
 
       await this.usersService.updateByPayload(
         { _id: userInDb._id },
-        { hidden_posts: this.getToggledHidden(userInDb.hidden_posts, postInDb._id) },
+        {
+          bun_info: {
+            hidden_posts: this.getToggledHidden(userInDb.bun_info.hidden_posts, postInDb._id),
+          },
+        },
       );
     } catch (err) {
       logger.error(`Error while hidePost: ${(err as Error).message}`);

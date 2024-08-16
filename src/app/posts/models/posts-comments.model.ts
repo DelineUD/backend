@@ -1,10 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-import { IUser } from '@app/users/interfaces/user.interface';
-import { UserPick } from '@app/users/interfaces/user-pick.interface';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
-import { ICPosts } from '../interfaces/posts.comments.interface';
+import { ICPosts, UserCPostsPick } from '../interfaces/posts.comments.interface';
 
 @Schema({
   collection: 'posts_comments',
@@ -24,7 +22,7 @@ export class PostCommentsModel extends Document implements ICPosts {
   @Prop({ required: true })
   isLiked: boolean;
   @Prop({ required: true, type: Types.ObjectId, ref: 'UserModel' })
-  author: Pick<IUser, UserPick>;
+  author: UserCPostsPick;
 }
 
 export const PostCommentsSchema = SchemaFactory.createForClass(PostCommentsModel);

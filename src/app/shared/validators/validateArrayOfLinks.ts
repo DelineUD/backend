@@ -1,6 +1,6 @@
 import { ForbiddenException, Logger } from '@nestjs/common';
 
-import { ILink } from '@app/_users/interfaces/user.interface';
+import { ILink } from '@/app/users/interfaces/user.interface';
 
 const logger = new Logger('Validate array of links');
 

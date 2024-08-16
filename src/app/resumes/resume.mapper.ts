@@ -1,11 +1,11 @@
+import { ResumeDto } from '@app/resumes/dto/resume.dto';
 import {
   IResume,
   IResumeAuthorResponse,
   IResumeResponse,
   UserResumePick,
 } from '@app/resumes/interfaces/resume.interface';
-import { ResumeDto } from '@app/resumes/dto/resume.dto';
-import { IUser } from '@app/users/interfaces/user.interface';
+import { UserEntity } from '../users/entities/user.entity';
 
 const toResumeAuthor = (author: UserResumePick, youBlocked: boolean): IResumeAuthorResponse => {
   return {
@@ -13,8 +13,8 @@ const toResumeAuthor = (author: UserResumePick, youBlocked: boolean): IResumeAut
     first_name: author?.first_name ?? null,
     last_name: author?.last_name ?? null,
     avatar: !youBlocked ? author?.avatar ?? null : null,
-    qualification: author?.qualification ?? null,
-    contact_link: !youBlocked ? author?.telegram ?? null : null,
+    qualification: null,
+    contact_link: null,
   };
 };
 
@@ -34,7 +34,7 @@ export const resumeDtoMapper = (dto: ResumeDto): IResume => {
  * Function for formatting resume data before sending
  * user -> found user
  */
-export const resumeMapper = (resume: IResume, user: Pick<IUser, '_id' | 'blocked_users'>): IResumeResponse => {
+export const resumeMapper = (resume: IResume, user: Pick<UserEntity, '_id' | 'bun_info'>): IResumeResponse => {
   if (!resume.author) {
     return null;
   }
@@ -82,6 +82,6 @@ export const resumeMapper = (resume: IResume, user: Pick<IUser, '_id' | 'blocked
  * Function for formatting resume list data before sending
  * user -> found user
  */
-export const resumeListMapper = (resumes: IResume[], user: Pick<IUser, '_id' | 'blocked_users'>): IResumeResponse[] => {
+export const resumeListMapper = (resumes: IResume[], user: Pick<UserEntity, '_id' | 'bun_info'>): IResumeResponse[] => {
   return resumes.map((r) => resumeMapper(r, user)).filter((r) => r);
 };

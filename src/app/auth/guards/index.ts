@@ -1,4 +1,4 @@
-import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
-import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
+import { JwtAuthGuard } from './jwt-access.guard';
+import { JwtAuthRefreshGuard } from './jwt-refresh.guard';
 
 export const GUARDS = [JwtAuthGuard, JwtAuthRefreshGuard];

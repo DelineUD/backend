@@ -2,141 +2,145 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
-  Param,
-  Patch,
   Post,
-  Query,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { Types } from 'mongoose';
 
+import { UserEntity } from '@/app/users/entities/user.entity';
+import { AuthRegisterOtpDto } from '@app/auth/dto/auth-register-otp.dto';
+
+import { fileStorageConfig } from '@shared/storage/storage.config';
+import { mediaFileFilter } from '@utils/mediaFileFilter';
 import { AuthService } from './auth.service';
+import { AuthLoginOtpDto } from './dto/auth-login-otp.dto';
+import { AuthLoginDto } from './dto/auth-login.dto';
+import { AuthRegisterDto } from './dto/auth-register.dto';
+import { AuthSendOtpDto } from './dto/auth-send-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-access.guard';
+import { JwtAuthRefreshGuard } from './guards/jwt-refresh.guard';
+import { IAuthTokens } from './interfaces/auth-tokens.interface';
+import { AuthLoginResponseType } from './types/auth-login-response.type';
+import { AuthRegisterResponseType } from './types/auth-register-response.type';
+import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 
-import { RegistrationStatus } from './interfaces/regisration-status.interface';
-import { ISensSmsResponse } from './interfaces/send-sms.interface';
-
-import { JwtAuthRefreshGuard } from '@app/auth/guards/jwt-refresh.guard';
-import { IAuthTokens } from '@app/auth/interfaces/auth-tokens.interface';
-import { ILoginResponse } from '@app/auth/interfaces/login.interface';
-import { AppVersionInterceptor } from '@app/shared/interceptors/app-version.interceptor';
-import { IUser } from '@app/users/interfaces/user.interface';
-import { UserId } from '@shared/decorators/user-id.decorator';
-import { CreateUserDto } from '../users/dto/user-create.dto';
-import { LoginUserDto } from '../users/dto/user-login.dto';
-import { LoginSmsDto } from './dto/login-sms.dto';
-import { SendSmsDto } from './dto/send-sms.dto';
-
-@ApiTags('Auth')
+@ApiTags('_Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
-   * Регистрация и обновление пользователя.
-   * @param createUserDto - данные пользователя.
-   * @returns - Статус регистрации
+   * Регистрация пользователя
+   * @param authRegisterDto - данные для регистрации
+   * @param avatar - файл для аватара пользователя
+   * @returns - пара токенов
    */
   @UsePipes(new ValidationPipe({ transform: true }))
-  @Post('register-or-update')
-  public async register(@Query() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
-    return await this.authService.register(createUserDto);
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: AuthRegisterDto })
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: fileStorageConfig,
+      fileFilter: mediaFileFilter,
+    }),
+  )
+  @Post('register')
+  public async register(
+    @Body() authRegisterDto: AuthRegisterDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ): Promise<AuthRegisterResponseType> {
+    return await this.authService.register(authRegisterDto, avatar);
   }
 
   /**
-   * Удаление пользователя.
-   * @param id - идентификатор пользователя.
-   * @returns - void
+   * Отправка sms с кодом для подтверждения номера при регистрации
+   * @param authSendOtpDto - данные для отправки sms кода
+   * @returns - 200 | 400
    */
   @UsePipes(new ValidationPipe({ transform: true }))
-  @Post('delete/:id')
-  public async delete(@Param('id') id: string): Promise<void> {
-    return await this.authService.delete(id);
+  @HttpCode(HttpStatus.OK)
+  @Post('register/send/otp')
+  public async registerOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
+    return await this.authService.registerOtpSend(authSendOtpDto);
   }
 
   /**
-   * Вход по паролю.
-   * @param loginUserDto - данные входа.
-   * @returns - Пара токенов и тип входа
+   * Подтверждения номера при регистрации
+   * @param authRegisterOtpDto - данные для подтверждения номера
+   * @returns - 200 | 400
    */
-  @UseInterceptors(AppVersionInterceptor)
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @HttpCode(HttpStatus.OK)
+  @Post('register/otp')
+  public async registerOtp(@Body() authRegisterOtpDto: AuthRegisterOtpDto): Promise<void> {
+    return await this.authService.registerOtp(authRegisterOtpDto);
+  }
+
+  /**
+   * Вход по паролю
+   * @param authLoginDto - данные для входа.
+   * @returns - пара токенов
+   */
+  @UsePipes(new ValidationPipe({ transform: true }))
   @Post('login')
-  public async login(@Body() loginUserDto: LoginUserDto): Promise<ILoginResponse> {
-    return await this.authService.login(loginUserDto);
+  public async login(@Body() authLoginDto: AuthLoginDto): Promise<AuthLoginResponseType> {
+    return await this.authService.login(authLoginDto);
   }
 
   /**
-   * Отправка sms кода.
-   * @param sendSmsDto - данные для отправки sms.
-   * @returns - ответ от стороннего api
+   * Вход по sms коду
+   * @param authLoginOtpDto - данные для входа
+   * @returns - пара токенов
    */
-  @UseInterceptors(AppVersionInterceptor)
-  @Post('send-sms')
-  public async sendSms(@Body() sendSmsDto: SendSmsDto): Promise<ISensSmsResponse> {
-    return await this.authService.sendSms(sendSmsDto);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @Post('login/otp')
+  public async loginOtp(@Body() authLoginOtpDto: AuthLoginOtpDto): Promise<AuthLoginResponseType> {
+    return await this.authService.loginOtp(authLoginOtpDto);
   }
 
   /**
-   * Вход по sms.
-   * @param headers - данные входа по sms.
-   * @returns - Пара токенов и тип входа
+   * Отправка sms с кодом для входа
+   * @param authSendOtpDto - данные для отправки sms кода
+   * @returns - 200 | 400 | 404
    */
-  @Get('login-sms')
-  @UseInterceptors(AppVersionInterceptor)
-  @ApiHeader({
-    name: 'User-Login-Data',
-    description: 'User-Login-Data: phone code',
-  })
-  public async loginSms(@Headers() headers: LoginSmsDto): Promise<ILoginResponse> {
-    return await this.authService.loginSms(headers);
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @HttpCode(HttpStatus.OK)
+  @Post('login/send/otp')
+  public async loginOtpSend(@Body() authSendOtpDto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
+    return await this.authService.loginOtpSend(authSendOtpDto);
   }
 
   /**
-   * Обновление токенов.
-   * @param req - данные запрса через refresh стратегию.
-   * @returns - Пара токенов.
+   * Обновление токенов
+   * @param req - данные запрса через access стратегию
+   * @returns - пара токенов
    */
   @UseGuards(JwtAuthRefreshGuard)
   @ApiBearerAuth('defaultBearerAuth')
-  @ApiHeader({ name: 'refreshToken' })
-  @Post('refresh')
-  async getNewTokens(@Req() req: Request): Promise<IAuthTokens> {
-    return this.authService.refresh(req);
+  @ApiHeader({ name: 'refresh_token' })
+  @Post('tokens/refresh')
+  async refreshTokens(@Req() req: Request): Promise<IAuthTokens> {
+    return this.authService.refreshTokens(req);
   }
 
   /**
-   * Получение пользователя.
-   * @param req - данные запрса через access стратегию.
-   * @returns - Пользователь.
+   * Получение пользователя
+   * @param req - данные запрса через access стратегию
+   * @returns -   пользователь
    */
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(AppVersionInterceptor)
   @ApiBearerAuth('defaultBearerAuth')
   @Get('profile')
-  async getMe(@Req() req: Request): Promise<Partial<IUser>> {
-    return this.authService.getMe(req);
-  }
-
-  /**
-   * Приянять соглашение eua.
-   * @param userId - системный идентификатор пользователя.
-   * @returns - void.
-   */
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('defaultBearerAuth')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch('profile/eua')
-  async approveEua(@UserId() userId: Types.ObjectId): Promise<void> {
-    return this.authService.approveEua(userId);
+  async getMe(@Req() req: Request): Promise<Partial<UserEntity>> {
+    return this.authService.getProfile(req);
   }
 }

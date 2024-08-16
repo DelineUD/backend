@@ -1,21 +1,21 @@
 import { forwardRef, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
 import { DeleteResult } from 'mongodb';
+import { FilterQuery, Model, Types } from 'mongoose';
 
-import { ResumeDto } from '@app/resumes/dto/resume.dto';
-import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
 import { FiltersService } from '@app/filters/filters.service';
-import { IDeleteResumeQuery } from '@app/resumes/interfaces/delete-resume.interface';
+import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
+import { ResumeDto } from '@app/resumes/dto/resume.dto';
 import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
+import { IDeleteResumeQuery } from '@app/resumes/interfaces/delete-resume.interface';
 import { resumeDtoMapper, resumeListMapper, resumeMapper } from '@app/resumes/resume.mapper';
+import { getMainFilters } from '@helpers/getMainFilters';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import normalizeDto from '@utils/normalizeDto';
-import { getMainFilters } from '@helpers/getMainFilters';
 import { UsersService } from '../users/users.service';
 import { Resume } from './entities/resume.entity';
-import { IResume, IResumeResponse } from './interfaces/resume.interface';
 import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
+import { IResume, IResumeResponse } from './interfaces/resume.interface';
 
 const logger = new Logger('Resumes');
 
@@ -30,7 +30,7 @@ export class ResumesService {
 
   async update({ id, ...resumeParams }: ICrudResumeParams): Promise<IResume | IResume[]> {
     try {
-      const userInDb = await this.usersService.findOne({ id });
+      const userInDb = await this.usersService.findOne({ _id: id });
       if (!userInDb) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
@@ -78,7 +78,7 @@ export class ResumesService {
         return [];
       }
 
-      return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
+      return resumeListMapper(resumes, { _id: userInDb._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
       throw new InternalServerErrorException('Ошибка при поиске резюме!');
@@ -101,7 +101,7 @@ export class ResumesService {
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      return resumeListMapper(resumes, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
+      return resumeListMapper(resumes, { _id: userInDb._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
@@ -125,7 +125,7 @@ export class ResumesService {
         throw new EntityNotFoundError(`Резюме не найдено`);
       }
 
-      return resumeMapper(resume, { _id: userInDb._id, blocked_users: userInDb.blocked_users });
+      return resumeMapper(resume, { _id: userInDb._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw err;

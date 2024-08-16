@@ -1,16 +1,9 @@
 import { Types } from 'mongoose';
 
-import { IUser } from '@app/users/interfaces/user.interface';
+import { UserEntity } from '@/app/users/entities/user.entity';
 
-export type UserResumePickList =
-  | '_id'
-  | 'avatar'
-  | 'first_name'
-  | 'last_name'
-  | 'telegram'
-  | 'qualification'
-  | 'blocked_users';
-export type UserResumePick = Pick<IUser, UserResumePickList>;
+export type UserResumePickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'bun_info';
+export type UserResumePick = Pick<UserEntity, UserResumePickList>;
 
 export interface IResume {
   _id?: Types.ObjectId; // Sys mongo id

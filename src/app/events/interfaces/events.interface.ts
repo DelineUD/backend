@@ -1,12 +1,11 @@
 import { Types } from 'mongoose';
 
-import { IUser } from '@app/users/interfaces/user.interface';
-import { UserPick } from '@app/users/interfaces/user-pick.interface';
+import { PostUserPick } from '@/app/posts/interfaces/posts.interface';
 
 export interface IEvents {
   _id?: Types.ObjectId;
 
-  author: Types.ObjectId | Pick<IUser, UserPick>;
+  author: Types.ObjectId | PostUserPick;
   hText: string;
   startDate: Date;
   stopDate: Date;

@@ -1,10 +1,10 @@
 import { Types } from 'mongoose';
 
-import { IUser } from '@app/users/interfaces/user.interface';
+import { IBun, IUser } from '@/app/users/interfaces/user.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 
-type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'blocked_users';
+type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'bun_info';
 export type PostUserPick = Pick<IUser, PostUserPickList>;
 
 // TODO: Разобраться с обязательностью полей
@@ -18,7 +18,7 @@ export interface IPosts {
   countComments: number;
   groups: GroupFilterKeys[];
   publishInProfile?: boolean;
-  author?: IPostAuthorResponse & { blocked_users: Types.ObjectId[] };
+  author?: IPostAuthorResponse & { bun_info: IBun };
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,6 +1,6 @@
-import { IVacancy, IVacancyAuthorResponse, IVacancyResponse, UserVacancyPick } from './interfaces/vacancy.interface';
 import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
-import { IUser } from '@app/users/interfaces/user.interface';
+import { UserEntity } from '../users/entities/user.entity';
+import { IVacancy, IVacancyAuthorResponse, IVacancyResponse, UserVacancyPick } from './interfaces/vacancy.interface';
 
 const toVacancyAuthor = (author: UserVacancyPick, youBlocked: boolean): IVacancyAuthorResponse => {
   return author
@@ -10,7 +10,7 @@ const toVacancyAuthor = (author: UserVacancyPick, youBlocked: boolean): IVacancy
         last_name: author?.last_name ?? null,
         avatar: !youBlocked ? author?.avatar ?? null : null,
         city: author?.city ?? null,
-        contact_link: !youBlocked ? author?.telegram ?? null : null,
+        contact_link: null,
       }
     : null;
 };
@@ -32,7 +32,7 @@ export const vacancyDtoMapper = (dto: VacancyDto): IVacancy => {
  * Function for formatting vacancy data before sending
  * user -> found user
  */
-export const vacancyMapper = (vacancy: IVacancy, user: Pick<IUser, '_id' | 'blocked_users'>): IVacancyResponse => {
+export const vacancyMapper = (vacancy: IVacancy, user: Pick<UserEntity, '_id' | 'bun_info'>): IVacancyResponse => {
   if (!vacancy.author) {
     return null;
   }
@@ -55,7 +55,7 @@ export const vacancyMapper = (vacancy: IVacancy, user: Pick<IUser, '_id' | 'bloc
     updatedAt,
   } = vacancy;
 
-  const youBlocked = author.blocked_users?.includes(user._id) ?? false;
+  const youBlocked = author.bun_info?.blocked_users?.includes(user._id) ?? false;
 
   return {
     _id,
@@ -82,7 +82,7 @@ export const vacancyMapper = (vacancy: IVacancy, user: Pick<IUser, '_id' | 'bloc
  */
 export const vacancyListMapper = (
   vacancies: IVacancy[],
-  user: Pick<IUser, '_id' | 'blocked_users'>,
+  user: Pick<UserEntity, '_id' | 'bun_info'>,
 ): IVacancyResponse[] => {
   return vacancies.map((v) => vacancyMapper(v, user)).filter((v) => v);
 };

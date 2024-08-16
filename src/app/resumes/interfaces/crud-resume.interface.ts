@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumberString, IsOptional, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 
 export class ICrudResumeParams {
   @ApiProperty({ default: '' })
   @IsString()
-  readonly id: string;
+  readonly id: Types.ObjectId;
 
   @ApiProperty({ default: 'resume_1' })
   @IsString()

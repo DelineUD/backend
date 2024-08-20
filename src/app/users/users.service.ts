@@ -8,7 +8,7 @@ import { AuthLoginDto } from '@app/auth/dto/auth-login.dto';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 import { UserEntity } from './entities/user.entity';
-import { IUser } from './interfaces/user.interface';
+import { IUser, IUserQuery } from './interfaces/user.interface';
 import { createUserMapper } from './mappers/create-user.mapper';
 
 const logger = new Logger('Users');
@@ -17,10 +17,9 @@ const logger = new Logger('Users');
 export class UsersService {
   constructor(@InjectModel(UserEntity.name) private readonly userModel: Model<UserEntity>) {}
 
-  async create(dto: UserCreateDto): Promise<IUser> {
+  async create(dto: UserCreateDto): Promise<UserEntity> {
     try {
-      const newUser = await this.userModel.create(dto);
-      return createUserMapper(newUser._id, dto);
+      return await this.userModel.create(createUserMapper(dto));
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
       throw err;
@@ -36,7 +35,7 @@ export class UsersService {
     }
   }
 
-  async findOne(where: Partial<IUser>): Promise<UserEntity> {
+  async findOne(where: Partial<IUserQuery>): Promise<UserEntity> {
     try {
       return await this.userModel.findOne({ ...where }).exec();
     } catch (err) {
@@ -83,9 +82,9 @@ export class UsersService {
     }
   }
 
-  async updateByPayload(where: Partial<IUser>, payload: Partial<IUser>): Promise<IUser> {
+  async updateByPayload(where: Partial<UserEntity>, payload: Partial<UserEntity>): Promise<IUser> {
     try {
-      const updatedUser = await this.userModel.findOneAndUpdate({ ...where }, { ...payload }, { new: true });
+      const updatedUser = await this.userModel.findOneAndUpdate({ filter: { where } }, { ...payload }, { new: true });
 
       if (!updatedUser) {
         throw new EntityNotFoundError('Пользователь не найден');

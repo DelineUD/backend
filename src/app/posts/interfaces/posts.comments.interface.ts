@@ -1,10 +1,10 @@
 import { Types } from 'mongoose';
 
-import { IUser } from '@/app/users/interfaces/user.interface';
+import { UserEntity } from '@/app/users/entities/user.entity';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 
 export type UserCPostsPickList = '_id' | 'avatar' | 'first_name' | 'last_name';
-export type UserCPostsPick = Pick<IUser, UserCPostsPickList>;
+export type UserCPostsPick = Pick<UserEntity, UserCPostsPickList>;
 
 export interface ICPosts {
   _id?: Types.ObjectId;

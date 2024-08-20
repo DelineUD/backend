@@ -36,7 +36,6 @@ export interface IBun {
 }
 
 export interface IUser {
-  _id: Types.ObjectId;
   phone: string;
   email: string;
   password: string;
@@ -50,4 +49,10 @@ export interface IUser {
   specializations?: string[];
   bun_info?: IBun;
   getcourse_id?: string;
+}
+
+export interface IUserQuery {
+  _id: Types.ObjectId;
+  phone: string;
+  email: string;
 }

@@ -1,3 +1,4 @@
+import { UserEntity } from '@/app/users/entities/user.entity';
 import { IUser } from '@/app/users/interfaces/user.interface';
 import { GroupFilterKeys } from '@app/filters/consts';
 import { IPostAuthorResponse, IPosts, IPostsResponse, PostUserPick } from '../interfaces/posts.interface';
@@ -17,8 +18,8 @@ export const postListMapper = (posts: IPosts[], user: IUser): IPostsResponse[] =
   return posts.map((p) => postsMapper(p, user));
 };
 
-const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'bun_info'>) => {
-  const youBlocked = post.author.bun_info.blocked_users.includes(user._id) ?? false;
+const postsMapper = (post: IPosts, user: Pick<UserEntity, '_id' | 'bun_info'>) => {
+  const youBlocked = post.author.bun_info?.blocked_users.includes(user._id) ?? false;
 
   if (!post.author) {
     return null;
@@ -41,10 +42,10 @@ const postsMapper = (post: IPosts, user: Pick<IUser, '_id' | 'bun_info'>) => {
   };
 };
 
-export const postMapper = (post: IPosts, user: Pick<IUser, '_id' | 'bun_info'>): IPostsResponse => {
+export const postMapper = (post: IPosts, user: Pick<UserEntity, '_id' | 'bun_info'>): IPostsResponse => {
   const { _id, pText, countComments, groups, files, publishInProfile, createdAt, updatedAt, author, likes, views } =
     post;
-  const youBlocked = post.author.bun_info.blocked_users.includes(user._id) ?? false;
+  const youBlocked = post.author.bun_info?.blocked_users.includes(user._id) ?? false;
 
   return {
     _id,

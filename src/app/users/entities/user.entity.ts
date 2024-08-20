@@ -8,7 +8,6 @@ import { IAdditional, IBun, ILink, IPreference, IUser } from '../interfaces/user
 
 @Schema({ collection: '_users', timestamps: true })
 export class UserEntity extends Document implements IUser {
-  @Prop({ required: true }) _id: Types.ObjectId;
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) email: string;
   @Prop({ required: true }) password: string;

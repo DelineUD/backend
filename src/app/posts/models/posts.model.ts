@@ -31,7 +31,7 @@ export class PostModel extends Document implements IPosts {
 export const PostsSchema = SchemaFactory.createForClass(PostModel);
 
 PostsSchema.virtual('author', {
-  ref: 'UserModel',
+  ref: 'UserEntity',
   localField: 'authorId',
   foreignField: '_id',
   justOne: true,

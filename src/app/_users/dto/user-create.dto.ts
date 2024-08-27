@@ -44,11 +44,14 @@ export class UserCreateDto {
   @IsOptional()
   keywords?: string;
   @IsEnum(EUserJobFormat)
-  job_format: EUserJobFormat;
+  @IsOptional()
+  job_format?: EUserJobFormat;
   @IsEnum(EUserJobFormat)
-  job_experience: EUserJobExperience;
+  @IsOptional()
+  job_experience?: EUserJobExperience;
   @IsEnum(EUserProjectInvolvement)
-  project_involvement: EUserProjectInvolvement;
+  @IsOptional()
+  project_involvement?: EUserProjectInvolvement;
   @IsArray()
   @IsOptional()
   qualifications?: IQualification[];

@@ -12,6 +12,7 @@ const logger = new Logger('Validate array of qualification');
  */
 export const validateArrayOfQualification = ({ value }: { value: string }): IQualification[] => {
   try {
+    console.log(value);
     if (!value) return [];
 
     const parsedArray = JSON.parse(value);

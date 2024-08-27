@@ -94,24 +94,31 @@ export class AuthService {
   }
 
   async registerOtp(dto: AuthRegisterOtpDto): Promise<void> {
-    const { phone, otp } = dto;
+    try {
+      const { phone, otp } = dto;
 
-    if (!phone || !otp) throw new BadRequestException('Неверные данные!');
+      if (!phone || !otp) throw new BadRequestException('Неверные данные!');
 
-    const userInDb = await this.usersService.findByPhone(phone);
-    if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
+      const userInDb = await this.usersService.findByPhone(phone);
+      if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-    const otpCode = await this.codesService.findCodeByPayload({
-      user_phone: phone,
-    });
-    if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
+      const validPhone = transformPhoneNumber(phone);
+      const otpCode = await this.codesService.findCodeByPayload({
+        user_phone: validPhone,
+      });
+      console.log(validPhone);
+      if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
 
-    if (otpCode.otp !== +otp && Number(process.env.QUICK_CODE) !== +otp)
-      throw new ForbiddenException(`Неверно введен код из СМС.`);
+      if (otpCode.otp !== Number(otp) && Number(process.env.QUICK_CODE) !== +otp)
+        throw new ForbiddenException(`Неверно введен код из СМС.`);
 
-    await this.codesService.deleteCodeById(otpCode._id);
+      await this.codesService.deleteCodeById(otpCode._id);
 
-    return;
+      return;
+    } catch (err) {
+      logger.error(`Error while registerOtp: ${(err as Error).message}`);
+      throw err;
+    }
   }
 
   async registerOtpSend(dto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
@@ -121,7 +128,8 @@ export class AuthService {
       const userInDb = await this.usersService.findByPhone(phone);
       if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-      const otpCode = await this.codesService.generateCode({ userPhone: phone });
+      const validPhone = transformPhoneNumber(phone);
+      const otpCode = await this.codesService.generateCode({ userPhone: validPhone });
       const msg = `Код для подтверждения: ${otpCode.otp}.`;
 
       const { status, status_code } = await this.smsService.send(phone, msg);

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { ILink, IQualification } from '@app/_users/interfaces/user.interface';
@@ -47,7 +47,7 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
     required: true,
   })
   @IsEnum(EUserJobFormat, { each: true })
-  job_format: EUserJobFormat;
+  job_format?: EUserJobFormat;
 
   @ApiProperty({
     enum: EUserJobExperience,
@@ -56,7 +56,7 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
     required: true,
   })
   @IsEnum(EUserJobExperience, { each: true })
-  job_experience: EUserJobExperience;
+  job_experience?: EUserJobExperience;
 
   @ApiProperty({
     enum: EUserProjectInvolvement,
@@ -65,7 +65,7 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
     required: true,
   })
   @IsEnum(EUserProjectInvolvement, { each: true })
-  project_involvement: EUserProjectInvolvement;
+  project_involvement?: EUserProjectInvolvement;
 
   @ApiProperty({
     default: [

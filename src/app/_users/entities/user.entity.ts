@@ -19,10 +19,13 @@ export class UserEntity extends Document implements IUser {
   @Prop({
     type: {
       about: { type: String, required: false, maxlength: 300 },
-      qualifications: { type: [{ name: String, year: { type: Number, required: false }, _id: false }], required: false },
-      project_involvement: { type: String, enum: EUserProjectInvolvement, required: true },
-      job_format: { type: String, enum: EUserJobFormat, required: true },
-      job_experience: { type: String, enum: EUserJobExperience, required: true },
+      qualifications: {
+        type: [{ name: String, year: { type: Number, required: false }, _id: false }],
+        required: false,
+      },
+      project_involvement: { type: String, enum: EUserProjectInvolvement, required: false },
+      job_format: { type: String, enum: EUserJobFormat, required: false },
+      job_experience: { type: String, enum: EUserJobExperience, required: false },
       keywords: { type: [String], required: false },
     },
     _id: false,

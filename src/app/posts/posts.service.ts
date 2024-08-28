@@ -224,8 +224,6 @@ export class PostsService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      console.log('USER ====>', user);
-
       const post = await this.postModel
         .findOne({ _id: postId })
         .populate('author', '_id first_name last_name avatar bun_info')

@@ -1,5 +1,5 @@
-import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 import { IEvents } from '@app/events/interfaces/events.interface';
 
@@ -20,7 +20,7 @@ export class Events extends Document implements IEvents {
   @Prop({ required: false }) favor?: Array<string>;
   @Prop({ required: false }) iGo?: Array<string>;
   @Prop({ required: false }) notGo?: Array<string>;
-  @Prop({ type: Types.ObjectId, ref: 'UserModel' }) author: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'UserEntity' }) author: Types.ObjectId;
 }
 
 export const EventsSchema = SchemaFactory.createForClass(Events);

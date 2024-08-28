@@ -104,8 +104,9 @@ export class AuthService {
     const userInDb = await this.usersService.findByPhone(phone);
     if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
+    const validPhone = transformPhoneNumber(phone);
     const otpCode = await this.codesService.findCodeByPayload({
-      user_phone: phone,
+      user_phone: validPhone,
     });
     if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
 
@@ -124,7 +125,8 @@ export class AuthService {
       const userInDb = await this.usersService.findByPhone(phone);
       if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-      const otpCode = await this.codesService.generateCode({ userPhone: phone });
+      const validPhone = transformPhoneNumber(phone);
+      const otpCode = await this.codesService.generateCode({ userPhone: validPhone });
       const msg = `Код для подтверждения: ${otpCode.otp}.`;
 
       const { status, status_code } = await this.smsService.send(phone, msg);

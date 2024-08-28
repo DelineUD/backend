@@ -24,9 +24,9 @@ export interface IAdditional {
   about?: string;
   keywords?: string[];
   qualifications?: IQualification[];
-  project_involvement: EUserProjectInvolvement;
-  job_format: EUserJobFormat;
-  job_experience: EUserJobExperience;
+  project_involvement?: EUserProjectInvolvement;
+  job_format?: EUserJobFormat;
+  job_experience?: EUserJobExperience;
 }
 
 export interface IBun {
@@ -43,7 +43,7 @@ export interface IUser {
   last_name: string;
   avatar?: string;
   city?: string;
-  additional_info: IAdditional;
+  additional_info?: IAdditional;
   preferences?: IPreference;
   programs?: string[];
   specializations?: string[];

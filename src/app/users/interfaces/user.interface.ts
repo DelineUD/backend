@@ -7,7 +7,6 @@ import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 export interface ILink {
   url: string;
   name?: string;
-  _id?: Types.ObjectId;
 }
 
 export interface IQualification {
@@ -36,6 +35,7 @@ export interface IBun {
 }
 
 export interface IUser {
+  _id?: Types.ObjectId;
   phone: string;
   email: string;
   password: string;
@@ -46,7 +46,7 @@ export interface IUser {
   additional_info?: IAdditional;
   preferences?: IPreference;
   programs?: string[];
-  specializations?: string[];
+  specialization?: string;
   bun_info?: IBun;
   getcourse_id?: string;
 }

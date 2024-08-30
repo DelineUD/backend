@@ -9,7 +9,6 @@ import { FilterKeys } from '@app/filters/consts';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { FiltersService } from '@app/filters/filters.service';
 import { SmsService } from '@app/sms/sms.service';
-import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 import { AuthLoginOtpDto } from './dto/auth-login-otp.dto';
 import { AuthLoginDto } from './dto/auth-login.dto';
 import { AuthRegisterDto } from './dto/auth-register.dto';
@@ -41,9 +40,7 @@ export class AuthService {
     avatar: Express.Multer.File,
   ): Promise<AuthRegisterResponseType> {
     try {
-      const validPhone = transformPhoneNumber(phone);
-
-      const userInDb = await this.usersService.findOne({ phone: validPhone });
+      const userInDb = await this.usersService.findOne({ phone });
       if (userInDb) throw new BadRequestException('Пользователь с этим номером уже зарегистрирован.');
 
       const salt = await genSalt(10);
@@ -55,7 +52,7 @@ export class AuthService {
 
       const user = await this.usersService.create({
         ...dto,
-        phone: validPhone,
+        phone,
         avatar: pathToAvatar,
         password: hashPassword,
       });
@@ -64,7 +61,7 @@ export class AuthService {
 
       const updateFilters: UpdateFiltersDto = {
         [FilterKeys.City]: user.city,
-        [FilterKeys.Spec]: user.specializations,
+        [FilterKeys.Spec]: user.specialization,
         [FilterKeys.Programs]: user.programs,
       };
       this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
@@ -87,8 +84,6 @@ export class AuthService {
       });
       await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
 
-      console.log(tokens);
-
       return tokens;
     } catch (err) {
       logger.error(`Error while login: ${(err as Error).message}`);
@@ -104,9 +99,8 @@ export class AuthService {
     const userInDb = await this.usersService.findByPhone(phone);
     if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-    const validPhone = transformPhoneNumber(phone);
     const otpCode = await this.codesService.findCodeByPayload({
-      user_phone: validPhone,
+      user_phone: phone,
     });
     if (!otpCode) throw new ForbiddenException(`Срок действия кода истек.`);
 
@@ -125,8 +119,7 @@ export class AuthService {
       const userInDb = await this.usersService.findByPhone(phone);
       if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 
-      const validPhone = transformPhoneNumber(phone);
-      const otpCode = await this.codesService.generateCode({ userPhone: validPhone });
+      const otpCode = await this.codesService.generateCode({ userPhone: phone });
       const msg = `Код для подтверждения: ${otpCode.otp}.`;
 
       const { status, status_code } = await this.smsService.send(phone, msg);

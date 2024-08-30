@@ -1,9 +1,9 @@
-import { UserCreateDto } from '@app/users/dto/user-create.dto';
-import { IAdditional, IPreference, IUser } from '@/app/users/interfaces/user.interface';
+import { UserUpdateDto } from '@app/users/dto/user-update.dto';
+import { IAdditional, IPreference, IUser } from '@app/users/interfaces/user.interface';
 import { splitDtoField } from '@helpers/splitDto';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 
-export const createUserMapper = (dto: UserCreateDto): IUser => {
+export const updateUserMapper = (dto: UserUpdateDto): IUser => {
   const {
     phone,
     email,
@@ -22,7 +22,6 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     programs,
     specialization,
     is_hide_phone,
-    getcourse_id,
   } = dto;
 
   const splitPrograms = splitDtoField(programs);
@@ -56,6 +55,5 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     preferences,
     specialization,
     ...(splitPrograms.length && { programs: splitPrograms }),
-    ...(getcourse_id && { getcourse_id }),
   };
 };

@@ -95,7 +95,6 @@ export class PostsService {
       if (!postInDb) throw new EntityNotFoundError(`Запись не найдена!`);
       if (String(userId) !== String(postInDb.authorId)) throw new BadRequestException('Нет доступа!');
 
-      // Convert filesxz
       const convertedFiles: Express.Multer.File[] = await this.convertsService.getConvertedStaticFiles(
         uploadedFiles,
         this.convertsService.convertToMp4.bind(this.convertsService),
@@ -223,8 +222,6 @@ export class PostsService {
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
-
-      console.log('USER ====>', user);
 
       const post = await this.postModel
         .findOne({ _id: postId })

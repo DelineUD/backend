@@ -52,7 +52,7 @@ export class UserEntity extends Document implements IUser {
   })
   bun_info?: IBun;
   @Prop({ type: [String], required: false }) programs?: string[];
-  @Prop({ type: [String], required: false }) specializations?: string[];
+  @Prop({ type: String, required: false }) specialization?: string;
   @Prop({ type: String, required: false }) getcourse_id?: string;
 }
 

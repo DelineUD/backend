@@ -1,6 +1,6 @@
 export enum FilterKeys {
   City = 'city',
-  Spec = 'specializations',
+  Spec = 'specialization',
   Programs = 'programs',
   Experience = 'job_experience',
   Format = 'job_format',
@@ -12,7 +12,7 @@ export enum FilterKeys {
 
 export enum FilterNames {
   City = 'Город',
-  Spec = 'Специализации',
+  Spec = 'Специализация',
   Programs = 'Программы',
   Experience = 'Опыт работы',
   Format = 'Формат работы',

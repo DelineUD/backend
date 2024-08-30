@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 import { ICodes } from '@app/auth/interfaces/codes.interface';
 
 @Schema({
-  collection: '_auth_codes',
+  collection: 'auth_codes',
   timestamps: true,
 })
 export class Codes extends Document implements ICodes {

@@ -60,7 +60,7 @@ export class UserCreateDto {
   programs?: string;
   @IsString()
   @IsOptional()
-  specializations?: string;
+  specialization?: string;
   @IsBooleanString()
   @IsOptional()
   is_hide_phone?: boolean;

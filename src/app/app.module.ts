@@ -9,12 +9,12 @@ import { NotFoundInterceptor } from '@shared/interceptors/not-found.interceptor'
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ProfileModule } from './profiles/profile.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { EventsModule } from './events/events.module';
 import { FiltersController } from './filters/filters.controller';
 import { FiltersModule } from './filters/filters.module';
 import { PostsModule } from './posts/posts.module';
-import { ResidentsModule } from './residents/residents.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { VacancyModule } from './vacancy/vacancy.module';
 
@@ -33,8 +33,8 @@ import { VacancyModule } from './vacancy/vacancy.module';
       dest: './files',
     }),
     AuthModule,
+    ProfileModule,
     FiltersModule,
-    ResidentsModule,
     PostsModule,
     EventsModule,
     VacancyModule,

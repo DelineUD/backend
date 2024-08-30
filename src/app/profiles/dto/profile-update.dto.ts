@@ -1,36 +1,36 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-import { UserCreateDto } from '@/app/users/dto/user-create.dto';
-import { ILink, IQualification } from '@/app/users/interfaces/user.interface';
-import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { UserUpdateDto } from '@app/users/dto/user-update.dto';
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 import { EUserQualification } from '@shared/consts/user-qualification.enum';
-import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
 import { validateArrayOfQualification } from '@shared/validators/validateArrayOfQualification';
+import { ILink, IQualification } from '@app/users/interfaces/user.interface';
+import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 import { validatePhoneNumber } from '@shared/validators/validatePhoneNumber';
 
-export class AuthRegisterDto extends PartialType(UserCreateDto) {
-  @ApiProperty({ default: '+79992456800', description: 'Номер телефона пользователя' })
+export class ProfileUpdateDto extends PartialType(UserUpdateDto) {
+  @ApiPropertyOptional({ default: '+79992456800', description: 'Номер телефона пользователя' })
   @Transform(validatePhoneNumber)
-  phone: string;
+  phone?: string;
 
-  @ApiProperty({ default: 'user@example.com', description: 'Электронная почта пользователя' })
-  email: string;
+  @ApiPropertyOptional({ default: 'user@example.com', description: 'Электронная почта пользователя' })
+  email?: string;
 
-  @ApiProperty({ default: 'root', description: 'Пароль пользователя' })
-  password: string;
+  @ApiPropertyOptional({ default: 'root', description: 'Пароль пользователя' })
+  password?: string;
 
-  @ApiProperty({ default: 'Максим', description: 'Имя пользователя' })
-  first_name: string;
+  @ApiPropertyOptional({ default: 'Максим', description: 'Имя пользователя' })
+  first_name?: string;
 
-  @ApiProperty({ default: 'Максимыч', description: 'Фамилия пользователя' })
-  last_name: string;
+  @ApiPropertyOptional({ default: 'Максимыч', description: 'Фамилия пользователя' })
+  last_name?: string;
 
-  @ApiProperty({ default: 'Санкт-Петербург', description: 'Город пользователя' })
+  @ApiPropertyOptional({ default: 'Санкт-Петербург', description: 'Город пользователя' })
   city?: string;
 
   @ApiPropertyOptional({ default: 'Краткое описание пользователя', description: 'Информация о пользователе' })
@@ -39,37 +39,37 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiPropertyOptional({ type: 'string', format: 'binary' })
   avatar?: any;
 
-  @ApiProperty({ default: 'IT, Frontend', description: 'Ключевые слова' })
+  @ApiPropertyOptional({ default: 'IT, Frontend', description: 'Ключевые слова' })
   keywords?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     enum: EUserJobFormat,
     description: 'Формат работы',
     default: EUserJobFormat.ft001,
     required: true,
   })
   @IsEnum(EUserJobFormat, { each: true })
-  job_format: EUserJobFormat;
+  job_format?: EUserJobFormat;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     enum: EUserJobExperience,
     description: 'нет опыта',
     default: EUserJobExperience.et004,
     required: true,
   })
   @IsEnum(EUserJobExperience, { each: true })
-  job_experience: EUserJobExperience;
+  job_experience?: EUserJobExperience;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     enum: EUserProjectInvolvement,
     description: 'Постоянная занятость',
     default: EUserProjectInvolvement.pit001,
     required: true,
   })
   @IsEnum(EUserProjectInvolvement, { each: true })
-  project_involvement: EUserProjectInvolvement;
+  project_involvement?: EUserProjectInvolvement;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     default: [
       { name: EUserQualification.qt001, year: 2024 },
       { name: EUserQualification.qt002, year: 2023 },

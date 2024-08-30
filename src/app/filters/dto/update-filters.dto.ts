@@ -6,10 +6,10 @@ export class UpdateFiltersDto {
   @IsOptional()
   @IsString()
   city?: string;
-  @ApiProperty({ default: [], required: false })
+  @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  specializations?: string[];
+  specialization?: string;
   @ApiProperty({ default: [], required: false })
   @IsOptional()
   @IsString()

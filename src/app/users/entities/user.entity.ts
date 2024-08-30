@@ -6,7 +6,7 @@ import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 
-@Schema({ collection: '_users', timestamps: true })
+@Schema({ collection: 'users', timestamps: true })
 export class UserEntity extends Document implements IUser {
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) email: string;
@@ -52,7 +52,7 @@ export class UserEntity extends Document implements IUser {
   })
   bun_info?: IBun;
   @Prop({ type: [String], required: false }) programs?: string[];
-  @Prop({ type: [String], required: false }) specializations?: string[];
+  @Prop({ type: String, required: false }) specialization?: string;
   @Prop({ type: String, required: false }) getcourse_id?: string;
 }
 

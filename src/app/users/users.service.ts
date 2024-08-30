@@ -1,7 +1,8 @@
+import { DeleteResult } from 'mongodb';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { compare } from 'bcrypt';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import { UserCreateDto } from '@/app/users/dto/user-create.dto';
 import { AuthLoginDto } from '@app/auth/dto/auth-login.dto';
@@ -64,27 +65,25 @@ export class UsersService {
 
   async findByPhone(phone: string): Promise<UserEntity> {
     try {
-      const validPhone = transformPhoneNumber(phone);
-
-      return await this.userModel.findOne({ phone: validPhone }).exec();
+      return await this.userModel.findOne({ phone }).exec();
     } catch (err) {
       logger.error(`Error while findByPhone: ${err}`);
       throw err;
     }
   }
 
-  async deleteOne(userId: Types.ObjectId): Promise<void> {
+  async deleteOne(userId: Types.ObjectId): Promise<DeleteResult> {
     try {
-      await this.userModel.findOneAndDelete({ _id: userId });
+      return await this.userModel.findOneAndDelete({ _id: userId });
     } catch (err) {
       logger.error(`Error while deleteUser: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async updateByPayload(where: Partial<UserEntity>, payload: Partial<UserEntity>): Promise<IUser> {
+  async updateByPayload(where: FilterQuery<UserEntity>, payload: UpdateQuery<UserEntity>): Promise<UserEntity> {
     try {
-      const updatedUser = await this.userModel.findOneAndUpdate({ filter: { where } }, { ...payload }, { new: true });
+      const updatedUser = await this.userModel.findOneAndUpdate(where, payload, { new: true });
 
       if (!updatedUser) {
         throw new EntityNotFoundError('Пользователь не найден');

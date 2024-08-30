@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 @Schema({
-  collection: '_auth_tokens',
+  collection: 'auth_tokens',
   timestamps: true,
 })
 export class Tokens extends Document {

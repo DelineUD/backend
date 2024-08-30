@@ -4,7 +4,7 @@ import { Transform } from 'class-transformer';
 
 import { validateStringOfObjectId } from '@shared/validators/validateStringOfObjectId';
 
-export class ResidentsFindQueryDto {
+export class ProfilesFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()

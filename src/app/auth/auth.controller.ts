@@ -33,7 +33,7 @@ import { AuthLoginResponseType } from './types/auth-login-response.type';
 import { AuthRegisterResponseType } from './types/auth-register-response.type';
 import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 
-@ApiTags('_Auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

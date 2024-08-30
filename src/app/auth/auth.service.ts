@@ -84,8 +84,6 @@ export class AuthService {
       });
       await this.tokensService.updateRefreshToken(userInDb._id, tokens.refresh_token);
 
-      console.log(tokens);
-
       return tokens;
     } catch (err) {
       logger.error(`Error while login: ${(err as Error).message}`);
@@ -95,7 +93,7 @@ export class AuthService {
 
   async registerOtp(dto: AuthRegisterOtpDto): Promise<void> {
     const { phone, otp } = dto;
-    console.log(phone);
+
     if (!phone || !otp) throw new BadRequestException('Неверные данные!');
 
     const userInDb = await this.usersService.findByPhone(phone);
@@ -117,7 +115,7 @@ export class AuthService {
   async registerOtpSend(dto: AuthSendOtpDto): Promise<AuthSendSmsResponseType> {
     try {
       const { phone } = dto;
-      console.log(phone);
+
       const userInDb = await this.usersService.findByPhone(phone);
       if (userInDb) throw new BadRequestException('Пользователь c этим номером уже зарегистрирован.');
 

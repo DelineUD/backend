@@ -6,7 +6,7 @@ import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 
-@Schema({ collection: 'users', timestamps: true })
+@Schema({ collection: '_users', timestamps: true })
 export class UserEntity extends Document implements IUser {
   @Prop({ required: true }) phone: string;
   @Prop({ required: true }) email: string;

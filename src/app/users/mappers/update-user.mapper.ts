@@ -30,30 +30,29 @@ export const updateUserMapper = (dto: UserUpdateDto): IUser => {
 
   const additional_info: IAdditional = {
     ...(qualifications?.length && { qualifications }),
-    project_involvement,
-    job_format,
-    job_experience,
+    ...(project_involvement && { project_involvement }),
+    ...(job_format && { job_format }),
+    ...(job_experience && { job_experience }),
     ...(about && { about }),
     ...(splitKeywords.length && { keywords: splitKeywords }),
   };
 
   const preferences: IPreference = {
-    is_hide_phone,
-    is_eula_approved: false,
+    ...(is_hide_phone && { is_hide_phone }),
   };
 
   return {
-    email,
-    password,
-    first_name,
-    last_name,
-    phone: validPhone,
+    ...(email && { email }),
+    ...(password && { password }),
+    ...(first_name && { first_name }),
+    ...(last_name && { last_name }),
+    ...(validPhone && validPhone !== 'undefined' && { phone: validPhone }),
     ...(avatar && { avatar }),
     ...(city && { city }),
     ...(links?.length && { links }),
-    additional_info,
-    preferences,
-    specialization,
+    ...(additional_info && { additional_info }),
+    ...(preferences && { preferences }),
+    ...(specialization && { specialization }),
     ...(splitPrograms.length && { programs: splitPrograms }),
   };
 };

@@ -1,20 +1,20 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { FilterQuery, Types } from 'mongoose';
 import { hash } from 'bcrypt';
+import { FilterQuery, Types } from 'mongoose';
 
-import { updateUserMapper } from '@app/users/mappers/update-user.mapper';
-import { ProfileUpdateDto } from '@app/profiles/dto/profile-update.dto';
 import { FiltersService } from '@app/filters/filters.service';
+import { ProfileUpdateDto } from '@app/profiles/dto/profile-update.dto';
 import { ProfilesBlockDto } from '@app/profiles/dto/profiles-block.dto';
 import { ProfilesFindQueryDto } from '@app/profiles/dto/profiles-find-query.dto';
 import { getMainFilters } from '@helpers/getMainFilters';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import { profileListMapper, profileMapper } from './mappers/profile.mapper';
 import { UserEntity } from '../users/entities/user.entity';
+import { updateUserMapper } from '../users/mappers/update-user.mapper';
 import { UsersService } from '../users/users.service';
 import { ProfileGetParamsDto } from './dto/profile-get-params.dto';
-import { IProfileResponse } from './interfaces/profile.interface';
 import { IProfileListResponse } from './interfaces/profile-list.interface';
+import { IProfileResponse } from './interfaces/profile.interface';
+import { profileListMapper, profileMapper } from './mappers/profile.mapper';
 
 const logger = new Logger('Profiles');
 
@@ -52,7 +52,7 @@ export class ProfileService {
 
       logger.log('Profile successfully updated!');
 
-      return profileMapper(profile, { _id: profile._id, bun_info: profile.bun_info });
+      return profileMapper(profile, { _id: profile._id, bun_info: profile?.bun_info });
     } catch (err) {
       logger.error(`Error while update: ${(err as Error).message}`);
       throw err;
@@ -82,7 +82,7 @@ export class ProfileService {
       return await this.usersService.findAll(query).then((res) =>
         profileListMapper(res, {
           _id: user._id,
-          bun_info: user.bun_info,
+          bun_info: user?.bun_info,
         }),
       );
     } catch (err) {

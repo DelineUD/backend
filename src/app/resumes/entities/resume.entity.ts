@@ -1,5 +1,5 @@
-import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 import { IResume } from '@app/resumes/interfaces/resume.interface';
 
@@ -25,7 +25,7 @@ export class Resume extends Document implements IResume {
 export const ResumeSchema = SchemaFactory.createForClass(Resume);
 
 ResumeSchema.virtual('author', {
-  ref: 'UserModel',
+  ref: 'UserEntity',
   localField: 'authorId',
   foreignField: '_id',
   justOne: true,

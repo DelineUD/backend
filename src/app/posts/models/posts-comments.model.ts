@@ -21,7 +21,7 @@ export class PostCommentsModel extends Document implements ICPosts {
   countLikes: number;
   @Prop({ required: true })
   isLiked: boolean;
-  @Prop({ required: true, type: Types.ObjectId, ref: 'UserModel' })
+  @Prop({ required: true, type: Types.ObjectId, ref: 'UserEntity' })
   author: UserCPostsPick;
 }
 

@@ -24,7 +24,7 @@ export class Vacancy extends Document implements IVacancy {
 export const VacancySchema = SchemaFactory.createForClass(Vacancy);
 
 VacancySchema.virtual('author', {
-  ref: 'UserModel',
+  ref: 'UserEntity',
   localField: 'authorId',
   foreignField: '_id',
   justOne: true,

@@ -1,7 +1,7 @@
-import { DeleteResult } from 'mongodb';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { compare } from 'bcrypt';
+import { DeleteResult } from 'mongodb';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import { UserCreateDto } from '@/app/users/dto/user-create.dto';

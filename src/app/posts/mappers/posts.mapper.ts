@@ -19,7 +19,7 @@ export const postListMapper = (posts: IPosts[], user: IUser): IPostsResponse[] =
 };
 
 const postsMapper = (post: IPosts, user: Pick<UserEntity, '_id' | 'bun_info'>) => {
-  const youBlocked = post.author.bun_info?.blocked_users.includes(user._id) ?? false;
+  const youBlocked = post.author?.bun_info?.blocked_users.includes(user._id) ?? false;
 
   if (!post.author) {
     return null;

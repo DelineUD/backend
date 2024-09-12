@@ -1,7 +1,7 @@
-import { IFilters, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 
 export const filtersMapper = (
-  model: IFilters[] = [],
+  model: IFilter[] = [],
   name = 'Фильтр',
   displayName = 'Название фильтра',
   multi = false,
@@ -9,19 +9,19 @@ export const filtersMapper = (
   return {
     name,
     displayName,
-    values: model.map((i) => ({ code: i._id, name: i.name })),
+    values: model.map((i) => ({ code: String(i._id), name: i.name })),
     multi,
   };
 };
 
-export const filterQueryMapper = (queryParam: PromiseSettledResult<IFilters>): string => {
+export const filterQueryMapper = (queryParam: PromiseSettledResult<IFilter>): string => {
   if (queryParam.status === 'rejected') {
     return;
   }
   return queryParam.value?.name;
 };
 
-export const filterQueriesMapper = (queryParam: PromiseSettledResult<IFilters[]>, allMatch = false) => {
+export const filterQueriesMapper = (queryParam: PromiseSettledResult<IFilter[]>, allMatch = false) => {
   if (queryParam.status === 'rejected') {
     return;
   }

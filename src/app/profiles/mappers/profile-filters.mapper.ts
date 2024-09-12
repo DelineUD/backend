@@ -4,11 +4,11 @@ import { FiltersService } from '@app/filters/filters.service';
 import { filterQueriesMapper } from '@app/filters/mappers/filters.mapper';
 import { IFiltersQuery } from '@app/filters/interfaces/filtets-query.interface';
 
-export async function getMainFilters(
+export async function profileFiltersMapper(
   filtersService: FiltersService,
-  initQuery: FilterQuery<IFiltersQuery>,
-): Promise<Partial<FilterQuery<IFiltersQuery>>> {
-  const mainQuery: Partial<FilterQuery<IFiltersQuery>> = {};
+  initQuery: FilterQuery<Partial<IFiltersQuery>>,
+): Promise<Partial<FilterQuery<Partial<IFiltersQuery>>>> {
+  const query: Partial<FilterQuery<Partial<IFiltersQuery>>> = {};
 
   const {
     cityPromises,
@@ -31,17 +31,17 @@ export async function getMainFilters(
       Promise.all(projectInvolvementPromises),
     ]);
 
-  filterQueriesMapper(city) && (mainQuery.city = filterQueriesMapper(city));
-  filterQueriesMapper(spec) && (mainQuery.specialization = filterQueriesMapper(spec));
-  filterQueriesMapper(programs) && (mainQuery.programs = filterQueriesMapper(programs));
+  filterQueriesMapper(city) && (query.city = filterQueriesMapper(city));
+  filterQueriesMapper(spec) && (query.specialization = filterQueriesMapper(spec));
+  filterQueriesMapper(programs) && (query.programs = filterQueriesMapper(programs));
 
   filterQueriesMapper(qualifications) &&
-    (mainQuery['additional_info.qualifications'] = filterQueriesMapper(qualifications));
-  filterQueriesMapper(jobFormats) && (mainQuery['additional_info.job_format'] = filterQueriesMapper(jobFormats));
+    (query['additional_info.qualifications'] = filterQueriesMapper(qualifications));
+  filterQueriesMapper(jobFormats) && (query['additional_info.job_format'] = filterQueriesMapper(jobFormats));
   filterQueriesMapper(jobExperienceies) &&
-    (mainQuery['additional_info.job_experience'] = filterQueriesMapper(jobExperienceies));
+    (query['additional_info.job_experience'] = filterQueriesMapper(jobExperienceies));
   filterQueriesMapper(projectsInvolvement) &&
-    (mainQuery['additional_info.project_involvement'] = filterQueriesMapper(projectsInvolvement));
+    (query['additional_info.project_involvement'] = filterQueriesMapper(projectsInvolvement));
 
-  return { ...mainQuery };
+  return query;
 }

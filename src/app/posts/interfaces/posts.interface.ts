@@ -2,7 +2,6 @@ import { Types } from 'mongoose';
 
 import { UserEntity } from '@/app/users/entities/user.entity';
 import { IBun } from '@/app/users/interfaces/user.interface';
-import { GroupFilterKeys } from '@app/filters/consts';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 
 type PostUserPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'bun_info';
@@ -17,7 +16,7 @@ export interface IPosts {
   likes: Array<string>;
   views: Array<string>;
   countComments: number;
-  groups: GroupFilterKeys[];
+  groups: string[];
   publishInProfile?: boolean;
   author?: IPostAuthorResponse & { bun_info?: IBun };
   createdAt?: Date;
@@ -34,7 +33,7 @@ export interface IPostsResponse {
   countViews: number;
   isLiked: boolean;
   isViewed: boolean;
-  groups: GroupFilterKeys[];
+  groups: string[];
   publishInProfile: boolean;
   createdAt?: Date;
   updatedAt?: Date;

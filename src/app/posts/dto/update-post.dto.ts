@@ -1,8 +1,8 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsBooleanString, IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsMongoId, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-import { GroupFilterKeys } from '@app/filters/consts';
+import { groupFilters } from '@app/filters/consts';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 import { validateArrayOfFiles } from '@shared/validators/validateArrayOfFiles';
 import { IsUniqueArray } from '@shared/decorators/unique-array.decorator';
@@ -19,11 +19,10 @@ export class UpdatePostDto extends PartialType(PostDto) {
   @IsString()
   pText?: string;
 
-  @ApiProperty({ default: [GroupFilterKeys.pf001], required: false })
+  @ApiProperty({ default: [groupFilters[0].name], required: false })
   @IsOptional()
-  @IsEnum(GroupFilterKeys, { each: true })
   @IsUniqueArray({ message: 'Each value in group must be unique' })
-  groups?: GroupFilterKeys[];
+  groups?: string[];
 
   @ApiProperty({ default: 'false', required: false })
   @IsOptional()

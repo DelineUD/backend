@@ -38,12 +38,16 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { ICPosts, ICPostsResponse } from './interfaces/posts.comments.interface';
 import { IPostsResponse } from './interfaces/posts.interface';
 import { PostsService } from './posts.service';
+import { IFilter } from '@app/filters/interfaces/filters.interface';
+import { FiltersService } from '@app/filters/filters.service';
 
 @ApiTags('Posts')
 @ApiBearerAuth('defaultBearerAuth')
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
 export class PostsController {
+  constructor(private postsService: PostsService, private filtersService: FiltersService) {}
+
   /**
    * Создание поста.
    * @param userId - id пользователя.
@@ -67,8 +71,6 @@ export class PostsController {
   ): Promise<IPostsResponse> {
     return await this.postsService.create(userId, createPostDto, uploadedFiles ?? []);
   }
-
-  constructor(private postsService: PostsService) {}
 
   /**
    * Удаление поста.
@@ -125,6 +127,15 @@ export class PostsController {
   }
 
   /**
+   * Получение фильтров для постов.
+   * @returns - Фильтры постов.
+   */
+  @Get('filters')
+  public async getPostsFilter(): Promise<IFilter[]> {
+    return await Promise.all([this.filtersService.getGroupFilter()]);
+  }
+
+  /**
    * Получние поста по id.
    * @param userId - id пользователя.
    * @param params - Данные для нахождения поста.
@@ -132,7 +143,7 @@ export class PostsController {
    */
   @Get(':postId')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({ name: 'postId' })
+  @ApiParam({ name: 'postId', type: 'string', description: 'Системный идентификатор поста' })
   async getById(@UserId() userId: Types.ObjectId, @Param() params: IPostsFindParams): Promise<IPostsResponse> {
     return await this.postsService.findPostById(userId, params);
   }

@@ -1,5 +1,5 @@
-export class IAllQueryFilters {
-  city?: string;
+export class IFiltersQuery {
+  city?: string[];
   specializations?: string[];
   programs?: string[];
   job_format?: string[];

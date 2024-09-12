@@ -6,7 +6,7 @@ import { FiltersService } from '@app/filters/filters.service';
 import { ProfileUpdateDto } from '@app/profiles/dto/profile-update.dto';
 import { ProfilesBlockDto } from '@app/profiles/dto/profiles-block.dto';
 import { ProfilesFindQueryDto } from '@app/profiles/dto/profiles-find-query.dto';
-import { getMainFilters } from '@helpers/getMainFilters';
+import { profileFiltersMapper } from '@app/profiles/mappers/profile-filters.mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UserEntity } from '../users/entities/user.entity';
 import { updateUserMapper } from '../users/mappers/update-user.mapper';
@@ -61,7 +61,7 @@ export class ProfileService {
 
   async findAll(
     userId: Types.ObjectId,
-    { search, ...queryParams }: Partial<ProfilesFindQueryDto>,
+    { search, ...queryParams }: ProfilesFindQueryDto,
   ): Promise<IProfileListResponse> {
     try {
       const user = await this.usersService.findOne({ _id: userId });
@@ -69,7 +69,7 @@ export class ProfileService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const query: FilterQuery<Partial<UserEntity>> = await getMainFilters(this.filtersService, queryParams);
+      const query: FilterQuery<Partial<UserEntity>> = await profileFiltersMapper(this.filtersService, queryParams);
 
       if (search) {
         const [first, last] = [new RegExp(search.split(' ')[0], 'i'), new RegExp(search.split(' ')[1], 'i')];
@@ -98,7 +98,7 @@ export class ProfileService {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      const resident = await this.usersService.findOne({ _id: id });
+      const resident = await this.usersService.findOne({ _id: new Types.ObjectId(id) });
 
       return profileMapper(resident, { _id: user._id, bun_info: user.bun_info });
     } catch (err) {

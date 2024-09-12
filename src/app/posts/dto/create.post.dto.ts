@@ -5,8 +5,8 @@ import { Transform } from 'class-transformer';
 import { IsUniqueArray } from '@shared/decorators/unique-array.decorator';
 import { validateArrayOfFiles } from '@shared/validators/validateArrayOfFiles';
 import { EFileType } from '@shared/interfaces/file.interface';
+import { EPostGroup } from '@shared/consts/post-group.enum';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
-import { GroupFilterKeys } from '@app/filters/consts';
 import { PostDto } from './post.dto';
 
 export class CreatePostDto extends PartialType(PostDto) {
@@ -14,10 +14,10 @@ export class CreatePostDto extends PartialType(PostDto) {
   @IsString()
   pText: string;
 
-  @ApiProperty({ default: [GroupFilterKeys.pf001], required: true })
-  @IsEnum(GroupFilterKeys, { each: true })
+  @ApiProperty({ default: [EPostGroup.pg001], required: true })
+  @IsEnum(EPostGroup, { each: true })
   @IsUniqueArray({ message: 'Each value in group must be unique' })
-  groups: GroupFilterKeys[];
+  groups: EPostGroup[];
 
   @ApiProperty({ default: 'false' })
   @IsOptional()

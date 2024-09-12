@@ -2,27 +2,42 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
-import { Cities } from '@app/filters/entities/cities.entity';
+import { CitiesEntity } from '@app/filters/entities/cities.entity';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
-import { IFilters, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
-import { Specializations } from '@app/filters/entities/specializations.entity';
-import { Programs } from '@app/filters/entities/programs.entity';
-import { filtersMapper } from '@app/filters/filters.mapper';
-import { FilterKeys, FilterNames, GroupFilterKeys } from '@app/filters/consts';
-import { IAllQueryFilters } from '@app/filters/interfaces/all-filters.interface';
-import { EUserQualification } from '@shared/consts/user-qualification.enum';
-import { EUserJobFormat } from '@shared/consts/user-format.enum';
-import { EUserJobExperience } from '@shared/consts/user-experience.enum';
-import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
+import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { SpecializationsEntity } from '@app/filters/entities/specializations.entity';
+import { ProgramsEntity } from '@app/filters/entities/programs.entity';
+import { filtersMapper } from '@app/filters/mappers/filters.mapper';
+import {
+  FilterKeys,
+  FilterNames,
+  groupFilters,
+  jobExperienceFilters,
+  jobFormatFilters,
+  projectInvolvementFilters,
+  qualificationsFilters,
+} from '@app/filters/consts';
+import { GroupsEntity } from '@app/filters/entities/groups.entity';
+import { JobFormatsEntity } from '@app/filters/entities/job-formats.entity';
+import { JobExperienceEntity } from '@app/filters/entities/job-experience.entity';
+import { ProjectsInvolvementEntity } from '@app/filters/entities/projects-involvement.entity';
+import { Qualifications } from '@app/filters/entities/qualifications.entity';
+import { IFiltersQuery } from '@app/filters/interfaces/filtets-query.interface';
 
 const logger = new Logger('Filters');
 
 @Injectable()
 export class FiltersService {
   constructor(
-    @InjectModel(Cities.name) private readonly citiesModel: Model<Cities>,
-    @InjectModel(Specializations.name) private readonly specializationsModel: Model<Specializations>,
-    @InjectModel(Programs.name) private readonly programsModel: Model<Programs>,
+    @InjectModel(CitiesEntity.name) private readonly citiesModel: Model<CitiesEntity>,
+    @InjectModel(SpecializationsEntity.name) private readonly specializationsModel: Model<SpecializationsEntity>,
+    @InjectModel(ProgramsEntity.name) private readonly programsModel: Model<ProgramsEntity>,
+    @InjectModel(Qualifications.name) private readonly qualificationsModel: Model<Qualifications>,
+    @InjectModel(GroupsEntity.name) private readonly groupsEntity: Model<GroupsEntity>,
+    @InjectModel(JobFormatsEntity.name) private readonly jobFormatsEntity: Model<JobFormatsEntity>,
+    @InjectModel(JobExperienceEntity.name) private readonly jobExperienceEntity: Model<JobExperienceEntity>,
+    @InjectModel(ProjectsInvolvementEntity.name)
+    private readonly projectsInvolvementEntity: Model<ProjectsInvolvementEntity>,
   ) {}
 
   async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
@@ -38,7 +53,7 @@ export class FiltersService {
     }
   }
 
-  async updateFilters(name: string, model: Model<IFilters>): Promise<IFilters> {
+  async updateFilters(name: string, model: Model<IFilter>): Promise<IFilter> {
     try {
       if (!name) {
         return;
@@ -56,14 +71,14 @@ export class FiltersService {
     }
   }
 
-  async updateMultiFilters(names: string[], model: Model<IFilters>): Promise<IFilters[]> {
+  async updateMultiFilters(names: string[], model: Model<IFilter>): Promise<IFilter[]> {
     try {
       const existingFilters = await model.find({ name: { $in: names } }).exec();
       const existingFilterNames = existingFilters.map((f) => f.name);
       const newFilterNames = names.filter((n) => !existingFilterNames.includes(n));
 
       if (newFilterNames.length > 0) {
-        const newFilters: IFilters[] = newFilterNames.map((name) => ({ name }));
+        const newFilters: IFilter[] = newFilterNames.map((name) => ({ name }));
         await model.create(newFilters);
       }
 
@@ -74,6 +89,7 @@ export class FiltersService {
     }
   }
 
+  /* Finding */
   async findEntityByPayload<T>(model: Model<T>, payload: FilterQuery<T>) {
     try {
       return await model.findOne({ ...payload }).exec();
@@ -83,16 +99,7 @@ export class FiltersService {
     }
   }
 
-  getFiltersPromises(query: Partial<IAllQueryFilters>) {
-    return {
-      cityPromise: query[FilterKeys.City] && this.findCityByPayload({ _id: query[FilterKeys.City] }),
-      specPromises: query[FilterKeys.Spec] && query[FilterKeys.Spec]?.map((id) => this.findSpecByPayload({ _id: id })),
-      programsPromises:
-        query[FilterKeys.Programs] && query[FilterKeys.Programs]?.map((id) => this.findProgramsByPayload({ _id: id })),
-    };
-  }
-
-  async findCityByPayload(payload: FilterQuery<Cities>) {
+  async findCityByPayload(payload: FilterQuery<CitiesEntity>) {
     try {
       return this.findEntityByPayload(this.citiesModel, payload);
     } catch (err) {
@@ -101,7 +108,7 @@ export class FiltersService {
     }
   }
 
-  async findSpecByPayload(payload: FilterQuery<Specializations>) {
+  async findSpecByPayload(payload: FilterQuery<SpecializationsEntity>) {
     try {
       return this.findEntityByPayload(this.specializationsModel, payload);
     } catch (err) {
@@ -110,7 +117,7 @@ export class FiltersService {
     }
   }
 
-  async findProgramsByPayload(payload: FilterQuery<Programs>) {
+  async findProgramsByPayload(payload: FilterQuery<ProgramsEntity>) {
     try {
       return this.findEntityByPayload(this.programsModel, payload);
     } catch (err) {
@@ -119,9 +126,30 @@ export class FiltersService {
     }
   }
 
+  /* Getters */
+  getFiltersPromises(query: Partial<IFiltersQuery>) {
+    return {
+      cityPromises: query[FilterKeys.City]?.map((id) => this.findCityByPayload({ _id: id })),
+      specPromises: query[FilterKeys.Spec]?.map((id) => this.findSpecByPayload({ _id: id })),
+      programsPromises: query[FilterKeys.Programs]?.map((id) => this.findProgramsByPayload({ _id: id })),
+      qualificationsPromises: query[FilterKeys.Qualifications]?.map((id) =>
+        this.findEntityByPayload(this.qualificationsModel, { _id: id }),
+      ),
+      jobFormatPromises: query[FilterKeys.Format]?.map((id) =>
+        this.findEntityByPayload(this.jobFormatsEntity, { _id: id }),
+      ),
+      jobExperiencePromises: query[FilterKeys.Experience]?.map((id) =>
+        this.findEntityByPayload(this.jobExperienceEntity, { _id: id }),
+      ),
+      projectInvolvementPromises: query[FilterKeys.Involvement]?.map((id) =>
+        this.findEntityByPayload(this.projectsInvolvementEntity, { _id: id }),
+      ),
+    };
+  }
+
   async getCitiesFilter(): Promise<IFiltersResponse> {
     try {
-      return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, FilterNames.City, false);
+      return filtersMapper(await this.citiesModel.find().exec(), FilterKeys.City, FilterNames.City, true);
     } catch (err) {
       logger.error(`Error while getCitiesFilter: ${(err as Error).message}`);
       throw err;
@@ -146,68 +174,106 @@ export class FiltersService {
     }
   }
 
-  getGroupFilter(): IFiltersResponse {
+  async getGroupFilter(): Promise<IFiltersResponse> {
     try {
-      const groupFilter = Object.keys(GroupFilterKeys).map((key) => ({
-        _id: key,
-        name: GroupFilterKeys[key as keyof typeof GroupFilterKeys],
-      }));
-      return filtersMapper(groupFilter, FilterKeys.Group, FilterNames.Group, false);
+      return filtersMapper(await this.groupsEntity.find().exec(), FilterKeys.Group, FilterNames.Group, false);
     } catch (err) {
       logger.error(`Error while getGroupFilter: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  getQualificationsFilter(): IFiltersResponse {
+  async getQualificationsFilter(): Promise<IFiltersResponse> {
     try {
-      const qualificationFilter = Object.keys(EUserQualification).map((key) => ({
-        _id: key,
-        name: EUserQualification[key as keyof typeof EUserQualification],
-      }));
-      return filtersMapper(qualificationFilter, FilterKeys.Qualifications, FilterNames.Qualifications, true);
+      return filtersMapper(
+        await this.qualificationsModel.find().exec(),
+        FilterKeys.Qualifications,
+        FilterNames.Qualifications,
+        true,
+      );
     } catch (err) {
       logger.error(`Error while getQualificationsFilter: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  getFormatFilter(): IFiltersResponse {
+  async getFormatFilter(): Promise<IFiltersResponse> {
     try {
-      const formatFilter = Object.keys(EUserJobFormat).map((key) => ({
-        _id: key,
-        name: EUserJobFormat[key as keyof typeof EUserJobFormat],
-      }));
-      return filtersMapper(formatFilter, FilterKeys.Format, FilterNames.Format, true);
+      return filtersMapper(await this.jobFormatsEntity.find().exec(), FilterKeys.Format, FilterNames.Format, true);
     } catch (err) {
       logger.error(`Error while getFormatFilter: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  getExperienceFilter(): IFiltersResponse {
+  async getExperienceFilter(): Promise<IFiltersResponse> {
     try {
-      const experienceFilter = Object.keys(EUserJobExperience).map((key) => ({
-        _id: key,
-        name: EUserJobExperience[key as keyof typeof EUserJobExperience],
-      }));
-      return filtersMapper(experienceFilter, FilterKeys.Experience, FilterNames.Experience, true);
+      return filtersMapper(
+        await this.jobExperienceEntity.find().exec(),
+        FilterKeys.Experience,
+        FilterNames.Experience,
+        true,
+      );
     } catch (err) {
       logger.error(`Error while getExperienceFilter: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  getInvolvementFilter(): IFiltersResponse {
+  async getInvolvementFilter(): Promise<IFiltersResponse> {
     try {
-      const involvementFilter = Object.keys(EUserProjectInvolvement).map((key) => ({
-        _id: key,
-        name: EUserProjectInvolvement[key as keyof typeof EUserProjectInvolvement],
-      }));
-      return filtersMapper(involvementFilter, FilterKeys.Involvement, FilterNames.Involvement, true);
+      return filtersMapper(
+        await this.projectsInvolvementEntity.find().exec(),
+        FilterKeys.Involvement,
+        FilterNames.Involvement,
+        true,
+      );
     } catch (err) {
       logger.error(`Error while getInvolvementFilter: ${(err as Error).message}`);
       throw err;
+    }
+  }
+
+  async seedGroupFilters(): Promise<void> {
+    await this.createOrUpdateFilters(groupFilters, this.groupsEntity);
+  }
+
+  async seedJobExperienceFilters(): Promise<void> {
+    await this.createOrUpdateFilters(jobExperienceFilters, this.jobExperienceEntity);
+  }
+
+  async seedJobFormatFilters(): Promise<void> {
+    await this.createOrUpdateFilters(jobFormatFilters, this.jobFormatsEntity);
+  }
+
+  async seedProjectInvolvementFilters(): Promise<void> {
+    await this.createOrUpdateFilters(projectInvolvementFilters, this.projectsInvolvementEntity);
+  }
+
+  async seedQualificationFilters(): Promise<void> {
+    await this.createOrUpdateFilters(qualificationsFilters, this.qualificationsModel);
+  }
+
+  async seedAllFilters(): Promise<void> {
+    try {
+      await Promise.all([
+        this.seedGroupFilters(),
+        this.seedJobExperienceFilters(),
+        this.seedJobFormatFilters(),
+        this.seedProjectInvolvementFilters(),
+        this.seedQualificationFilters(),
+      ]);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async createOrUpdateFilters(filters: IFilter[], model: Model<IFilter>) {
+    for (const filter of filters) {
+      const existingFilter = await model.findOne({ name: filter.name }).exec();
+      if (!existingFilter) {
+        await model.create(filter);
+      }
     }
   }
 }

@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-import { GroupFilterKeys } from '@app/filters/consts';
 import { IPostFile } from '@app/posts/interfaces/post-file.interface';
 import { IPosts } from '../interfaces/posts.interface';
 
@@ -21,7 +20,7 @@ export class PostModel extends Document implements IPosts {
   @Prop({ required: true })
   views: Array<string>;
   @Prop({ required: true })
-  groups: GroupFilterKeys[];
+  groups: string[];
   @Prop({ required: false })
   publishInProfile?: boolean;
   @Prop({ required: true })

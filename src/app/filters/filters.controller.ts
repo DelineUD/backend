@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { FiltersService } from '@app/filters/filters.service';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
-import { IFilters, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 
 @ApiTags('Filters')
 @Controller('filters')
@@ -24,7 +24,7 @@ export class FiltersController {
    * @returns - Фильтры резюме.
    */
   @Get('resumes')
-  public async getResumesFilter(): Promise<IFilters[]> {
+  public async getResumesFilter(): Promise<IFilter[]> {
     return await Promise.all([
       await this.filtersService.getCitiesFilter(),
       await this.filtersService.getSpecializationsFilter(),
@@ -37,38 +37,12 @@ export class FiltersController {
    * @returns - Фильтры вакансий.
    */
   @Get('vacancies')
-  public async getVacanciesFilter(): Promise<IFilters[]> {
+  public async getVacanciesFilter(): Promise<IFilter[]> {
     return await Promise.all([
       await this.filtersService.getCitiesFilter(),
       await this.filtersService.getSpecializationsFilter(),
       await this.filtersService.getProgramsFilter(),
     ]);
-  }
-
-  /**
-   * Получение фильтров для резидентов.
-   * @returns - Фильтры резидентов.
-   */
-  @Get('residents')
-  public async getResidentsFilter(): Promise<IFilters[]> {
-    return await Promise.all([
-      await this.filtersService.getCitiesFilter(),
-      await this.filtersService.getSpecializationsFilter(),
-      await this.filtersService.getProgramsFilter(),
-      this.getQualificationsFilter(),
-      this.getFormatFilter(),
-      this.getExperienceFilter(),
-      this.getInvolvementFilter(),
-    ]);
-  }
-
-  /**
-   * Получение фильтров для постов.
-   * @returns - Фильтры постов.
-   */
-  @Get('posts')
-  public async getPostsFilter(): Promise<IFilters[]> {
-    return await Promise.all([this.filtersService.getGroupFilter()]);
   }
 
   /**
@@ -103,7 +77,7 @@ export class FiltersController {
    * @returns - Фильтры квалификаций.
    */
   @Get('qualifications')
-  getQualificationsFilter(): IFiltersResponse {
+  getQualificationsFilter(): Promise<IFiltersResponse> {
     return this.filtersService.getQualificationsFilter();
   }
 
@@ -112,7 +86,7 @@ export class FiltersController {
    * @returns - Фильтры формата работы.
    */
   @Get('format')
-  getFormatFilter(): IFiltersResponse {
+  getFormatFilter(): Promise<IFiltersResponse> {
     return this.filtersService.getFormatFilter();
   }
 
@@ -121,7 +95,7 @@ export class FiltersController {
    * @returns - Фильтры опыта работы.
    */
   @Get('experience')
-  getExperienceFilter(): IFiltersResponse {
+  getExperienceFilter(): Promise<IFiltersResponse> {
     return this.filtersService.getExperienceFilter();
   }
 
@@ -130,7 +104,7 @@ export class FiltersController {
    * @returns - Фильтры участия в проектах.
    */
   @Get('involvement')
-  getInvolvementFilter(): IFiltersResponse {
+  getInvolvementFilter(): Promise<IFiltersResponse> {
     return this.filtersService.getInvolvementFilter();
   }
 }

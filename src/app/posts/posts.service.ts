@@ -4,7 +4,7 @@ import { DeleteResult } from 'mongodb';
 import { FilterQuery, Model, Types } from 'mongoose';
 
 import { ConvertsService } from '@app/converts/converts.service';
-import { GroupFilterKeys } from '@app/filters/consts';
+import { groupFilters } from '@app/filters/consts';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
@@ -192,7 +192,7 @@ export class PostsService {
       }
 
       query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
-      query.groups && (baseQuery.groups = { $in: query.groups.map((i) => GroupFilterKeys[i]) });
+      query.groups && (baseQuery.groups = { $in: query.groups.map((i) => groupFilters[i]) });
       query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
       baseQuery._id = {
         $nin: user.bun_info?.hidden_posts ?? [],

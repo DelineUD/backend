@@ -5,8 +5,8 @@ import { Document } from 'mongoose';
   collection: 'specialization',
   timestamps: true,
 })
-export class Specializations extends Document {
+export class SpecializationsEntity extends Document {
   @Prop({ required: true }) name: string;
 }
 
-export const SpecializationSchema = SchemaFactory.createForClass(Specializations);
+export const SpecializationSchema = SchemaFactory.createForClass(SpecializationsEntity);

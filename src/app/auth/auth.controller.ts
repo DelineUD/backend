@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
   Req,
   UploadedFile,
   UseGuards,
@@ -59,6 +60,13 @@ export class AuthController {
     @UploadedFile() avatar: Express.Multer.File,
   ): Promise<AuthRegisterResponseType> {
     return await this.authService.register(authRegisterDto, avatar);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('defaultBearerAuth')
+  @Put('eula-approve')
+  public async eulaApprove(@Req() req: Request): Promise<Partial<UserEntity>> {
+    return await this.authService.approveEula(req);
   }
 
   /**

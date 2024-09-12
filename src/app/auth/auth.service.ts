@@ -228,4 +228,26 @@ export class AuthService {
       throw err;
     }
   }
+
+  async approveEula(req: Request): Promise<IProfileResponse> {
+    try {
+      const user = req.user as { _id: Types.ObjectId; phone: string };
+      const userInDb = await this.usersService.findOne({ phone: user.phone });
+      if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
+
+      const response = await this.usersService.updateByPayload(
+        { phone: user.phone },
+        {
+          preferences: {
+            is_eula_approved: true,
+          },
+        },
+      );
+
+      return profileMapper(response);
+    } catch (err) {
+      logger.error(`Error while approveEula: ${(err as Error).message}`);
+      throw err;
+    }
+  }
 }

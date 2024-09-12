@@ -1,6 +1,6 @@
 export class IFiltersQuery {
   city?: string[];
-  specializations?: string[];
+  specialization?: string[];
   programs?: string[];
   job_format?: string[];
   job_experience?: string[];

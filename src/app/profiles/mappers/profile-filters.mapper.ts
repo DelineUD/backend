@@ -20,7 +20,7 @@ export async function profileFiltersMapper(
     projectInvolvementPromises,
   } = filtersService.getFiltersPromises(initQuery);
 
-  const [city, spec, programs, qualifications, jobFormats, jobExperienceies, projectsInvolvement] =
+  const [city, spec, programs, qualifications, jobFormats, jobExperience, projectsInvolvement] =
     await Promise.allSettled([
       Promise.all(cityPromises),
       Promise.all(specPromises),
@@ -38,8 +38,7 @@ export async function profileFiltersMapper(
   filterQueriesMapper(qualifications) &&
     (query['additional_info.qualifications'] = filterQueriesMapper(qualifications));
   filterQueriesMapper(jobFormats) && (query['additional_info.job_format'] = filterQueriesMapper(jobFormats));
-  filterQueriesMapper(jobExperienceies) &&
-    (query['additional_info.job_experience'] = filterQueriesMapper(jobExperienceies));
+  filterQueriesMapper(jobExperience) && (query['additional_info.job_experience'] = filterQueriesMapper(jobExperience));
   filterQueriesMapper(projectsInvolvement) &&
     (query['additional_info.project_involvement'] = filterQueriesMapper(projectsInvolvement));
 

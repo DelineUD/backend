@@ -102,9 +102,7 @@ export class PostsService {
 
       // Files with type
       const uploadedPostFiles: IPostFile[] = getUploadedFilesWithType<IPostFile>(convertedFiles ?? []);
-      const updatedFiles = files
-        ? postInDb.files.concat(files).concat(uploadedPostFiles)
-        : postInDb.files.concat(uploadedPostFiles);
+      const updatedFiles = uploadedPostFiles.concat(files ?? []);
 
       await postInDb
         .updateOne({

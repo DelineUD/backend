@@ -5,8 +5,8 @@ import { Document } from 'mongoose';
   collection: 'programs',
   timestamps: true,
 })
-export class Programs extends Document {
+export class ProgramsEntity extends Document {
   @Prop({ required: true }) name: string;
 }
 
-export const ProgramsSchema = SchemaFactory.createForClass(Programs);
+export const ProgramsSchema = SchemaFactory.createForClass(ProgramsEntity);

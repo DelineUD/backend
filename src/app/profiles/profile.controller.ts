@@ -30,13 +30,15 @@ import { ProfileGetParamsDto } from './dto/profile-get-params.dto';
 import { IProfileResponse } from './interfaces/profile.interface';
 import { IProfileListResponse } from './interfaces/profile-list.interface';
 import { ProfileService } from './profile.service';
+import { IFilter } from '@app/filters/interfaces/filters.interface';
+import { FiltersService } from '@app/filters/filters.service';
 
 @ApiTags('Profiles')
 @ApiBearerAuth('defaultBearerAuth')
 @UseGuards(JwtAuthGuard)
 @Controller('profiles')
 export class ProfileController {
-  constructor(private profileService: ProfileService) {}
+  constructor(private profileService: ProfileService, private filtersService: FiltersService) {}
 
   /**
    * Обновление профиля
@@ -79,6 +81,24 @@ export class ProfileController {
   }
 
   /**
+   * Получение фильтров для профилей.
+   * @returns - фильтры профилей.
+   */
+  @Get('filters')
+  public async getProfilesFilter(): Promise<IFilter[]> {
+    console.log('Fetching filters');
+    return await Promise.all([
+      await this.filtersService.getCitiesFilter(),
+      await this.filtersService.getSpecializationsFilter(),
+      await this.filtersService.getProgramsFilter(),
+      this.filtersService.getQualificationsFilter(),
+      this.filtersService.getFormatFilter(),
+      this.filtersService.getExperienceFilter(),
+      this.filtersService.getInvolvementFilter(),
+    ]);
+  }
+
+  /**
    * Нахождение профиля по идентификатору
    * @param userId - идентификатор пользователя.
    * @param params - параметры для поиска.
@@ -86,11 +106,7 @@ export class ProfileController {
    */
   @Get(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiParam({
-    name: 'id',
-    type: 'string',
-    description: 'Системный идентификатор профиля',
-  })
+  @ApiParam({ name: 'id', type: 'string', description: 'Системный идентификатор профиля' })
   async findOneById(@UserId() userId: Types.ObjectId, @Param() params: ProfileGetParamsDto): Promise<IProfileResponse> {
     return await this.profileService.findOneById(userId, params);
   }

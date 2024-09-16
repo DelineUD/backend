@@ -1,6 +1,6 @@
 import { UserEntity } from '@/app/users/entities/user.entity';
 import { IUser } from '@/app/users/interfaces/user.interface';
-import { GroupFilterKeys } from '@app/filters/consts';
+import { groupFilters } from '@app/filters/consts';
 import { IPostAuthorResponse, IPosts, IPostsResponse, PostUserPick } from '../interfaces/posts.interface';
 
 const toAuthorPost = (author: PostUserPick, youBlocked: boolean): IPostAuthorResponse => {
@@ -34,7 +34,7 @@ const postsMapper = (post: IPosts, user: Pick<UserEntity, '_id' | 'bun_info'>) =
     countViews: post.views.length ?? 0,
     isViewed: post.views.includes(String(user._id)),
     isLiked: post.likes.includes(String(user._id)),
-    groups: post.groups ?? [GroupFilterKeys.pf001],
+    groups: post.groups ?? [groupFilters[0].name],
     publishInProfile: post.publishInProfile ?? false,
     author: toAuthorPost(post.author as PostUserPick, youBlocked),
     createdAt: post.createdAt,
@@ -54,7 +54,7 @@ export const postMapper = (post: IPosts, user: Pick<UserEntity, '_id' | 'bun_inf
     countComments: countComments ?? 0,
     countLikes: likes.length ?? 0,
     countViews: views.length ?? 0,
-    groups: groups ?? [GroupFilterKeys.pf001],
+    groups: groups ?? [groupFilters[0].name],
     isViewed: views.includes(String(user._id)),
     isLiked: likes.includes(String(user._id)),
     author: toAuthorPost(author as PostUserPick, youBlocked),

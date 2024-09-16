@@ -1,14 +1,14 @@
-import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 import { IFilter } from '@app/filters/interfaces/filters.interface';
 
 @Schema({
-  collection: 'cities',
+  collection: 'groups',
   timestamps: true,
 })
-export class CitiesEntity extends Document implements IFilter {
+export class GroupsEntity extends Document implements IFilter {
   @Prop({ required: true }) name: string;
 }
 
-export const CitiesSchema = SchemaFactory.createForClass(CitiesEntity);
+export const GroupsSchema = SchemaFactory.createForClass(GroupsEntity);

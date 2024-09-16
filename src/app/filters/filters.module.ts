@@ -1,51 +1,68 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 
-import { Countries, CountriesSchema } from '@app/filters/entities/countries.entity';
-import { Cities, CitiesSchema } from '@app/filters/entities/cities.entity';
+import { CitiesEntity, CitiesSchema } from '@app/filters/entities/cities.entity';
+import { SpecializationsEntity, SpecializationSchema } from '@app/filters/entities/specializations.entity';
+import { ProgramsEntity, ProgramsSchema } from '@app/filters/entities/programs.entity';
+import { GroupsEntity, GroupsSchema } from '@app/filters/entities/groups.entity';
+import { JobFormatsEntity, JobFormatsSchema } from '@app/filters/entities/job-formats.entity';
+import { JobExperienceEntity, JobExperienceSchema } from '@app/filters/entities/job-experience.entity';
+import {
+  ProjectsInvolvementEntity,
+  ProjectsInvolvementSchema,
+} from '@app/filters/entities/projects-involvement.entity';
 import { FiltersController } from './filters.controller';
 import { FiltersService } from './filters.service';
-import { Specializations, SpecializationSchema } from '@app/filters/entities/specializations.entity';
-import { NarrowSpecializations, NarrowSpecializationSchema } from '@app/filters/entities/narrow-specializations.entity';
-import { Programs, ProgramsSchema } from '@app/filters/entities/programs.entity';
-import { Courses, CoursesSchema } from '@app/filters/entities/courses.entity';
+import { Qualifications, QualificationsSchema } from '@app/filters/entities/qualifications.entity';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {
-        name: Countries.name,
-        schema: CountriesSchema,
-      },
-    ]),
-    MongooseModule.forFeature([
-      {
-        name: Cities.name,
+        name: CitiesEntity.name,
         schema: CitiesSchema,
       },
     ]),
     MongooseModule.forFeature([
       {
-        name: Specializations.name,
+        name: SpecializationsEntity.name,
         schema: SpecializationSchema,
       },
     ]),
     MongooseModule.forFeature([
       {
-        name: NarrowSpecializations.name,
-        schema: NarrowSpecializationSchema,
-      },
-    ]),
-    MongooseModule.forFeature([
-      {
-        name: Programs.name,
+        name: ProgramsEntity.name,
         schema: ProgramsSchema,
       },
     ]),
     MongooseModule.forFeature([
       {
-        name: Courses.name,
-        schema: CoursesSchema,
+        name: Qualifications.name,
+        schema: QualificationsSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: GroupsEntity.name,
+        schema: GroupsSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: JobFormatsEntity.name,
+        schema: JobFormatsSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: JobExperienceEntity.name,
+        schema: JobExperienceSchema,
+      },
+    ]),
+    MongooseModule.forFeature([
+      {
+        name: ProjectsInvolvementEntity.name,
+        schema: ProjectsInvolvementSchema,
       },
     ]),
   ],

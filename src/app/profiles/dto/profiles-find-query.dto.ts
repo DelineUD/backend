@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateStringOfObjectId } from '@shared/validators/validateStringOfObjectId';
@@ -12,13 +12,13 @@ export class ProfilesFindQueryDto {
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsMongoId()
+  @Transform(validateStringOfObjectId)
   city?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @Transform(validateStringOfObjectId)
-  specializations?: string;
+  specialization?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()

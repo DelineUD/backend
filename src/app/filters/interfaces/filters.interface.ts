@@ -1,12 +1,12 @@
 import { Types } from 'mongoose';
 
-export interface IFilters {
-  _id?: string | Types.ObjectId;
+export interface IFilter {
+  _id?: Types.ObjectId;
   name: string;
 }
 
 export interface IFiltersValue {
-  code: string | Types.ObjectId;
+  code: string;
   name: string;
 }
 

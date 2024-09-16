@@ -17,6 +17,7 @@ import { FiltersModule } from './filters/filters.module';
 import { PostsModule } from './posts/posts.module';
 import { ResumesModule } from './resumes/resumes.module';
 import { VacancyModule } from './vacancy/vacancy.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { VacancyModule } from './vacancy/vacancy.module';
     VacancyModule,
     ResumesModule,
     ComplaintsModule,
+    SeedModule,
   ],
   controllers: [AppController, FiltersController],
   providers: [

@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '@/app/users/users.module';
 import { ConvertModule } from '@app/converts/converts.module';
 import { UploadModule } from '@app/upload/upload.module';
+import { FiltersModule } from '@app/filters/filters.module';
 import { PostCommentsModel, PostCommentsSchema } from './models/posts-comments.model';
 import { PostModel, PostsSchema } from './models/posts.model';
 import { PostsController } from './posts.controller';
@@ -24,6 +25,7 @@ import { PostsService } from './posts.service';
       },
     ]),
     forwardRef(() => UsersModule),
+    FiltersModule,
     UploadModule,
     ConvertModule,
   ],

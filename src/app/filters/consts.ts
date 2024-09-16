@@ -1,3 +1,9 @@
+import { EUserJobExperience } from '@shared/consts/user-experience.enum';
+import { EUserJobFormat } from '@shared/consts/user-format.enum';
+import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
+import { EUserQualification } from '@shared/consts/user-qualification.enum';
+import { EPostGroup } from '@shared/consts/post-group.enum';
+
 export enum FilterKeys {
   City = 'city',
   Spec = 'specialization',
@@ -21,14 +27,12 @@ export enum FilterNames {
   Group = 'Группа',
 }
 
-export enum StatusFilterKeys {
-  sf001 = 'Новичок',
-  sf002 = 'Специалист',
-  sf003 = 'Профи',
-}
+export const groupFilters = Object.values(EPostGroup).map((value) => ({ name: value }));
 
-export enum GroupFilterKeys {
-  pf001 = 'Общее',
-  pf002 = 'Важное',
-  pf003 = 'Афонская',
-}
+export const jobExperienceFilters = Object.values(EUserJobExperience).map((value) => ({ name: value }));
+
+export const jobFormatFilters = Object.values(EUserJobFormat).map((value) => ({ name: value }));
+
+export const projectInvolvementFilters = Object.values(EUserProjectInvolvement).map((value) => ({ name: value }));
+
+export const qualificationsFilters = Object.values(EUserQualification).map((value) => ({ name: value }));

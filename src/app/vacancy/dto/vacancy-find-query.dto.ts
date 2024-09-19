@@ -1,10 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsEmpty, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateStringOfObjectId } from '@shared/validators/validateStringOfObjectId';
 
 export class VacancyFindQueryDto {
+  @ApiProperty({ default: '', required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @Transform(validateStringOfObjectId)

@@ -6,9 +6,25 @@ import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 
 export async function vacancyFiltersMapper(
   filtersService: FiltersService,
-  initQueryParams: FilterQuery<Partial<VacancyFindQueryDto>>,
+  { name, payment, ...baseQueries }: FilterQuery<Partial<VacancyFindQueryDto>>,
 ): Promise<Partial<FilterQuery<Partial<VacancyFindQueryDto>>>> {
-  const query: Partial<FilterQuery<Partial<VacancyFindQueryDto>>> = {};
+  const queryFilter: Partial<FilterQuery<Partial<VacancyFindQueryDto>>> = {};
+
+  name && (queryFilter.name = { $regex: new RegExp(name, 'i') });
+
+  if (payment?.length) {
+    queryFilter.payment = {};
+
+    const minPayment = Number(payment[0]);
+    const maxPayment = Number(payment[1]) ?? undefined;
+
+    queryFilter.payment = {
+      $elemMatch: {
+        $gte: minPayment,
+        $lte: maxPayment || Infinity,
+      },
+    };
+  }
 
   const {
     cityPromises,
@@ -18,7 +34,7 @@ export async function vacancyFiltersMapper(
     jobFormatPromises,
     jobExperiencePromises,
     projectInvolvementPromises,
-  } = filtersService.getFiltersPromises(initQueryParams);
+  } = filtersService.getFiltersPromises(baseQueries);
 
   const [city, spec, programs, qualifications, jobFormats, jobExperience, projectsInvolvement] =
     await Promise.allSettled([
@@ -31,28 +47,15 @@ export async function vacancyFiltersMapper(
       Promise.all(projectInvolvementPromises),
     ]);
 
-  filterQueriesMapper(city) && (query.city = filterQueriesMapper(city));
-  filterQueriesMapper(spec) && (query.specialization = filterQueriesMapper(spec));
-  filterQueriesMapper(programs) && (query.programs = filterQueriesMapper(programs));
+  filterQueriesMapper(city) && (queryFilter.city = filterQueriesMapper(city));
+  filterQueriesMapper(spec) && (queryFilter.specialization = filterQueriesMapper(spec));
+  filterQueriesMapper(programs) && (queryFilter.programs = filterQueriesMapper(programs));
 
-  filterQueriesMapper(qualifications) && (query.qualifications = filterQueriesMapper(qualifications));
-  filterQueriesMapper(jobFormats) && (query.job_format = filterQueriesMapper(jobFormats));
-  filterQueriesMapper(jobExperience) && (query.job_experience = filterQueriesMapper(jobExperience));
-  filterQueriesMapper(projectsInvolvement) && (query.project_involvement = filterQueriesMapper(projectsInvolvement));
+  filterQueriesMapper(qualifications) && (queryFilter.qualifications = filterQueriesMapper(qualifications));
+  filterQueriesMapper(jobFormats) && (queryFilter.job_format = filterQueriesMapper(jobFormats));
+  filterQueriesMapper(jobExperience) && (queryFilter.job_experience = filterQueriesMapper(jobExperience));
+  filterQueriesMapper(projectsInvolvement) &&
+    (queryFilter.project_involvement = filterQueriesMapper(projectsInvolvement));
 
-  if (initQueryParams?.payment?.length) {
-    query.payment = {};
-
-    const minPayment = Number(initQueryParams.payment[0]);
-    const maxPayment = Number(initQueryParams.payment[1]) ?? undefined;
-
-    query.payment = {
-      $elemMatch: {
-        $gte: minPayment,
-        $lte: maxPayment || Infinity,
-      },
-    };
-  }
-
-  return query;
+  return queryFilter;
 }

@@ -9,7 +9,7 @@ export class UpdateFiltersDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @IsString()
-  specialization?: string;
+  specialization?: string[];
   @ApiProperty({ default: [], required: false })
   @IsOptional()
   @IsString()

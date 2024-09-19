@@ -3,53 +3,60 @@ import { Types } from 'mongoose';
 import { UserEntity } from '@/app/users/entities/user.entity';
 import { IBun } from '@/app/users/interfaces/user.interface';
 
-export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'city' | 'bun_info';
+export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name';
 export type UserVacancyPick = Pick<UserEntity, UserVacancyPickList>;
 
 export interface IVacancy {
   _id?: Types.ObjectId;
-
-  id: string; // Get course id
-  authorId: Types.ObjectId;
   name: string;
-  country: string;
-  city: string;
-  about: string;
-  other?: string;
-  specializations: string[];
-  narrow_specializations: string[];
-  programs: string[];
-  format: string;
-  service_cost?: number;
+  job_format: string;
+  job_experience: string;
+  contacts: string;
+  payment?: number[];
+  specializations?: string[];
+  city?: string;
+  about?: string;
+  project_involvement?: string;
+  programs?: string[];
+  authorId: Types.ObjectId;
   author?: IVacancyAuthorResponse & { bun_info: IBun };
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IVacancyResponse {
-  _id?: Types.ObjectId; // Sys mongo _id
-
-  id: string; // Get course id
+  _id: Types.ObjectId;
   name: string;
-  author: IVacancyAuthorResponse;
-  country: string;
-  city: string;
-  about: string;
-  other: string | null;
-  format: string;
-  specializations: string[];
-  narrow_specializations: string[];
-  programs: string[];
-  service_cost: number;
-  createdAt: string;
-  updatedAt: string;
+  job_format: string;
+  job_experience: string;
+  contacts: string;
+  payment: number[] | null;
+  specializations: string[] | null;
+  city: string | null;
+  about: string | null;
+  project_involvement: string | null;
+  programs: string[] | null;
+  author: IVacancyAuthorResponse | null;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+export interface IVacancyListResponse {
+  _id: Types.ObjectId;
+  name: string;
+  job_format: string;
+  job_experience: string;
+  payment: number[] | null;
+  city: string | null;
+  project_involvement: string | null;
+  author: IVacancyAuthorResponse | null;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface IVacancyAuthorResponse {
-  _id: Types.ObjectId | null; // Sys mongo _id
-  first_name: string | null;
-  last_name: string | null;
+  _id: Types.ObjectId;
+  first_name: string;
+  last_name: string;
   avatar: string | null;
-  city: string | null;
-  contact_link: string | null;
 }

@@ -1,196 +1,148 @@
-import { forwardRef, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeleteResult } from 'mongodb';
 import { FilterQuery, Model, Types } from 'mongoose';
 
 import { FiltersService } from '@app/filters/filters.service';
-import { IResume } from '@app/resumes/interfaces/resume.interface';
 import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
-import { VacancyDto } from '@app/vacancy/dto/vacancy.dto';
-import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
-import { IDeleteVacancyQuery } from '@app/vacancy/interfaces/delete-vacancy.interface';
-import { vacancyDtoMapper, vacancyListMapper, vacancyMapper } from '@app/vacancy/vacancy.mapper';
-import { getMainFilters } from '@helpers/getMainFilters';
+import { VacancyCreateDto } from '@app/vacancy/dto/vacancy-create.dto';
+import { FilterKeys } from '@app/filters/consts';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import normalizeDto from '@utils/normalizeDto';
 import { UsersService } from '../users/users.service';
-import { Vacancy } from './entities/vacancy.entity';
-import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
-import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
+import { IVacancyFindAll, IVacancyFindOne } from './interfaces/vacancy-find.interface';
+import { VacancyEntity } from './entities/vacancy.entity';
+import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.interface';
+import { vacancyListMapper, vacancyMapper } from './mappers/vacancy.mapper';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { vacancyFiltersMapper } from '@app/vacancy/mappers/vacancy-filters.mapper';
 
 const logger = new Logger('Vacancies');
 
 @Injectable()
 export class VacancyService {
   constructor(
-    @InjectModel(Vacancy.name) private readonly vacancyModel: Model<Vacancy>,
+    @InjectModel(VacancyEntity.name) private readonly vacancyModel: Model<VacancyEntity>,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly filtersService: FiltersService,
   ) {}
 
-  async update({ id, ...vacancyParams }: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
+  async create(userId: Types.ObjectId, dto: VacancyCreateDto): Promise<IVacancyResponse> {
     try {
-      // FIXME: убрать conversation to unknown
-      const userInDb = await this.usersService.findOne({ _id: id as unknown as Types.ObjectId });
-      if (!userInDb) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
+      const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
 
-      const dto = vacancyParams as Partial<VacancyDto>;
-      const normalizedDto = normalizeDto(dto, '_vacancy') as VacancyDto[];
-      const vacancyMapped = normalizedDto.map((v) => {
-        return vacancyDtoMapper({ authorId: userInDb._id, ...v });
-      });
-
-      await Promise.all([
-        await this.vacancyModel.deleteMany({ authorId: userInDb._id }),
-        await this.vacancyModel.create(...vacancyMapped),
-      ]);
-
+      const { _id: vacancyId, authorId } = await this.vacancyModel.create({ ...dto, authorId: _id });
       logger.log(`Vacancies successfully created!`);
 
-      return await this.vacancyModel.find({ authorId: userInDb._id });
+      const vacancy = await this.vacancyModel
+        .findOne({ _id: vacancyId, authorId })
+        .populate('author', '_id first_name last_name avatar')
+        .exec();
+
+      if (!vacancy) throw new EntityNotFoundError('Вакансия не найдена!');
+
+      const updateFilters: UpdateFiltersDto = {
+        [FilterKeys.City]: dto.city,
+        [FilterKeys.Spec]: dto.specializations ?? [],
+        [FilterKeys.Programs]: dto.programs ?? [],
+      };
+      await this.filtersService.update(updateFilters).then(() => logger.log(`Filters successfully updated!`));
+
+      return vacancyMapper(vacancy, {
+        _id,
+        bun_info,
+      });
     } catch (err) {
-      logger.error(`Error while update: ${(err as Error).message}`);
-      throw new InternalServerErrorException(`Ошибка при обновлении вакансий: "${err.message}!"`);
+      logger.error(`Error while create: ${(err as Error).message}`);
+      throw err;
     }
   }
 
   async findAll(
     userId: Types.ObjectId,
-    { desc, format, ...queryParams }: VacancyFindQueryDto,
-  ): Promise<IVacancyResponse[]> {
+    { desc, ...queryParams }: VacancyFindQueryDto,
+  ): Promise<IVacancyListResponse[]> {
     try {
-      const query: FilterQuery<Partial<IVacancy>> = await getMainFilters(this.filtersService, queryParams);
-      format && (query.format = format);
+      const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
 
-      const userInDb = await this.usersService.findOne({ _id: userId });
-      if (!userInDb) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
+      const query: FilterQuery<Partial<VacancyFindQueryDto>> = await vacancyFiltersMapper(
+        this.filtersService,
+        queryParams,
+      );
 
       const vacancies = await this.vacancyModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar telegram qualification')
-        .sort(typeof desc === 'undefined' && { createdAt: -1 })
+        .populate('author', '_id first_name last_name avatar')
+        .sort(desc ? { createdAt: -1 } : { createdAt: 1 })
         .exec();
 
-      return vacancyListMapper(vacancies, { _id: userInDb._id, bun_info: userInDb.bun_info });
+      return vacancyListMapper(vacancies, { _id, bun_info });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
-      throw new InternalServerErrorException('Ошибка при поиске вакансий!');
+      throw err;
     }
   }
 
-  async findAllByUserId(params: IFindAllVacancyParams, query: VacancyFindQueryDto): Promise<IVacancyResponse[]> {
+  async findAllByUserId(
+    { userId }: IVacancyFindAll,
+    { desc }: { desc: string | undefined },
+  ): Promise<IVacancyListResponse[]> {
     try {
-      const { userId } = params;
-      const { desc } = query;
-
-      const userInDb = await this.usersService.findOne({ _id: userId });
-      if (!userInDb) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
-      }
+      const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
 
       const vacancies = await this.vacancyModel
-        .find({ authorId: userInDb._id })
-        .populate('author', '_id first_name last_name avatar telegram city')
+        .find({ authorId: _id })
+        .populate('author', '_id first_name last_name avatar')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      if (!vacancies.length) {
-        return [];
-      }
-
-      return vacancyListMapper(vacancies, { _id: userId._id, bun_info: userInDb.bun_info });
+      return vacancyListMapper(vacancies, { _id, bun_info });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async findByUserId(params: IFindOneVacancyParams): Promise<IVacancyResponse> {
+  async findOneById({ userId, id }: IVacancyFindOne): Promise<IVacancyResponse> {
     try {
-      const { userId, id } = params;
-
-      const userInDb = await this.usersService.findOne({ _id: userId });
-      if (!userInDb) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
-      }
+      const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
 
       const vacancy = await this.vacancyModel
-        .findOne({ authorId: userInDb._id, _id: id })
-        .populate('author', '_id first_name last_name avatar telegram city')
+        .findOne({ _id: new Types.ObjectId(id), authorId: _id })
+        .populate('author', '_id first_name last_name avatar')
         .exec();
 
       if (!vacancy) {
-        throw new EntityNotFoundError(`Вакансия не найдена`);
+        throw new EntityNotFoundError(`Вакансия не найдена!`);
       }
 
-      return vacancyMapper(vacancy, { _id: userInDb._id, bun_info: userInDb?.bun_info });
+      return vacancyMapper(vacancy, { _id, bun_info });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async deleteOneById(userId: Types.ObjectId, id: Types.ObjectId): Promise<DeleteResult> {
+  async deleteOneById(userId: Types.ObjectId, vacancyId: string): Promise<DeleteResult> {
     try {
-      const deletedVacancy = await this.vacancyModel
-        .findOneAndDelete({
-          authorId: new Types.ObjectId(userId),
-          _id: id,
-        })
-        .exec();
+      const userInDb = await this.usersService.findOne({ _id: userId });
 
-      if (!deletedVacancy) {
-        throw new EntityNotFoundError('Запись не найдена');
+      const vacancyInDb = await this.vacancyModel.findOne({ _id: new Types.ObjectId(vacancyId) }).exec();
+
+      if (!vacancyInDb) {
+        throw new EntityNotFoundError('Вакансия не найдена!');
       }
 
+      if (String(userInDb._id) !== String(vacancyInDb.authorId)) {
+        throw new BadRequestException('Нет доступа!');
+      }
+
+      await this.vacancyModel.deleteOne({ _id: vacancyInDb._id, authorId: userInDb._id }).exec();
       logger.log('Vacancy successfully deleted!');
 
-      return {
-        acknowledged: true,
-        deletedCount: 1,
-      };
+      return;
     } catch (err) {
       logger.error(`Error while deleteOneById: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async deleteAll(userId: Types.ObjectId, where: Partial<IResume>): Promise<DeleteResult> {
-    try {
-      const result = await this.vacancyModel.deleteMany({ ...where, authorId: userId });
-      if (!result) {
-        throw new EntityNotFoundError('Ошибка при удалении вакансий');
-      }
-
-      logger.log('Vacancies successfully deleted!');
-
-      return result;
-    } catch (err) {
-      logger.error(`Error while deleteAll: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async deleteByGetCoursePayload(query: IDeleteVacancyQuery): Promise<DeleteResult> {
-    try {
-      const dto = query as Partial<IVacancy>;
-      const normalizedQueries = normalizeDto(dto, '_vacancy') as Partial<IVacancy>;
-
-      const result = await this.vacancyModel.deleteMany({ ...normalizedQueries });
-      if (!result) {
-        throw new EntityNotFoundError('Ошибка при удалении вакансий');
-      }
-
-      logger.log('Vacancies successfully deleted!');
-
-      return result;
-    } catch (err) {
-      logger.error(`Error while deleteByGetCoursePayload: ${(err as Error).message}`);
       throw err;
     }
   }

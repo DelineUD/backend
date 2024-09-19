@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param, Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
@@ -22,7 +34,7 @@ export class VacancyController {
    * Создание новой вакансии
    * @param userId - идентификатор пользователя
    * @param createVacancyDto - данные для создания вакансии
-   * @returns - вакансии
+   * @returns - новая вакансия
    */
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -31,6 +43,23 @@ export class VacancyController {
     @Body() createVacancyDto: VacancyCreateDto,
   ): Promise<IVacancyResponse> {
     return await this.vacancyService.create(userId, createVacancyDto);
+  }
+
+  /**
+   * Обновление вакансии
+   * @param userId - идентификатор пользователя
+   * @param id - идентификатор вакансии
+   * @param updateVacancyDto - данные для обновления вакансии
+   * @returns - обновленная вакансия
+   */
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async update(
+    @UserId() userId: Types.ObjectId,
+    @Param('id') id: string,
+    @Body() updateVacancyDto: VacancyCreateDto,
+  ): Promise<IVacancyResponse> {
+    return await this.vacancyService.update(userId, id, updateVacancyDto);
   }
 
   /**

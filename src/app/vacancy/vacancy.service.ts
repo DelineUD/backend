@@ -15,6 +15,7 @@ import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.int
 import { vacancyListMapper, vacancyMapper } from './mappers/vacancy.mapper';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { vacancyFiltersMapper } from '@app/vacancy/mappers/vacancy-filters.mapper';
+import { VacancyUpdateDto } from '@app/vacancy/dto/vacancy-update.dto';
 
 const logger = new Logger('Vacancies');
 
@@ -54,6 +55,43 @@ export class VacancyService {
       });
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async update(userId: Types.ObjectId, vacancyId: string, dto: VacancyUpdateDto): Promise<IVacancyResponse> {
+    try {
+      const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
+
+      const result = await this.vacancyModel
+        .updateOne(
+          {
+            _id: new Types.ObjectId(vacancyId),
+            authorId: _id,
+          },
+          dto,
+        )
+        .exec();
+
+      const vacancy = await this.vacancyModel
+        .findOne({ _id: vacancyId })
+        .populate('author', '_id first_name last_name avatar')
+        .exec();
+
+      if (!result || !vacancy) {
+        throw new EntityNotFoundError('Вакансия не найдена!');
+      }
+
+      if (String(_id) !== String(vacancy.authorId)) {
+        throw new EntityNotFoundError('Нет доступа!');
+      }
+
+      return vacancyMapper(vacancy, {
+        _id,
+        bun_info,
+      });
+    } catch (err) {
+      logger.error(`Error while update: ${(err as Error).message}`);
       throw err;
     }
   }

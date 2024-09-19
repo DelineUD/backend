@@ -19,7 +19,7 @@ import { Types } from 'mongoose';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { FiltersService } from '@app/filters/filters.service';
-import { IFilter } from '@app/filters/interfaces/filters.interface';
+import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 import { VacancyFindQueryDto } from '../vacancy/dto/vacancy-find-query.dto';
 import { VacancyCreateDto } from './dto/vacancy-create.dto';
 import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.interface';
@@ -71,7 +71,7 @@ export class VacancyController {
    */
   @Get('filters')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getFilters(): Promise<IFilter[]> {
+  async getFilters(): Promise<IFiltersResponse[]> {
     return Promise.all([
       this.filtersService.getCitiesFilter(),
       this.filtersService.getSpecializationsFilter(),

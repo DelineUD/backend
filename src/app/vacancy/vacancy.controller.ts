@@ -3,13 +3,14 @@ import {
   Controller,
   Delete,
   Get,
-  Param, Patch,
+  Param,
+  Patch,
   Post,
   Put,
   Query,
   UseGuards,
   UsePipes,
-  ValidationPipe
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'mongodb';
@@ -17,18 +18,20 @@ import { Types } from 'mongoose';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
-import { VacancyCreateDto } from './dto/vacancy-create.dto';
+import { FiltersService } from '@app/filters/filters.service';
+import { IFilter } from '@app/filters/interfaces/filters.interface';
 import { VacancyFindQueryDto } from '../vacancy/dto/vacancy-find-query.dto';
-import { VacancyService } from './vacancy.service';
+import { VacancyCreateDto } from './dto/vacancy-create.dto';
 import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.interface';
 import { IVacancyFindAll, IVacancyFindOne } from './interfaces/vacancy-find.interface';
+import { VacancyService } from './vacancy.service';
 
 @ApiTags('Vacancies')
 @Controller('vacancies')
 @ApiBearerAuth('defaultBearerAuth')
 @UseGuards(JwtAuthGuard)
 export class VacancyController {
-  constructor(private readonly vacancyService: VacancyService) {}
+  constructor(private readonly vacancyService: VacancyService, private filtersService: FiltersService) {}
 
   /**
    * Создание новой вакансии
@@ -60,6 +63,24 @@ export class VacancyController {
     @Body() updateVacancyDto: VacancyCreateDto,
   ): Promise<IVacancyResponse> {
     return await this.vacancyService.update(userId, id, updateVacancyDto);
+  }
+
+  /**
+   * Получение фильтров вакансий
+   * @returns - фильтры вакансий
+   */
+  @Get('filters')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getFilters(): Promise<IFilter[]> {
+    return Promise.all([
+      this.filtersService.getCitiesFilter(),
+      this.filtersService.getSpecializationsFilter(),
+      this.filtersService.getProgramsFilter(),
+      this.filtersService.getQualificationsFilter(),
+      this.filtersService.getFormatFilter(),
+      this.filtersService.getExperienceFilter(),
+      this.filtersService.getInvolvementFilter(),
+    ]);
   }
 
   /**

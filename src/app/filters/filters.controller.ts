@@ -33,19 +33,6 @@ export class FiltersController {
   }
 
   /**
-   * Получение фильтров для вакансий.
-   * @returns - Фильтры вакансий.
-   */
-  @Get('vacancies')
-  public async getVacanciesFilter(): Promise<IFilter[]> {
-    return await Promise.all([
-      await this.filtersService.getCitiesFilter(),
-      await this.filtersService.getSpecializationsFilter(),
-      await this.filtersService.getProgramsFilter(),
-    ]);
-  }
-
-  /**
    * Получение фильтров для городов.
    * @returns - Фильтры городов.
    */

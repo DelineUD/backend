@@ -13,7 +13,7 @@ export class VacancyFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @Transform(validateStringOfObjectId)
-  specializations?: string;
+  specialization?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()

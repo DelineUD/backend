@@ -40,5 +40,9 @@ export class VacancyCreateDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  qualifications?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   programs?: string[];
 }

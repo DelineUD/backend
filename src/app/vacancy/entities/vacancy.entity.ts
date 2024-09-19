@@ -17,6 +17,7 @@ export class VacancyEntity extends Document implements IVacancy {
   @Prop({ required: false }) city: string;
   @Prop({ required: false }) payment: number[];
   @Prop({ required: false }) project_involvement: string;
+  @Prop({ required: false }) qualifications: string[];
   @Prop({ required: false }) programs: string[];
   @Prop({ required: false }) specializations: string[];
 }

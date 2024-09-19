@@ -13,10 +13,11 @@ export interface IVacancy {
   job_experience: string;
   contacts: string;
   payment?: number[];
-  specializations?: string[];
   city?: string;
   about?: string;
   project_involvement?: string;
+  specializations?: string[];
+  qualifications?: string[];
   programs?: string[];
   authorId: Types.ObjectId;
   author?: IVacancyAuthorResponse & { bun_info: IBun };
@@ -31,10 +32,11 @@ export interface IVacancyResponse {
   job_experience: string;
   contacts: string;
   payment: number[] | null;
-  specializations: string[] | null;
   city: string | null;
   about: string | null;
   project_involvement: string | null;
+  specializations: string[] | null;
+  qualifications: string[] | null;
   programs: string[] | null;
   author: IVacancyAuthorResponse | null;
   created_at?: Date;

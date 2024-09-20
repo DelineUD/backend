@@ -16,10 +16,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { Types } from 'mongoose';
 
 import { UserEntity } from '@/app/users/entities/user.entity';
 import { AuthRegisterOtpDto } from '@app/auth/dto/auth-register-otp.dto';
-
+import { UserId } from '@shared/decorators/user-id.decorator';
 import { fileStorageConfig } from '@shared/storage/storage.config';
 import { mediaFileFilter } from '@utils/mediaFileFilter';
 import { AuthService } from './auth.service';
@@ -62,11 +63,17 @@ export class AuthController {
     return await this.authService.register(authRegisterDto, avatar);
   }
 
+  /**
+   * Подтверждение EULA
+   * @param userId - идентификатор пользователя
+   * @returns - 200 | 400
+   */
+
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('defaultBearerAuth')
   @Put('eula-approve')
-  public async eulaApprove(@Req() req: Request): Promise<Partial<UserEntity>> {
-    return await this.authService.approveEula(req);
+  public async eulaApprove(@UserId() userId: Types.ObjectId): Promise<Partial<UserEntity>> {
+    return await this.authService.approveEula(userId);
   }
 
   /**

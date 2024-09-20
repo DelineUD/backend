@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsEnum } from 'class-validator';
 
 import { UserCreateDto } from '@/app/users/dto/user-create.dto';
-import { ILink, IQualification } from '@/app/users/interfaces/user.interface';
+import { IEducation, ILink, IQualification } from '@/app/users/interfaces/user.interface';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
@@ -12,6 +12,7 @@ import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
 import { validateArrayOfQualification } from '@shared/validators/validateArrayOfQualification';
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 import { validatePhoneNumber } from '@shared/validators/validatePhoneNumber';
+import { validateArrayOfEducation } from '@shared/validators/validateArrayOfEducation';
 
 export class AuthRegisterDto extends PartialType(UserCreateDto) {
   @ApiProperty({ default: '+79992456800', description: 'Номер телефона пользователя' })
@@ -78,6 +79,16 @@ export class AuthRegisterDto extends PartialType(UserCreateDto) {
   })
   @Transform(validateArrayOfQualification)
   qualifications?: IQualification[];
+
+  @ApiPropertyOptional({
+    default: [
+      { name: 'ВУЗ 1', specialization: 'Дизайнер 1', year: 2024 },
+      { name: 'ВУЗ 2', specialization: 'Дизайнер 2', year: 2023 },
+    ],
+    description: 'Образование пользователя',
+  })
+  @Transform(validateArrayOfEducation)
+  education?: IEducation[];
 
   @ApiPropertyOptional({
     default: [

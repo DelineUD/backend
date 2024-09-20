@@ -10,7 +10,7 @@ import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor'
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 import { UserEntity } from './entities/user.entity';
 import { IUser, IUserQuery } from './interfaces/user.interface';
-import { createUserMapper } from './mappers/create-user.mapper';
+import { userCreateMapper } from './mappers/user-create.mapper';
 
 const logger = new Logger('Users');
 
@@ -20,7 +20,7 @@ export class UsersService {
 
   async create(dto: UserCreateDto): Promise<UserEntity> {
     try {
-      return await this.userModel.create(createUserMapper(dto));
+      return await this.userModel.create(userCreateMapper(dto));
     } catch (err) {
       logger.error(`Error while create: ${(err as Error).message}`);
       throw err;

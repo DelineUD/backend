@@ -1,59 +1,110 @@
-import { Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
-import { ICrudVacancyParams } from '@app/vacancy/interfaces/crud-vacancy.interface';
-import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
-import { IDeleteVacancyQuery } from '@app/vacancy/interfaces/delete-vacancy.interface';
+import { FiltersService } from '@app/filters/filters.service';
+import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { VacancyFindQueryDto } from '../vacancy/dto/vacancy-find-query.dto';
+import { VacancyCreateDto } from './dto/vacancy-create.dto';
+import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.interface';
+import { IVacancyFindAll, IVacancyFindOne } from './interfaces/vacancy-find.interface';
 import { VacancyService } from './vacancy.service';
-import { IFindAllVacancyParams, IFindOneVacancyParams } from './interfaces/find-vacancy.interface';
-import { IVacancy, IVacancyResponse } from './interfaces/vacancy.interface';
 
-@ApiTags('Vacancy')
-@Controller('vacancy')
+@ApiTags('Vacancies')
+@Controller('vacancies')
+@ApiBearerAuth('defaultBearerAuth')
+@UseGuards(JwtAuthGuard)
 export class VacancyController {
-  constructor(private readonly vacancyService: VacancyService) {}
+  constructor(private readonly vacancyService: VacancyService, private filtersService: FiltersService) {}
 
   /**
-   * Создание новой вакансии.
-   * @param vacancyParams - данные для вакансии.
-   * @returns - Вакансии.
+   * Создание новой вакансии
+   * @param userId - идентификатор пользователя
+   * @param createVacancyDto - данные для создания вакансии
+   * @returns - новая вакансия
    */
-  @Post('update')
+  @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(@Query() vacancyParams: ICrudVacancyParams): Promise<IVacancy | IVacancy[]> {
-    return await this.vacancyService.update(vacancyParams);
+  async create(
+    @UserId() userId: Types.ObjectId,
+    @Body() createVacancyDto: VacancyCreateDto,
+  ): Promise<IVacancyResponse> {
+    return await this.vacancyService.create(userId, createVacancyDto);
   }
 
   /**
-   * Получение всех вакансий.
-   * @param userId - идентификатор пользователя.
-   * @param queryParams - параметры для поиска вакансыий.
-   * @returns - Все вакансии.
+   * Обновление вакансии
+   * @param userId - идентификатор пользователя
+   * @param id - идентификатор вакансии
+   * @param updateVacancyDto - данные для обновления вакансии
+   * @returns - обновленная вакансия
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
-  @Get('list')
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async update(
+    @UserId() userId: Types.ObjectId,
+    @Param('id') id: string,
+    @Body() updateVacancyDto: VacancyCreateDto,
+  ): Promise<IVacancyResponse> {
+    return await this.vacancyService.update(userId, id, updateVacancyDto);
+  }
+
+  /**
+   * Получение фильтров вакансий
+   * @returns - фильтры вакансий
+   */
+  @Get('filters')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getFilters(): Promise<IFiltersResponse[]> {
+    return Promise.all([
+      this.filtersService.getCitiesFilter(),
+      this.filtersService.getSpecializationsFilter(),
+      this.filtersService.getProgramsFilter(),
+      this.filtersService.getQualificationsFilter(),
+      this.filtersService.getFormatFilter(),
+      this.filtersService.getExperienceFilter(),
+      this.filtersService.getInvolvementFilter(),
+    ]);
+  }
+
+  /**
+   * Получение всех вакансий
+   * @param userId - идентификатор пользователя
+   * @param queryParams - параметры для поиска вакансий
+   * @returns - все вакансии
+   */
+  @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(
     @UserId() userId: Types.ObjectId,
     @Query() queryParams?: VacancyFindQueryDto,
-  ): Promise<IVacancyResponse[]> {
+  ): Promise<IVacancyListResponse[]> {
     return await this.vacancyService.findAll(userId, queryParams);
   }
 
   /**
-   * Получение всех вакансий пользователя.
-   * @param params - параметры для поиска.
-   * @param query - параметры фильтров для поиска.
-   * @returns - Список вакансий пользователя.
+   * Получение всех вакансий пользователя
+   * @param params - параметры для поиска
+   * @param query - параметры фильтров для поиска
+   * @returns - список вакансий пользователя
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
-  @Get('list/:userId')
+  @Get(':userId')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
     name: 'userId',
@@ -61,63 +112,47 @@ export class VacancyController {
     description: 'Системный идентификатор пользователя',
   })
   async findAllByUserId(
-    @Param() params: IFindAllVacancyParams,
-    @Query() query: VacancyFindQueryDto,
-  ): Promise<IVacancyResponse[]> {
-    return await this.vacancyService.findAllByUserId(params, query);
+    @Param() params: IVacancyFindAll,
+    @Query() { desc }: { desc: string | undefined },
+  ): Promise<IVacancyListResponse[]> {
+    return await this.vacancyService.findAllByUserId(params, { desc });
   }
 
   /**
-   * Получение вакансии пользователя по id.
-   * @param params.userId - Системный идентификатор пользователя.
-   * @param params.id - Идентификатор вакансии.
-   * @returns - Найденная вакансия.
+   * Получение вакансии по id
+   * @param params - параметры поиска вакансии
+   * @returns - вакансия
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @Get(':userId/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
     name: 'userId',
     type: 'string',
-    description: 'Системный идентификатор пользователя',
+    description: 'Идентификатор пользователя',
   })
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'Идентификатор вакансии (GetCourse Id)',
+    description: 'Идентификатор вакансии',
   })
-  async findByUserId(@Param() params: IFindOneVacancyParams): Promise<IVacancyResponse> {
-    return await this.vacancyService.findByUserId(params);
+  async findById(@Param() params: IVacancyFindOne): Promise<IVacancyResponse> {
+    return await this.vacancyService.findOneById(params);
   }
 
   /**
-   * Удаление вакансии пользователя по идентификатору.
-   * @returns - Резултат удаления.
-   * @param userId - Идентификатор пользователя
-   * @param id - Идентификатор вакансии
+   * Удаление вакансии пользователя по идентификатору
+   * @returns - резултат удаления
+   * @param userId - идентификатор пользователя
+   * @param id - идентификатор вакансии
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  @Delete('delete/:id')
+  @Delete(':id')
   @ApiParam({
     name: 'id',
     type: 'string',
     description: 'Системный идентификатор вакансии',
   })
-  async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: Types.ObjectId): Promise<DeleteResult> {
+  async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: string): Promise<DeleteResult> {
     return await this.vacancyService.deleteOneById(userId, id);
-  }
-
-  /**
-   * Удаление вакансии пользователя c Get Course.
-   * @returns - Резултат удаления.
-   * @param query - параметры для удаления
-   */
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @Post('delete')
-  async deleteByGetCoursePayload(@Query() query: IDeleteVacancyQuery): Promise<DeleteResult> {
-    return await this.vacancyService.deleteByGetCoursePayload(query);
   }
 }

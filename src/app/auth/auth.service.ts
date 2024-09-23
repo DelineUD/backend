@@ -61,7 +61,7 @@ export class AuthService {
 
       const updateFilters: UpdateFiltersDto = {
         [FilterKeys.City]: user.city,
-        [FilterKeys.Spec]: user.specialization,
+        [FilterKeys.Spec]: [user.specialization],
         [FilterKeys.Programs]: user.programs,
       };
       this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));

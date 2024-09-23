@@ -44,7 +44,7 @@ export class FiltersService {
     try {
       return await Promise.allSettled([
         await this.updateFilters(updateFiltersDto[FilterKeys.City], this.citiesModel),
-        await this.updateFilters(updateFiltersDto[FilterKeys.Spec], this.specializationsModel),
+        await this.updateMultiFilters(updateFiltersDto[FilterKeys.Spec], this.specializationsModel),
         await this.updateMultiFilters(updateFiltersDto[FilterKeys.Programs], this.programsModel),
       ]);
     } catch (err) {

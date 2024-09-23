@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { PostModel } from '@app/posts/models/posts.model';
-import { Vacancy } from '@app/vacancy/entities/vacancy.entity';
+import { VacancyEntity } from '@app/vacancy/entities/vacancy.entity';
 import { Resume } from '../resumes/entities/resume.entity';
 import { UserEntity } from '../users/entities/user.entity';
 
@@ -16,8 +16,8 @@ export class MigrationService {
     private readonly postModel: Model<PostModel>,
     @InjectModel(UserEntity.name)
     private readonly userModel: Model<UserEntity>,
-    @InjectModel(Vacancy.name)
-    private readonly vacancyModel: Model<Vacancy>,
+    @InjectModel(VacancyEntity.name)
+    private readonly vacancyModel: Model<VacancyEntity>,
     @InjectModel(Resume.name)
     private readonly resumeModel: Model<Resume>,
   ) {}

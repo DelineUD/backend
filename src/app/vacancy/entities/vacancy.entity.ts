@@ -4,24 +4,25 @@ import { Document, Types } from 'mongoose';
 import { IVacancy } from '@app/vacancy/interfaces/vacancy.interface';
 
 @Schema({
-  collection: 'vacancy',
+  collection: 'vacancies',
   timestamps: true,
 })
-export class Vacancy extends Document implements IVacancy {
-  @Prop({ required: true }) id: string; // Get course id
-  @Prop({ required: true }) authorId: Types.ObjectId; // Sys user _id
-  @Prop({ required: true }) name: string;
-  @Prop({ required: true }) country: string;
-  @Prop({ required: true }) city: string;
+export class VacancyEntity extends Document implements IVacancy {
+  @Prop() authorId: Types.ObjectId;
+  @Prop() name: string;
+  @Prop() job_experience: string;
+  @Prop() job_format: string;
+  @Prop() contacts: string;
   @Prop({ required: false }) about: string;
-  @Prop({ required: false }) other?: string;
-  @Prop({ required: true }) format: string;
-  @Prop({ required: true }) specializations: string[];
-  @Prop({ required: true }) narrow_specializations: string[];
-  @Prop({ required: true }) programs: string[];
+  @Prop({ required: false }) city: string;
+  @Prop({ required: false }) payment: number[];
+  @Prop({ required: false }) project_involvement: string;
+  @Prop({ required: false }) qualifications: string[];
+  @Prop({ required: false }) programs: string[];
+  @Prop({ required: false }) specializations: string[];
 }
 
-export const VacancySchema = SchemaFactory.createForClass(Vacancy);
+export const VacancySchema = SchemaFactory.createForClass(VacancyEntity);
 
 VacancySchema.virtual('author', {
   ref: 'UserEntity',

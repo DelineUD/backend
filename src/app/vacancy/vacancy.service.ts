@@ -145,16 +145,16 @@ export class VacancyService {
     try {
       const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
 
-      const vacancy = await this.vacancyModel
-        .findOne({ _id: new Types.ObjectId(id), authorId: _id })
+      const vacancyInDb = await this.vacancyModel
+        .findOne({ _id: new Types.ObjectId(id) })
         .populate('author', '_id first_name last_name avatar')
         .exec();
 
-      if (!vacancy) {
-        throw new EntityNotFoundError(`Вакансия не найдена!`);
+      if (!vacancyInDb) {
+        throw new EntityNotFoundError('Вакансия не найдена!');
       }
 
-      return vacancyMapper(vacancy, { _id, bun_info });
+      return vacancyMapper(vacancyInDb, { _id, bun_info });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;

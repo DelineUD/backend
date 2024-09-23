@@ -6,6 +6,7 @@ import { VacancyFindQueryDto } from '@app/vacancy/dto/vacancy-find-query.dto';
 
 export async function vacancyFiltersMapper(
   filtersService: FiltersService,
+  // TODO - UDO-190
   { name, payment, ...baseQueries }: FilterQuery<Partial<VacancyFindQueryDto>>,
 ): Promise<Partial<FilterQuery<Partial<VacancyFindQueryDto>>>> {
   const queryFilter: Partial<FilterQuery<Partial<VacancyFindQueryDto>>> = {};

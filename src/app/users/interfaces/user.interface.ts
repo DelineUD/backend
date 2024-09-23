@@ -14,6 +14,12 @@ export interface IQualification {
   year?: number;
 }
 
+export interface IEducation {
+  name: string;
+  specialization?: string;
+  year?: number;
+}
+
 export interface IPreference {
   is_hide_phone?: boolean;
   is_eula_approved?: boolean;
@@ -23,6 +29,7 @@ export interface IAdditional {
   about?: string;
   keywords?: string[];
   qualifications?: IQualification[];
+  education?: IEducation[];
   project_involvement?: EUserProjectInvolvement;
   job_format?: EUserJobFormat;
   job_experience?: EUserJobExperience;

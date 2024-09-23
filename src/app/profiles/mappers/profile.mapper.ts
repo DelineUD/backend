@@ -53,10 +53,11 @@ export const profileMapper = (profile: UserEntity, user: Pick<UserEntity, '_id' 
       keywords: additional_info?.keywords ?? [],
       links: links ?? null,
       education: {
+        additional_education: additional_info.education ?? null,
         qualifications: additional_info?.qualifications ?? null,
         programs: programs ?? null,
-        specialization: specialization ?? null,
       },
+      specialization: specialization ?? null,
       job_format: additional_info?.job_format ?? null,
       job_experience: additional_info?.job_experience ?? null,
       project_involvement: additional_info?.project_involvement ?? null,

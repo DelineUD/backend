@@ -229,14 +229,13 @@ export class AuthService {
     }
   }
 
-  async approveEula(req: Request): Promise<IProfileResponse> {
+  async approveEula(userId: Types.ObjectId): Promise<IProfileResponse> {
     try {
-      const user = req.user as { _id: Types.ObjectId; phone: string };
-      const userInDb = await this.usersService.findOne({ phone: user.phone });
+      const userInDb = await this.usersService.findOne({ _id: userId });
       if (!userInDb) throw new UnauthorizedException('Пользователь не найден!');
 
       const response = await this.usersService.updateByPayload(
-        { phone: user.phone },
+        { phone: userInDb.phone },
         {
           preferences: {
             is_eula_approved: true,

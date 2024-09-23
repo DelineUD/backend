@@ -1,9 +1,9 @@
-import { UserCreateDto } from '@app/users/dto/user-create.dto';
-import { IAdditional, IPreference, IUser } from '@/app/users/interfaces/user.interface';
+import { UserUpdateDto } from '@app/users/dto/user-update.dto';
+import { IAdditional, IPreference, IUser } from '@app/users/interfaces/user.interface';
 import { splitDtoField } from '@helpers/splitDto';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
 
-export const createUserMapper = (dto: UserCreateDto): IUser => {
+export const userUpdateMapper = (dto: UserUpdateDto): IUser => {
   const {
     phone,
     email,
@@ -16,13 +16,14 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
     keywords,
     links,
     qualifications,
+    education,
     project_involvement,
     job_format,
     job_experience,
     programs,
     specialization,
     is_hide_phone,
-    getcourse_id,
+    is_eula_approved,
   } = dto;
 
   const splitPrograms = splitDtoField(programs);
@@ -31,31 +32,31 @@ export const createUserMapper = (dto: UserCreateDto): IUser => {
 
   const additional_info: IAdditional = {
     ...(qualifications?.length && { qualifications }),
-    project_involvement,
-    job_format,
-    job_experience,
+    ...(education?.length && { education }),
+    ...(project_involvement && { project_involvement }),
+    ...(job_format && { job_format }),
+    ...(job_experience && { job_experience }),
     ...(about && { about }),
     ...(splitKeywords.length && { keywords: splitKeywords }),
   };
 
   const preferences: IPreference = {
-    is_hide_phone,
-    is_eula_approved: false,
+    ...(is_hide_phone && { is_hide_phone }),
+    ...(is_eula_approved && { is_eula_approved }),
   };
 
   return {
-    email,
-    password,
-    first_name,
-    last_name,
-    phone: validPhone,
+    ...(email && { email }),
+    ...(password && { password }),
+    ...(first_name && { first_name }),
+    ...(last_name && { last_name }),
+    ...(validPhone && validPhone !== 'undefined' && { phone: validPhone }),
     ...(avatar && { avatar }),
     ...(city && { city }),
     ...(links?.length && { links }),
-    additional_info,
-    preferences,
-    specialization,
+    ...(additional_info && { additional_info }),
+    ...(preferences && { preferences }),
+    ...(specialization && { specialization }),
     ...(splitPrograms.length && { programs: splitPrograms }),
-    ...(getcourse_id && { getcourse_id }),
   };
 };

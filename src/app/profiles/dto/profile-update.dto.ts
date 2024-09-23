@@ -8,10 +8,11 @@ import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 import { EUserQualification } from '@shared/consts/user-qualification.enum';
 import { validateArrayOfQualification } from '@shared/validators/validateArrayOfQualification';
-import { ILink, IQualification } from '@app/users/interfaces/user.interface';
+import { IEducation, ILink, IQualification } from '@app/users/interfaces/user.interface';
 import { validateArrayOfLinks } from '@shared/validators/validateArrayOfLinks';
 import { validateArrayOfString } from '@shared/validators/validateArrayOfString';
 import { validatePhoneNumber } from '@shared/validators/validatePhoneNumber';
+import { validateArrayOfEducation } from '@shared/validators/validateArrayOfEducation';
 
 export class ProfileUpdateDto extends PartialType(UserUpdateDto) {
   @ApiPropertyOptional({ default: '+79992456800', description: 'Номер телефона пользователя' })
@@ -78,6 +79,16 @@ export class ProfileUpdateDto extends PartialType(UserUpdateDto) {
   })
   @Transform(validateArrayOfQualification)
   qualifications?: IQualification[];
+
+  @ApiPropertyOptional({
+    default: [
+      { name: 'ВУЗ 1', specialization: 'Дизайнер 1', year: 2024 },
+      { name: 'ВУЗ 2', specialization: 'Дизайнер 2', year: 2023 },
+    ],
+    description: 'Образование пользователя',
+  })
+  @Transform(validateArrayOfEducation)
+  education?: IEducation[];
 
   @ApiPropertyOptional({
     default: [

@@ -9,7 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ILink, IQualification } from '@app/users/interfaces/user.interface';
+import { IEducation, ILink, IQualification } from '@app/users/interfaces/user.interface';
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
@@ -60,6 +60,9 @@ export class UserUpdateDto {
   @IsArray()
   @IsOptional()
   qualifications?: IQualification[];
+  @IsArray()
+  @IsOptional()
+  education?: IEducation[];
   @IsString()
   @IsOptional()
   programs?: string;
@@ -69,4 +72,7 @@ export class UserUpdateDto {
   @IsBooleanString()
   @IsOptional()
   is_hide_phone?: boolean;
+  @IsBooleanString()
+  @IsOptional()
+  is_eula_approved?: boolean;
 }

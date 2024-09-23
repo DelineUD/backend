@@ -1,12 +1,12 @@
-import { ILink, IQualification } from '@app/users/interfaces/user.interface';
+import { IEducation, ILink, IQualification } from '@app/users/interfaces/user.interface';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 
 export interface IProfileEducation {
+  additional_education: IEducation[] | null;
   qualifications: IQualification[] | null;
   programs: string[] | null;
-  specialization: string | null;
 }
 
 export interface IProfilePersonalInformation {
@@ -15,6 +15,7 @@ export interface IProfilePersonalInformation {
   keywords: string[];
   links: Array<ILink> | null;
   education: IProfileEducation | null;
+  specialization: string | null;
   job_format: EUserJobFormat | null;
   job_experience: EUserJobExperience | null;
   project_involvement: EUserProjectInvolvement | null;

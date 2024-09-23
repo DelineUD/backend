@@ -9,7 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ILink, IQualification } from '@/app/users/interfaces/user.interface';
+import { IEducation, ILink, IQualification } from '@/app/users/interfaces/user.interface';
 import { EUserJobExperience } from '@shared/consts/user-experience.enum';
 import { EUserJobFormat } from '@shared/consts/user-format.enum';
 import { EUserProjectInvolvement } from '@shared/consts/user-involvement.enum';
@@ -55,6 +55,9 @@ export class UserCreateDto {
   @IsArray()
   @IsOptional()
   qualifications?: IQualification[];
+  @IsArray()
+  @IsOptional()
+  education?: IEducation[];
   @IsString()
   @IsOptional()
   programs?: string;

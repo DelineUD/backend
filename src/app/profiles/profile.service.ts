@@ -9,7 +9,7 @@ import { ProfilesFindQueryDto } from '@app/profiles/dto/profiles-find-query.dto'
 import { profileFiltersMapper } from '@app/profiles/mappers/profile-filters.mapper';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { UserEntity } from '../users/entities/user.entity';
-import { updateUserMapper } from '../users/mappers/update-user.mapper';
+import { userUpdateMapper } from '../users/mappers/user-update.mapper';
 import { UsersService } from '../users/users.service';
 import { ProfileGetParamsDto } from './dto/profile-get-params.dto';
 import { IProfileListResponse } from './interfaces/profile-list.interface';
@@ -43,10 +43,11 @@ export class ProfileService {
 
       const profile = await this.usersService.updateByPayload(
         { _id: userInDb._id },
-        updateUserMapper({
+        userUpdateMapper({
           ...dto,
           password: hashedPassword,
           avatar: avatarUrl,
+          is_eula_approved: userInDb.preferences?.is_eula_approved,
         }),
       );
 

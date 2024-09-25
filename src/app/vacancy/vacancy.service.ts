@@ -96,10 +96,7 @@ export class VacancyService {
     }
   }
 
-  async findAll(
-    userId: Types.ObjectId,
-    { desc, ...queryParams }: VacancyFindQueryDto,
-  ): Promise<IVacancyListResponse[]> {
+  async findAll(userId: Types.ObjectId, { desc, ...queryParams }: VacancyFindQueryDto): Promise<IVacancyListResponse> {
     try {
       const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
 
@@ -124,7 +121,7 @@ export class VacancyService {
   async findAllByUserId(
     { userId }: IVacancyFindAll,
     { desc }: { desc: string | undefined },
-  ): Promise<IVacancyListResponse[]> {
+  ): Promise<IVacancyListResponse> {
     try {
       const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
 

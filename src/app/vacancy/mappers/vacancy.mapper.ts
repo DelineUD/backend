@@ -1,13 +1,13 @@
 import { UserEntity } from '@app/users/entities/user.entity';
 import {
   IVacancy,
-  IVacancyAuthorResponse,
+  IVacancyAuthor,
   IVacancyListResponse,
   IVacancyResponse,
   UserVacancyPick,
 } from '../interfaces/vacancy.interface';
 
-const toVacancyAuthor = (author: UserVacancyPick, youBlocked: boolean): IVacancyAuthorResponse => {
+const toVacancyAuthor = (author: UserVacancyPick, youBlocked: boolean): IVacancyAuthor => {
   return author
     ? {
         _id: author._id,
@@ -61,7 +61,7 @@ export const vacancyMapper = (vacancy: IVacancy, user: Pick<UserEntity, '_id' | 
 export const vacancyListMapper = (
   vacancies: IVacancy[],
   user: Pick<UserEntity, '_id' | 'bun_info'>,
-): IVacancyListResponse[] => {
+): IVacancyListResponse => {
   return vacancies
     .map((vacancy) => {
       const {

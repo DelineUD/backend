@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   UseGuards,
   UsePipes,
@@ -19,7 +18,7 @@ import { Types } from 'mongoose';
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
 import { FiltersService } from '@app/filters/filters.service';
-import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 import { VacancyFindQueryDto } from '../vacancy/dto/vacancy-find-query.dto';
 import { VacancyCreateDto } from './dto/vacancy-create.dto';
 import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.interface';
@@ -94,7 +93,7 @@ export class VacancyController {
   async findAll(
     @UserId() userId: Types.ObjectId,
     @Query() queryParams?: VacancyFindQueryDto,
-  ): Promise<IVacancyListResponse[]> {
+  ): Promise<IVacancyListResponse> {
     return await this.vacancyService.findAll(userId, queryParams);
   }
 
@@ -114,7 +113,7 @@ export class VacancyController {
   async findAllByUserId(
     @Param() params: IVacancyFindAll,
     @Query() { desc }: { desc: string | undefined },
-  ): Promise<IVacancyListResponse[]> {
+  ): Promise<IVacancyListResponse> {
     return await this.vacancyService.findAllByUserId(params, { desc });
   }
 

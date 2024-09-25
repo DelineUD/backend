@@ -1,58 +1,105 @@
-import { Controller, Delete, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'mongodb';
 import { Types } from 'mongoose';
 
 import { UserId } from '@shared/decorators/user-id.decorator';
 import { JwtAuthGuard } from '@app/auth/guards/jwt-access.guard';
-import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
-import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
-import { IDeleteResumeQuery } from '@app/resumes/interfaces/delete-resume.interface';
+import { FiltersService } from '@app/filters/filters.service';
+import { IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { ResumeFindQueryDto } from './dto/resume-find-query.dto';
 import { ResumesService } from './resumes.service';
-import { IResume, IResumeResponse } from './interfaces/resume.interface';
-import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
+import { ResumeCreateDto } from './dto/resume-create.dto';
+import { IResumeResponse, IResumeListResponse } from './interfaces/resume.interface';
 
 @ApiTags('Resumes')
 @Controller('resumes')
+@ApiBearerAuth('defaultBearerAuth')
+@UseGuards(JwtAuthGuard)
 export class ResumesController {
-  constructor(private readonly resumesService: ResumesService) {}
+  constructor(private readonly resumesService: ResumesService, private filtersService: FiltersService) {}
 
   /**
-   * Создание или обновление резюме.
-   * @param resumeParams - Данные для резюме.
-   * @returns - Резюме.
+   * Создание нового резюме
+   * @param userId - идентификатор пользователя
+   * @param createResumeDto - данные для создания резюме
+   * @returns - новое резюме
    */
-  @Post('update')
+  @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(@Query() resumeParams: ICrudResumeParams): Promise<IResume | IResume[]> {
-    return await this.resumesService.update(resumeParams);
+  async create(@UserId() userId: Types.ObjectId, @Body() createResumeDto: ResumeCreateDto): Promise<IResumeResponse> {
+    return await this.resumesService.create(userId, createResumeDto);
   }
 
   /**
-   * Получение всех резюме.
-   * @param userId - идентификатор пользователя.
-   * @param queryParams - параметры для поиска резюме.
-   * @returns - Все резюме.
+   * Обновление резюме
+   * @param userId - идентификатор пользователя
+   * @param id - идентификатор резюме
+   * @param updateResumeDto - данные для обновления резюме
+   * @returns - обновленное резюме
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
-  @Get('list')
+  @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async update(
+    @UserId() userId: Types.ObjectId,
+    @Param('id') id: string,
+    @Body() updateResumeDto: ResumeCreateDto,
+  ): Promise<IResumeResponse> {
+    return await this.resumesService.update(userId, id, updateResumeDto);
+  }
+
+  /**
+   * Получение фильтров для резюме
+   * @returns - фильтры для резюме
+   */
+  @Get('filters')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getResumeFilters(): Promise<IFiltersResponse[]> {
+    return Promise.all([
+      this.filtersService.getCitiesFilter(),
+      this.filtersService.getSpecializationsFilter(),
+      this.filtersService.getProgramsFilter(),
+      this.filtersService.getQualificationsFilter(),
+      this.filtersService.getFormatFilter(),
+      this.filtersService.getExperienceFilter(),
+      this.filtersService.getInvolvementFilter(),
+    ]);
+  }
+
+  /**
+   * Получение всех резюме
+   * @param userId - идентификатор пользователя
+   * @param queryParams - параметры для поиска резюме
+   * @returns - все резюме
+   */
+  @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(
     @UserId() userId: Types.ObjectId,
     @Query() queryParams?: ResumeFindQueryDto,
-  ): Promise<IResumeResponse[]> {
+  ): Promise<IResumeListResponse> {
     return await this.resumesService.findAll(userId, queryParams);
   }
 
   /**
-   * Получение всех резюме пользователя.
-   * @param params.userId - идентификатор пользователя.
-   * @returns - Список всех резюме пользователя.
+   * Получение всех резюме пользователя
+   * @param params - параметры для поиска
+   * @param query - параметры фильтров для поиска
+   * @returns - список резюме пользователя
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
-  @Get('list/:userId')
+  @Get(':userId')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
     name: 'userId',
@@ -60,63 +107,47 @@ export class ResumesController {
     description: 'Системный идентификатор пользователя',
   })
   async findAllByUserId(
-    @Param() params: IFindAllResumeParams,
-    @Query() query: ResumeFindQueryDto,
-  ): Promise<IResumeResponse[]> {
-    return await this.resumesService.findAllByUserId(params, query);
+    @Param() params: { userId: string },
+    @Query() { desc }: { desc: string | undefined },
+  ): Promise<IResumeListResponse> {
+    return await this.resumesService.findAllByUserId(params, { desc });
   }
 
   /**
-   * Получение резюме пользователя по id.
-   * @param params.userId - идентификатор пользователя.
-   * @param params.id - идентификатор (гет курс) резюме.
-   * @returns - Найденное резюме.
+   * Получение резюме по id
+   * @param params - параметры поиска резюме
+   * @returns - резюме
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @Get(':userId/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiParam({
     name: 'userId',
     type: 'string',
-    description: 'Системный идентификатор пользователя',
+    description: 'Идентификатор пользователя',
   })
   @ApiParam({
     name: 'id',
     type: 'string',
-    description: 'Идентификатор резюме (GetCourse Id)',
+    description: 'Идентификатор резюме',
   })
-  async findOneByIds(@Param() params: IFindOneResumeParams): Promise<IResumeResponse> {
+  async findById(@Param() params: { userId: string; id: string }): Promise<IResumeResponse> {
     return await this.resumesService.findOneById(params);
   }
 
   /**
-   * Удаление резюме пользователя по идентификатору.
-   * @returns - Резултат удаления.
-   * @param userId - Идентификатор пользователя
-   * @param id - Идентификатор резюме
+   * Удаление резюме пользователя по идентификатору
+   * @returns - результат удаления
+   * @param userId - идентификатор пользователя
+   * @param id - идентификатор резюме
    */
-  @ApiBearerAuth('defaultBearerAuth')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  @Delete('delete/:id')
+  @Delete(':id')
   @ApiParam({
     name: 'id',
     type: 'string',
     description: 'Системный идентификатор резюме',
   })
-  async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: Types.ObjectId): Promise<DeleteResult> {
+  async deleteOneById(@UserId() userId: Types.ObjectId, @Param('id') id: string): Promise<DeleteResult> {
     return await this.resumesService.deleteOneById(userId, id);
-  }
-
-  /**
-   * Удаление резюме пользователя c Get Course.
-   * @returns - Резултат удаления.
-   * @param query - параметры для удаления
-   */
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @Post('delete')
-  async deleteByGetCoursePayload(@Query() query: IDeleteResumeQuery): Promise<DeleteResult> {
-    return await this.resumesService.deleteByGetCoursePayload(query);
   }
 }

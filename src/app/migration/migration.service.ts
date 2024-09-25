@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 
 import { PostModel } from '@app/posts/models/posts.model';
 import { VacancyEntity } from '@app/vacancy/entities/vacancy.entity';
-import { Resume } from '../resumes/entities/resume.entity';
+import { ResumeEntity } from '../resumes/entities/resume.entity';
 import { UserEntity } from '../users/entities/user.entity';
 
 const logger = new Logger('Migrations');
@@ -18,8 +18,8 @@ export class MigrationService {
     private readonly userModel: Model<UserEntity>,
     @InjectModel(VacancyEntity.name)
     private readonly vacancyModel: Model<VacancyEntity>,
-    @InjectModel(Resume.name)
-    private readonly resumeModel: Model<Resume>,
+    @InjectModel(ResumeEntity.name)
+    private readonly resumeModel: Model<ResumeEntity>,
   ) {}
 
   async runMigrations() {

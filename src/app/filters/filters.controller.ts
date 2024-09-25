@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { FiltersService } from '@app/filters/filters.service';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
-import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
+import { IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 
 @ApiTags('Filters')
 @Controller('filters')
@@ -17,19 +17,6 @@ export class FiltersController {
   @Post('update')
   async update(updateFiltersDto: UpdateFiltersDto): Promise<[] | PromiseSettledResult<unknown>[]> {
     return await this.filtersService.update(updateFiltersDto);
-  }
-
-  /**
-   * Получение фильтров для резюме.
-   * @returns - Фильтры резюме.
-   */
-  @Get('resumes')
-  public async getResumesFilter(): Promise<IFilter[]> {
-    return await Promise.all([
-      await this.filtersService.getCitiesFilter(),
-      await this.filtersService.getSpecializationsFilter(),
-      await this.filtersService.getProgramsFilter(),
-    ]);
   }
 
   /**

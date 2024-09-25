@@ -1,54 +1,62 @@
 import { Types } from 'mongoose';
 
 import { UserEntity } from '@/app/users/entities/user.entity';
+import { IBun } from '@app/users/interfaces/user.interface';
 
 export type UserResumePickList = '_id' | 'avatar' | 'first_name' | 'last_name' | 'bun_info';
 export type UserResumePick = Pick<UserEntity, UserResumePickList>;
 
-export interface IResume {
-  _id?: Types.ObjectId; // Sys mongo id
+export interface IResumeAuthor {
+  _id: Types.ObjectId;
+  first_name: string;
+  last_name: string;
+  avatar: string | null;
+}
 
-  id: string; // Get course id
-  authorId: Types.ObjectId; // Sys user _id
-  qualification: string;
-  country: string;
-  city: string;
-  about: string;
-  other?: string;
-  specializations: string[];
-  narrow_specializations: string[];
-  format: string;
-  service_cost?: number;
-  portfolio?: string;
-  author?: IResumeAuthorResponse & { blocked_users: Types.ObjectId[] };
-  createdAt?: string;
-  updatedAt?: string;
+export interface IResume {
+  _id?: Types.ObjectId;
+  name: string;
+  job_format: string;
+  job_experience: string;
+  specialization: string;
+  contacts: string;
+  city?: string;
+  about?: string;
+  project_involvement?: string;
+  qualifications?: string[];
+  programs?: string[];
+  authorId: Types.ObjectId;
+  author?: IResumeAuthor & { bun_info: IBun };
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IResumeResponse {
-  _id?: Types.ObjectId; // Sys mongo id
-
-  id: string; // Get course id
-  author: IResumeAuthorResponse | null;
-  qualification: string;
-  country: string;
-  city: string;
-  about: string;
-  other: string | null;
-  specializations: string[];
-  narrow_specializations: string[];
-  format: string;
-  service_cost?: number | null;
-  portfolio?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  _id: Types.ObjectId;
+  name: string;
+  job_format: string;
+  job_experience: string;
+  specialization: string;
+  contacts: string;
+  city: string | null;
+  about: string | null;
+  project_involvement: string | null;
+  qualifications: string[] | null;
+  programs: string[] | null;
+  author: IResumeAuthor | null;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-export interface IResumeAuthorResponse {
-  _id: Types.ObjectId | null; // Sys mongo id
-  first_name: string | null;
-  last_name: string | null;
-  avatar: string | null;
-  qualification: string | null;
-  contact_link: string | null;
+export interface IResumeListItem {
+  _id: Types.ObjectId;
+  name: string;
+  job_format: string;
+  job_experience: string;
+  city: string | null;
+  author: IResumeAuthor | null;
+  created_at?: Date;
+  updated_at?: Date;
 }
+
+export type IResumeListResponse = IResumeListItem[];

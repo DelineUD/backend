@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmpty, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 import { validateStringOfObjectId } from '@shared/validators/validateStringOfObjectId';
@@ -7,13 +7,13 @@ import { validateStringOfObjectId } from '@shared/validators/validateStringOfObj
 export class ResumeFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @Transform(validateStringOfObjectId)
-  specializations?: string;
+  @IsString()
+  name?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @Transform(validateStringOfObjectId)
-  narrow_specializations?: string;
+  specialization?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
@@ -23,22 +23,27 @@ export class ResumeFindQueryDto {
   @ApiProperty({ default: '', required: false })
   @IsOptional()
   @Transform(validateStringOfObjectId)
-  courses?: string;
+  qualifications?: string;
 
   @ApiProperty({ default: '', required: false })
   @IsOptional()
-  @IsMongoId()
-  country?: string;
-
-  @ApiProperty({ default: '', required: false })
-  @IsOptional()
-  @IsMongoId()
+  @Transform(validateStringOfObjectId)
   city?: string;
 
-  @ApiProperty({ default: false, required: false })
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsString()
-  format?: string;
+  @Transform(validateStringOfObjectId)
+  project_involvement?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Transform(validateStringOfObjectId)
+  job_format?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Transform(validateStringOfObjectId)
+  job_experience?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

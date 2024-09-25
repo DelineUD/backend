@@ -7,22 +7,21 @@ import { IResume } from '@app/resumes/interfaces/resume.interface';
   collection: 'resumes',
   timestamps: true,
 })
-export class Resume extends Document implements IResume {
-  @Prop({ required: true }) id: string; // Get course id
-  @Prop({ required: true }) authorId: Types.ObjectId; // Sys user _id
-  @Prop({ required: true }) specializations: string[];
-  @Prop({ required: true }) narrow_specializations: string[];
-  @Prop({ required: true }) qualification: string;
-  @Prop({ required: true }) about: string;
-  @Prop({ required: false }) other: string;
-  @Prop({ required: true }) format: string;
-  @Prop({ required: true }) country: string;
-  @Prop({ required: true }) city: string;
-  @Prop() service_cost?: number;
-  @Prop() portfolio?: string;
+export class ResumeEntity extends Document implements IResume {
+  @Prop() authorId: Types.ObjectId;
+  @Prop() name: string;
+  @Prop() job_experience: string;
+  @Prop() job_format: string;
+  @Prop() specialization: string;
+  @Prop() contacts: string;
+  @Prop({ required: false }) about: string;
+  @Prop({ required: false }) city: string;
+  @Prop({ required: false }) project_involvement: string;
+  @Prop({ required: false }) qualifications: string[];
+  @Prop({ required: false }) programs: string[];
 }
 
-export const ResumeSchema = SchemaFactory.createForClass(Resume);
+export const ResumeSchema = SchemaFactory.createForClass(ResumeEntity);
 
 ResumeSchema.virtual('author', {
   ref: 'UserEntity',

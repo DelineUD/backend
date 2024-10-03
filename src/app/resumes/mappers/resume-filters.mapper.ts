@@ -9,9 +9,9 @@ export async function resumeFiltersMapper(
   // TODO - UDO-190
   { name, ...baseQueries }: FilterQuery<Partial<ResumeFindQueryDto>>,
 ): Promise<Partial<FilterQuery<Partial<ResumeFindQueryDto>>>> {
-  const queryFilter: Partial<FilterQuery<Partial<ResumeFindQueryDto>>> = {};
-
-  name && (queryFilter.name = { $regex: new RegExp(name, 'i') });
+  const queryFilter: Partial<FilterQuery<Partial<ResumeFindQueryDto>>> = {
+    ...(name && [{ name: { $regex: new RegExp(name, 'i') } }]),
+  };
 
   const {
     cityPromises,

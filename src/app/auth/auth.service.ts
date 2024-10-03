@@ -23,7 +23,7 @@ import { AuthLoginResponseType } from './types/auth-login-response.type';
 import { AuthRegisterResponseType } from './types/auth-register-response.type';
 import { AuthSendSmsResponseType } from './types/auth-send-sms-response.type';
 
-const logger = new Logger('_Auth');
+const logger = new Logger('Auth');
 
 @Injectable()
 export class AuthService {
@@ -61,9 +61,10 @@ export class AuthService {
 
       const updateFilters: UpdateFiltersDto = {
         [FilterKeys.City]: user.city,
-        [FilterKeys.Spec]: [user.specialization],
+        [FilterKeys.Spec]: user.specialization ? [user.specialization] : [],
         [FilterKeys.Programs]: user.programs,
       };
+
       this.filtersService.update(updateFilters).then(() => logger.log('Fillers successfully updated!'));
 
       return await this.tokensService.generateTokens({ _id: user._id, phone: user.phone, email: user.email });

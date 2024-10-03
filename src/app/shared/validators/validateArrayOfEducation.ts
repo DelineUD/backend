@@ -29,7 +29,7 @@ export const validateArrayOfEducation = ({ value }: { value: string }): IQualifi
       if ('specialization' in item && typeof item.specialization !== 'string') {
         throw new ForbiddenException(`The "specialization" property at index ${index}, if provided, must be a string.`);
       }
-      if ('year' in item && typeof item.year !== 'number') {
+      if ('year' in item && item.year !== undefined && typeof item.year !== 'number') {
         throw new ForbiddenException(`The "year" property at index ${index}, if provided, must be a number.`);
       }
 

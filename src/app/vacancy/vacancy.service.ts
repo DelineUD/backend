@@ -96,10 +96,7 @@ export class VacancyService {
     }
   }
 
-  async findAll(
-    userId: Types.ObjectId,
-    { desc, ...queryParams }: VacancyFindQueryDto,
-  ): Promise<IVacancyListResponse[]> {
+  async findAll(userId: Types.ObjectId, { desc, ...queryParams }: VacancyFindQueryDto): Promise<IVacancyListResponse> {
     try {
       const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
 
@@ -124,7 +121,7 @@ export class VacancyService {
   async findAllByUserId(
     { userId }: IVacancyFindAll,
     { desc }: { desc: string | undefined },
-  ): Promise<IVacancyListResponse[]> {
+  ): Promise<IVacancyListResponse> {
     try {
       const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
 
@@ -143,18 +140,21 @@ export class VacancyService {
 
   async findOneById({ userId, id }: IVacancyFindOne): Promise<IVacancyResponse> {
     try {
-      const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
+      const userInDb = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
+      if (!userInDb) {
+        throw new EntityNotFoundError('Пользователь не найден!');
+      }
 
       const vacancyInDb = await this.vacancyModel
         .findOne({ _id: new Types.ObjectId(id) })
-        .populate('author', '_id first_name last_name avatar')
+        .populate('author', '_id first_name last_name avatar bun_info')
         .exec();
 
       if (!vacancyInDb) {
         throw new EntityNotFoundError('Вакансия не найдена!');
       }
 
-      return vacancyMapper(vacancyInDb, { _id, bun_info });
+      return vacancyMapper(vacancyInDb, { _id: userInDb._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findByUserId: ${(err as Error).message}`);
       throw err;

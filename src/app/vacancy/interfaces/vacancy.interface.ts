@@ -6,6 +6,13 @@ import { IBun } from '@/app/users/interfaces/user.interface';
 export type UserVacancyPickList = '_id' | 'avatar' | 'first_name' | 'last_name';
 export type UserVacancyPick = Pick<UserEntity, UserVacancyPickList>;
 
+export interface IVacancyAuthor {
+  _id: Types.ObjectId;
+  first_name: string;
+  last_name: string;
+  avatar: string | null;
+}
+
 export interface IVacancy {
   _id?: Types.ObjectId;
   name: string;
@@ -20,7 +27,7 @@ export interface IVacancy {
   qualifications?: string[];
   programs?: string[];
   authorId: Types.ObjectId;
-  author?: IVacancyAuthorResponse & { bun_info: IBun };
+  author?: IVacancyAuthor & { bun_info: IBun };
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -38,12 +45,12 @@ export interface IVacancyResponse {
   specializations: string[] | null;
   qualifications: string[] | null;
   programs: string[] | null;
-  author: IVacancyAuthorResponse | null;
+  author: IVacancyAuthor | null;
   created_at?: Date;
   updated_at?: Date;
 }
 
-export interface IVacancyListResponse {
+export interface IVacancyListItem {
   _id: Types.ObjectId;
   name: string;
   job_format: string;
@@ -51,14 +58,9 @@ export interface IVacancyListResponse {
   payment: number[] | null;
   city: string | null;
   project_involvement: string | null;
-  author: IVacancyAuthorResponse | null;
+  author: IVacancyAuthor | null;
   created_at?: Date;
   updated_at?: Date;
 }
 
-export interface IVacancyAuthorResponse {
-  _id: Types.ObjectId;
-  first_name: string;
-  last_name: string;
-  avatar: string | null;
-}
+export type IVacancyListResponse = IVacancyListItem[];

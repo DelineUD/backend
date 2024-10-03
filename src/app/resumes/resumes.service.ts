@@ -1,190 +1,186 @@
-import { forwardRef, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeleteResult } from 'mongodb';
 import { FilterQuery, Model, Types } from 'mongoose';
 
 import { FiltersService } from '@app/filters/filters.service';
-import { ResumeFindQueryDto } from '@app/resumes/dto/resume-find-query.dto';
-import { ResumeDto } from '@app/resumes/dto/resume.dto';
-import { ICrudResumeParams } from '@app/resumes/interfaces/crud-resume.interface';
-import { IDeleteResumeQuery } from '@app/resumes/interfaces/delete-resume.interface';
-import { resumeDtoMapper, resumeListMapper, resumeMapper } from '@app/resumes/resume.mapper';
-import { getMainFilters } from '@helpers/getMainFilters';
+import { ResumeFindQueryDto } from './dto/resume-find-query.dto';
+import { ResumeCreateDto } from './dto/resume-create.dto';
+import { FilterKeys } from '@app/filters/consts';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
-import normalizeDto from '@utils/normalizeDto';
 import { UsersService } from '../users/users.service';
-import { Resume } from './entities/resume.entity';
-import { IFindAllResumeParams, IFindOneResumeParams } from './interfaces/find-resume.interface';
-import { IResume, IResumeResponse } from './interfaces/resume.interface';
+import { IResumeFindAll, IResumeFindOne } from './interfaces/resume-find.interface';
+import { ResumeEntity } from './entities/resume.entity';
+import { IResumeListResponse, IResumeResponse } from './interfaces/resume.interface';
+import { resumeListMapper, resumeMapper } from './mappers/resume.mapper';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { resumeFiltersMapper } from './mappers/resume-filters.mapper';
+import { ResumeUpdateDto } from './dto/resume-update.dto';
 
 const logger = new Logger('Resumes');
 
 @Injectable()
 export class ResumesService {
   constructor(
-    @InjectModel(Resume.name) private readonly resumeModel: Model<Resume>,
+    @InjectModel(ResumeEntity.name) private readonly resumeModel: Model<ResumeEntity>,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly filtersService: FiltersService,
   ) {}
 
-  async update({ id, ...resumeParams }: ICrudResumeParams): Promise<IResume | IResume[]> {
+  async create(userId: Types.ObjectId, dto: ResumeCreateDto): Promise<IResumeResponse> {
     try {
-      const userInDb = await this.usersService.findOne({ _id: id });
-      if (!userInDb) {
-        throw new EntityNotFoundError('Пользователь не найден');
-      }
+      const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
 
-      const dto = resumeParams as Partial<ResumeDto>;
-      const normalizedDto = normalizeDto(dto, '_resume') as ResumeDto[];
-      const resumesMapped = normalizedDto.map((r) => {
-        return resumeDtoMapper({ authorId: userInDb._id, ...r });
+      const { _id: resumeId, authorId } = await this.resumeModel.create({ ...dto, authorId: _id });
+      logger.log(`Resume successfully created!`);
+
+      const resume = await this.resumeModel
+        .findOne({ _id: resumeId, authorId })
+        .populate('author', '_id first_name last_name avatar')
+        .exec();
+
+      if (!resume) throw new EntityNotFoundError('Резюме не найдено!');
+
+      const updateFilters: UpdateFiltersDto = {
+        [FilterKeys.City]: dto.city,
+        [FilterKeys.Spec]: dto.specialization ? [dto.specialization] : [],
+        [FilterKeys.Programs]: dto.programs ?? [],
+      };
+      await this.filtersService.update(updateFilters).then(() => logger.log(`Filters successfully updated!`));
+
+      return resumeMapper(resume, {
+        _id,
+        bun_info,
       });
-
-      await Promise.all([
-        await this.resumeModel.deleteMany({ authorId: userInDb._id }),
-        await this.resumeModel.create(...resumesMapped),
-      ]);
-
-      logger.log(`Resumes successfully created!`);
-
-      return await this.resumeModel.find({ authorId: userInDb._id });
     } catch (err) {
-      logger.error(`Error while update: ${(err as Error).message}`);
-      throw new InternalServerErrorException(`Ошибка при обновлении резюме: "${err.message}!"`);
+      logger.error(`Error while create: ${(err as Error).message}`);
+      throw err;
     }
   }
 
-  async findAll(
-    userId: Types.ObjectId,
-    { format, desc, ...queryParams }: ResumeFindQueryDto,
-  ): Promise<IResumeResponse[]> {
+  async update(userId: Types.ObjectId, resumeId: string, dto: ResumeUpdateDto): Promise<IResumeResponse> {
     try {
-      const query: FilterQuery<Partial<IResume>> = await getMainFilters(this.filtersService, queryParams);
-      format && (query.format = format);
+      const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
 
-      const userInDb = await this.usersService.findOne({ _id: userId });
-      if (!userInDb) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
+      const result = await this.resumeModel
+        .updateOne(
+          {
+            _id: new Types.ObjectId(resumeId),
+            authorId: _id,
+          },
+          dto,
+        )
+        .exec();
+
+      const resume = await this.resumeModel
+        .findOne({ _id: resumeId })
+        .populate('author', '_id first_name last_name avatar')
+        .exec();
+
+      if (!result || !resume) {
+        throw new EntityNotFoundError('Резюме не найдено!');
       }
+
+      if (String(_id) !== String(resume.authorId)) {
+        throw new EntityNotFoundError('Нет доступа!');
+      }
+
+      return resumeMapper(resume, {
+        _id,
+        bun_info,
+      });
+    } catch (err) {
+      logger.error(`Error while update: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async findAll(userId: Types.ObjectId, { desc, ...queryParams }: ResumeFindQueryDto): Promise<IResumeListResponse> {
+    try {
+      const { _id, bun_info } = await this.usersService.findOne({ _id: userId });
+
+      const query: FilterQuery<Partial<ResumeFindQueryDto>> = await resumeFiltersMapper(
+        this.filtersService,
+        queryParams,
+      );
 
       const resumes = await this.resumeModel
         .find(query)
-        .populate('author', '_id first_name last_name avatar city telegram')
-        .sort(typeof desc === 'undefined' && { createdAt: -1 })
+        .populate('author', '_id first_name last_name avatar')
+        .sort(desc ? { createdAt: -1 } : { createdAt: 1 })
         .exec();
 
-      if (!resumes.length) {
-        return [];
-      }
-
-      return resumeListMapper(resumes, { _id: userInDb._id, bun_info: userInDb.bun_info });
+      return resumeListMapper(resumes, { _id, bun_info });
     } catch (err) {
       logger.error(`Error while findAll: ${(err as Error).message}`);
-      throw new InternalServerErrorException('Ошибка при поиске резюме!');
+      throw err;
     }
   }
 
-  async findAllByUserId(params: IFindAllResumeParams, query: ResumeFindQueryDto): Promise<IResumeResponse[]> {
+  async findAllByUserId(
+    { userId }: IResumeFindAll,
+    { desc }: { desc: string | undefined },
+  ): Promise<IResumeListResponse> {
     try {
-      const { userId } = params;
-      const { desc } = query;
-
-      const userInDb = await this.usersService.findOne({ _id: userId });
-      if (!userInDb) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
-      }
+      const { _id, bun_info } = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
 
       const resumes = await this.resumeModel
-        .find({ authorId: userInDb._id })
-        .populate('author', '_id first_name last_name avatar telegram qualification')
+        .find({ authorId: _id })
+        .populate('author', '_id first_name last_name avatar')
         .sort(typeof desc === 'undefined' && { createdAt: -1 })
         .exec();
 
-      return resumeListMapper(resumes, { _id: userInDb._id, bun_info: userInDb.bun_info });
+      return resumeListMapper(resumes, { _id, bun_info });
     } catch (err) {
       logger.error(`Error while findAllByUserId: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async findOneById(params: IFindOneResumeParams): Promise<IResumeResponse> {
+  async findOneById({ userId, id }: IResumeFindOne): Promise<IResumeResponse> {
     try {
-      const { userId, id } = params;
-
-      const userInDb = await this.usersService.findOne({ _id: userId });
+      const userInDb = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
       if (!userInDb) {
-        throw new EntityNotFoundError(`Пользователь не найден`);
+        throw new EntityNotFoundError('Пользователь не найден!');
       }
 
-      const resume = await this.resumeModel
-        .findOne({ authorId: userInDb._id, id })
-        .populate('author', '_id first_name last_name avatar telegram qualification')
+      const resumeInDb = await this.resumeModel
+        .findOne({ _id: new Types.ObjectId(id) })
+        .populate('author', '_id first_name last_name avatar bun_info')
         .exec();
-      if (!resume) {
-        throw new EntityNotFoundError(`Резюме не найдено`);
+
+      if (!resumeInDb) {
+        throw new EntityNotFoundError('Резюме не найдено!');
       }
 
-      return resumeMapper(resume, { _id: userInDb._id, bun_info: userInDb.bun_info });
+      return resumeMapper(resumeInDb, { _id: userInDb._id, bun_info: userInDb.bun_info });
     } catch (err) {
       logger.error(`Error while findOneById: ${(err as Error).message}`);
       throw err;
     }
   }
 
-  async deleteOneById(userId: Types.ObjectId, id: Types.ObjectId): Promise<DeleteResult> {
+  async deleteOneById(userId: Types.ObjectId, resumeId: string): Promise<DeleteResult> {
     try {
-      const deletedResume = await this.resumeModel
-        .findOneAndDelete({ author: new Types.ObjectId(userId), _id: id })
-        .exec();
+      const userInDb = await this.usersService.findOne({ _id: userId });
 
-      if (!deletedResume) {
-        throw new EntityNotFoundError('Запись не найдена');
+      const resumeInDb = await this.resumeModel.findOne({ _id: new Types.ObjectId(resumeId) }).exec();
+
+      if (!resumeInDb) {
+        throw new EntityNotFoundError('Резюме не найдено!');
       }
 
+      if (String(userInDb._id) !== String(resumeInDb.authorId)) {
+        throw new BadRequestException('Нет доступа!');
+      }
+
+      await this.resumeModel.deleteOne({ _id: resumeInDb._id, authorId: userInDb._id }).exec();
       logger.log('Resume successfully deleted!');
 
-      return {
-        acknowledged: true,
-        deletedCount: 1,
-      };
+      return;
     } catch (err) {
       logger.error(`Error while deleteOneById: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async deleteAll(userId: Types.ObjectId, where: Partial<IResume>): Promise<DeleteResult> {
-    try {
-      const result = await this.resumeModel.deleteMany({ ...where, authorId: userId });
-      if (!result) {
-        throw new EntityNotFoundError('Ошибка при удалении резюме');
-      }
-
-      logger.log('Resumes successfully deleted!');
-
-      return result;
-    } catch (err) {
-      logger.error(`Error while deleteAll: ${(err as Error).message}`);
-      throw err;
-    }
-  }
-
-  async deleteByGetCoursePayload(query: IDeleteResumeQuery): Promise<DeleteResult> {
-    try {
-      const dto = query as Partial<IResume>;
-      const normalizedQueries = normalizeDto(dto, '_resume') as Partial<IResume>;
-
-      const result = await this.resumeModel.deleteMany({ ...normalizedQueries });
-      if (!result) {
-        throw new EntityNotFoundError('Ошибка при удалении вакансий');
-      }
-
-      logger.log('Resumes successfully deleted!');
-
-      return result;
-    } catch (err) {
-      logger.error(`Error while deleteByGetCoursePayload: ${(err as Error).message}`);
       throw err;
     }
   }

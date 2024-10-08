@@ -104,6 +104,7 @@ export class ResumesService {
         this.filtersService,
         queryParams,
       );
+      query.authorId = { $ne: _id };
 
       const resumes = await this.resumeModel
         .find(query)

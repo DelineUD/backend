@@ -31,13 +31,13 @@ export const userUpdateMapper = (dto: UserUpdateDto): Partial<IUser> => {
   const validPhone = transformPhoneNumber(phone);
 
   const additional_info: Partial<IAdditional> = {
-    ...(qualifications?.length ? { qualifications } : {}),
-    ...(education?.length ? { education } : {}),
+    ...(qualifications && { qualifications }),
+    ...(education && { education }),
     ...(project_involvement && { project_involvement }),
     ...(job_format && { job_format }),
     ...(job_experience && { job_experience }),
     ...(about && { about }),
-    ...(splitKeywords?.length ? { keywords: splitKeywords } : {}),
+    ...(splitKeywords?.length ? { keywords: splitKeywords } : { keywords: [] }),
   };
 
   const preferences: Partial<IPreference> = {

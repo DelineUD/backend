@@ -104,6 +104,7 @@ export class VacancyService {
         this.filtersService,
         queryParams,
       );
+      query.authorId = { $ne: _id };
 
       const vacancies = await this.vacancyModel
         .find(query)

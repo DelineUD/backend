@@ -50,6 +50,7 @@ export interface IUser {
   last_name: string;
   avatar?: string;
   city?: string;
+  links?: ILink[];
   additional_info?: IAdditional;
   preferences?: IPreference;
   programs?: string[];

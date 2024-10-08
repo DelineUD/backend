@@ -1,9 +1,9 @@
-import { UserUpdateDto } from '@app/users/dto/user-update.dto';
 import { IAdditional, IPreference, IUser } from '@app/users/interfaces/user.interface';
-import { splitDtoField } from '@helpers/splitDto';
+import { UserUpdateDto } from '@app/users/dto/user-update.dto';
 import { transformPhoneNumber } from '@utils/transformPhoneNumber';
+import { splitDtoField } from '@helpers/splitDto';
 
-export const userUpdateMapper = (dto: UserUpdateDto): IUser => {
+export const userUpdateMapper = (dto: UserUpdateDto): Partial<IUser> => {
   const {
     phone,
     email,
@@ -30,19 +30,19 @@ export const userUpdateMapper = (dto: UserUpdateDto): IUser => {
   const splitKeywords = splitDtoField(keywords);
   const validPhone = transformPhoneNumber(phone);
 
-  const additional_info: IAdditional = {
-    ...(qualifications?.length && { qualifications }),
-    ...(education?.length && { education }),
+  const additional_info: Partial<IAdditional> = {
+    ...(qualifications?.length ? { qualifications } : {}),
+    ...(education?.length ? { education } : {}),
     ...(project_involvement && { project_involvement }),
     ...(job_format && { job_format }),
     ...(job_experience && { job_experience }),
     ...(about && { about }),
-    ...(splitKeywords && { keywords: splitKeywords }),
+    ...(splitKeywords?.length ? { keywords: splitKeywords } : {}),
   };
 
-  const preferences: IPreference = {
-    ...(is_hide_phone && { is_hide_phone }),
-    ...(is_eula_approved && { is_eula_approved }),
+  const preferences: Partial<IPreference> = {
+    ...(is_hide_phone != null && { is_hide_phone }),
+    ...(is_eula_approved != null && { is_eula_approved }),
   };
 
   return {
@@ -50,13 +50,13 @@ export const userUpdateMapper = (dto: UserUpdateDto): IUser => {
     ...(password && { password }),
     ...(first_name && { first_name }),
     ...(last_name && { last_name }),
-    ...(validPhone && validPhone !== 'undefined' && { phone: validPhone }),
+    ...(validPhone && { phone: validPhone }),
     ...(avatar && { avatar }),
     ...(city && { city }),
     ...(links?.length ? { links } : { links: [] }),
-    ...(additional_info && { additional_info }),
-    ...(preferences && { preferences }),
+    ...(Object.keys(additional_info).length && { additional_info }),
+    ...(Object.keys(preferences).length && { preferences }),
     ...(specialization && { specialization }),
-    ...(splitPrograms && { programs: splitPrograms }),
+    ...(splitPrograms?.length ? { programs: splitPrograms } : {}),
   };
 };

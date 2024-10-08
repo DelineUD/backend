@@ -37,7 +37,7 @@ export const userUpdateMapper = (dto: UserUpdateDto): IUser => {
     ...(job_format && { job_format }),
     ...(job_experience && { job_experience }),
     ...(about && { about }),
-    ...(splitKeywords.length && { keywords: splitKeywords }),
+    ...(splitKeywords && { keywords: splitKeywords }),
   };
 
   const preferences: IPreference = {
@@ -53,10 +53,10 @@ export const userUpdateMapper = (dto: UserUpdateDto): IUser => {
     ...(validPhone && validPhone !== 'undefined' && { phone: validPhone }),
     ...(avatar && { avatar }),
     ...(city && { city }),
-    ...(links?.length && { links }),
+    ...(links?.length ? { links } : { links: [] }),
     ...(additional_info && { additional_info }),
     ...(preferences && { preferences }),
     ...(specialization && { specialization }),
-    ...(splitPrograms.length && { programs: splitPrograms }),
+    ...(splitPrograms && { programs: splitPrograms }),
   };
 };

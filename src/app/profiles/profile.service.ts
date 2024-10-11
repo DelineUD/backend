@@ -37,18 +37,17 @@ export class ProfileService {
         hashedPassword = await hash(password, 10);
       }
 
-      const avatarUrl = avatar
-        ? `${process.env.SERVER_URL}/${process.env.STATIC_PATH}/${process.env.IMAGES_FOLDER}/${avatar.filename}`
-        : userInDb.avatar;
-
       const profile = await this.usersService.updateByPayload(
         { _id: userInDb._id },
-        userUpdateMapper({
-          ...dto,
-          password: hashedPassword,
-          avatar: avatarUrl,
-          is_eula_approved: userInDb.preferences?.is_eula_approved,
-        }),
+        userUpdateMapper(
+          {
+            ...dto,
+            avatar,
+            password: hashedPassword,
+            is_eula_approved: userInDb.preferences?.is_eula_approved,
+          },
+          userInDb,
+        ),
       );
 
       logger.log('Profile successfully updated!');

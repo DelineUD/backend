@@ -271,6 +271,9 @@ export class FiltersService {
   private async createOrUpdateFilters(filters: IFilter[], model: Model<IFilter>) {
     for (const filter of filters) {
       const existingFilter = await model.findOne({ name: filter.name }).exec();
+      if (!filter) {
+        continue;
+      }
       if (!existingFilter) {
         await model.create(filter);
       }

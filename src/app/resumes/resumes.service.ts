@@ -16,6 +16,7 @@ import { resumeListMapper, resumeMapper } from './mappers/resume.mapper';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { resumeFiltersMapper } from './mappers/resume-filters.mapper';
 import { ResumeUpdateDto } from './dto/resume-update.dto';
+import { resumeUpdateMapper } from '@app/resumes/mappers/resume-update.mapper';
 
 const logger = new Logger('Resumes');
 
@@ -69,7 +70,7 @@ export class ResumesService {
             _id: new Types.ObjectId(resumeId),
             authorId: _id,
           },
-          dto,
+          resumeUpdateMapper(dto),
         )
         .exec();
 

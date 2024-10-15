@@ -19,6 +19,7 @@ export interface IProfilePersonalInformation {
   job_format: EUserJobFormat | null;
   job_experience: EUserJobExperience | null;
   project_involvement: EUserProjectInvolvement | null;
+  is_hide_phone: boolean;
 }
 
 export interface IProfileResponse {

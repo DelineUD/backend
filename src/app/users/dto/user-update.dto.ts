@@ -35,7 +35,7 @@ export class UserUpdateDto {
   last_name?: string;
   @IsString()
   @IsOptional()
-  avatar?: string;
+  avatar?: Express.Multer.File;
   @IsString()
   @IsOptional()
   city?: string;

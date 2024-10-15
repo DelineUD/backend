@@ -29,10 +29,18 @@ export enum FilterNames {
 
 export const groupFilters = Object.values(EPostGroup).map((value) => ({ name: value }));
 
-export const jobExperienceFilters = Object.values(EUserJobExperience).map((value) => ({ name: value }));
+export const jobExperienceFilters = Object.values(EUserJobExperience)
+  .filter((value) => value !== '')
+  .map((value) => ({ name: value }));
 
-export const jobFormatFilters = Object.values(EUserJobFormat).map((value) => ({ name: value }));
+export const jobFormatFilters = Object.values(EUserJobFormat)
+  .filter((value) => value !== '')
+  .map((value) => ({ name: value }));
 
-export const projectInvolvementFilters = Object.values(EUserProjectInvolvement).map((value) => ({ name: value }));
+export const projectInvolvementFilters = Object.values(EUserProjectInvolvement)
+  .filter((value) => value !== '')
+  .map((value) => ({ name: value }));
 
-export const qualificationsFilters = Object.values(EUserQualification).map((value) => ({ name: value }));
+export const qualificationsFilters = Object.values(EUserQualification)
+  .filter((value) => value !== '')
+  .map((value) => ({ name: value }));

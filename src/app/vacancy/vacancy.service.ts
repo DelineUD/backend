@@ -16,6 +16,7 @@ import { vacancyListMapper, vacancyMapper } from './mappers/vacancy.mapper';
 import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
 import { vacancyFiltersMapper } from '@app/vacancy/mappers/vacancy-filters.mapper';
 import { VacancyUpdateDto } from '@app/vacancy/dto/vacancy-update.dto';
+import { vacancyUpdateMapper } from '@app/vacancy/mappers/vacancy-update.mapper';
 
 const logger = new Logger('Vacancies');
 
@@ -69,7 +70,7 @@ export class VacancyService {
             _id: new Types.ObjectId(vacancyId),
             authorId: _id,
           },
-          dto,
+          vacancyUpdateMapper(dto),
         )
         .exec();
 

@@ -1,10 +1,9 @@
 import { BadRequestException, forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { DeleteResult } from 'mongodb';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { ConvertsService } from '@app/converts/converts.service';
-import { groupFilters } from '@app/filters/consts';
 import { CreatePostCommentDto } from '@app/posts/dto/create-post-comment.dto';
 import { CreatePostDto } from '@app/posts/dto/create.post.dto';
 import { DeletePostCommentDto } from '@app/posts/dto/delete-post-comment.dto';
@@ -21,11 +20,13 @@ import { commentListMapper } from '@app/posts/mappers/comments.mapper';
 import { getUploadedFilesWithType } from '@helpers/getUploadedFilesWithType';
 import { EntityNotFoundError } from '@shared/interceptors/not-found.interceptor';
 import { IRemoveEntity } from '@shared/interfaces/remove-entity.interface';
+import { FiltersService } from '../filters/filters.service';
 import { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { DeletePostDto } from './dto/delete.post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { IPosts, IPostsResponse } from './interfaces/posts.interface';
+import { postFiltersMapper } from './mappers/post-filters.mapper';
 import { postListMapper, postMapper } from './mappers/posts.mapper';
 import { PostCommentsModel } from './models/posts-comments.model';
 import { PostModel } from './models/posts.model';
@@ -39,6 +40,7 @@ export class PostsService {
     @InjectModel(PostCommentsModel.name) private readonly postCommentsModel: Model<PostCommentsModel>,
     @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
     private readonly convertsService: ConvertsService,
+    private readonly filterService: FiltersService,
   ) {}
 
   async create(
@@ -172,35 +174,17 @@ export class PostsService {
 
   async findAll(userId: Types.ObjectId, queryParams: IPostsFindQuery): Promise<IPostsResponse[]> {
     try {
-      const query: IPostsFindQuery = { ...queryParams };
-      const baseQuery: FilterQuery<Partial<IPosts>> = {};
-
-      const userObjectId = new Types.ObjectId(userId);
-
-      const user = await this.usersService.findOne({ _id: userObjectId });
+      const user = await this.usersService.findOne({ _id: new Types.ObjectId(userId) });
       if (!user) {
         throw new EntityNotFoundError('Пользователь не найден');
       }
 
-      if (query.userId) {
-        const queryUser = await this.usersService.findOne({ _id: query.userId as unknown as Types.ObjectId });
-        queryUser && (baseQuery.authorId = queryUser._id);
-      } else {
-        baseQuery.authorId = { $nin: user.bun_info?.hidden_posts ?? [] };
-      }
-
-      query.search && (baseQuery.pText = { $regex: new RegExp(query.search, 'i') });
-      query.groups && (baseQuery.groups = { $in: query.groups.map((i) => groupFilters[i]) });
-      query.publishInProfile && (baseQuery.publishInProfile = query.publishInProfile);
-      baseQuery._id = {
-        $nin: user.bun_info?.hidden_posts ?? [],
-        ...(query.lastIndex && { $lt: query.lastIndex }),
-      };
+      const baseQuery = await postFiltersMapper(this.filterService, this.usersService, queryParams, user);
 
       const posts = await this.postModel
         .find(baseQuery)
         .populate('author', '_id avatar first_name last_name bun_info')
-        .sort(typeof query.desc === 'undefined' && { createdAt: -1 })
+        .sort(typeof queryParams.desc === 'undefined' && { createdAt: -1 })
         .limit(10)
         .skip(!baseQuery.lastIndex ? 0 : 10)
         .exec();

@@ -2,12 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
-import { CitiesEntity } from '@app/filters/entities/cities.entity';
-import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
-import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
-import { SpecializationsEntity } from '@app/filters/entities/specializations.entity';
-import { ProgramsEntity } from '@app/filters/entities/programs.entity';
-import { filtersMapper } from '@app/filters/mappers/filters.mapper';
 import {
   FilterKeys,
   FilterNames,
@@ -17,12 +11,18 @@ import {
   projectInvolvementFilters,
   qualificationsFilters,
 } from '@app/filters/consts';
+import { UpdateFiltersDto } from '@app/filters/dto/update-filters.dto';
+import { CitiesEntity } from '@app/filters/entities/cities.entity';
 import { GroupsEntity } from '@app/filters/entities/groups.entity';
-import { JobFormatsEntity } from '@app/filters/entities/job-formats.entity';
 import { JobExperienceEntity } from '@app/filters/entities/job-experience.entity';
+import { JobFormatsEntity } from '@app/filters/entities/job-formats.entity';
+import { ProgramsEntity } from '@app/filters/entities/programs.entity';
 import { ProjectsInvolvementEntity } from '@app/filters/entities/projects-involvement.entity';
 import { Qualifications } from '@app/filters/entities/qualifications.entity';
+import { SpecializationsEntity } from '@app/filters/entities/specializations.entity';
+import { IFilter, IFiltersResponse } from '@app/filters/interfaces/filters.interface';
 import { IFiltersQuery } from '@app/filters/interfaces/filtets-query.interface';
+import { filtersMapper } from '@app/filters/mappers/filters.mapper';
 
 const logger = new Logger('Filters');
 
@@ -95,6 +95,15 @@ export class FiltersService {
       return await model.findOne({ ...payload }).exec();
     } catch (err) {
       logger.error(`Error while findEntityByPayload: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async findGroupsByPayload(payload: FilterQuery<GroupsEntity>) {
+    try {
+      return this.groupsEntity.find({ ...payload }).exec();
+    } catch (err) {
+      logger.error(`Error while findGroupByPayload: ${(err as Error).message}`);
       throw err;
     }
   }

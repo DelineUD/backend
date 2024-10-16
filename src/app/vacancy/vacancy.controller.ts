@@ -24,6 +24,7 @@ import { VacancyCreateDto } from './dto/vacancy-create.dto';
 import { IVacancyListResponse, IVacancyResponse } from './interfaces/vacancy.interface';
 import { IVacancyFindAll, IVacancyFindOne } from './interfaces/vacancy-find.interface';
 import { VacancyService } from './vacancy.service';
+import { VacancyUpdateDto } from './dto/vacancy-update.dto';
 
 @ApiTags('Vacancies')
 @Controller('vacancies')
@@ -59,7 +60,7 @@ export class VacancyController {
   async update(
     @UserId() userId: Types.ObjectId,
     @Param('id') id: string,
-    @Body() updateVacancyDto: VacancyCreateDto,
+    @Body() updateVacancyDto: VacancyUpdateDto,
   ): Promise<IVacancyResponse> {
     return await this.vacancyService.update(userId, id, updateVacancyDto);
   }

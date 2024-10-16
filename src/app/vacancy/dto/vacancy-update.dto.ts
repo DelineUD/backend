@@ -1,16 +1,31 @@
-import { IsOptional, IsString, IsArray, ArrayMaxSize, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+
+import { EUserJobExperience } from '@/app/shared/consts/user-experience.enum';
+import { EUserJobFormat } from '@/app/shared/consts/user-format.enum';
+import { EUserProjectInvolvement } from '@/app/shared/consts/user-involvement.enum';
 
 export class VacancyUpdateDto {
   @IsString()
   name?: string;
   @IsString()
-  job_experience?: string;
-  @IsString()
-  job_format?: string;
-  @ApiProperty({ example: 'Почта: pochta@mail.ru' })
-  @IsString()
+  @ApiPropertyOptional({
+    enum: EUserJobExperience,
+    description: 'Опыт работы',
+    default: EUserJobExperience.et004,
+    required: true,
+  })
+  @IsEnum(EUserJobExperience, { each: true })
+  job_experience?: EUserJobExperience;
+  @ApiPropertyOptional({
+    enum: EUserJobFormat,
+    description: 'Формат работы',
+    default: EUserJobFormat.ft001,
+    required: true,
+  })
+  @IsEnum(EUserJobFormat, { each: true })
+  job_format?: EUserJobFormat;
   contacts?: string;
   @IsOptional()
   @IsString()
@@ -25,8 +40,8 @@ export class VacancyUpdateDto {
   @IsNumber({}, { each: true })
   payment?: number[];
   @IsOptional()
-  @IsString()
-  project_involvement?: string;
+  @IsEnum(EUserProjectInvolvement, { each: true })
+  project_involvement?: EUserProjectInvolvement;
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

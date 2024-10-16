@@ -23,6 +23,7 @@ import { ResumeFindQueryDto } from './dto/resume-find-query.dto';
 import { ResumesService } from './resumes.service';
 import { ResumeCreateDto } from './dto/resume-create.dto';
 import { IResumeResponse, IResumeListResponse } from './interfaces/resume.interface';
+import { ResumeUpdateDto } from './dto/resume-update.dto';
 
 @ApiTags('Resumes')
 @Controller('resumes')
@@ -55,7 +56,7 @@ export class ResumesController {
   async update(
     @UserId() userId: Types.ObjectId,
     @Param('id') id: string,
-    @Body() updateResumeDto: ResumeCreateDto,
+    @Body() updateResumeDto: ResumeUpdateDto,
   ): Promise<IResumeResponse> {
     return await this.resumesService.update(userId, id, updateResumeDto);
   }
